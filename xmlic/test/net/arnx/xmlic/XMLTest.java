@@ -19,19 +19,6 @@ public class XMLTest {
 	}
 	
 	@Test
-	public void testXml() throws IOException {
-		XML xml = XML.load(getClass().getResource("test.xml"));
-		assertEquals("t1", xml.find("//li").xml());
-	}
-	
-	@Test
-	public void testText() throws IOException {
-		XML xml = XML.load(getClass().getResource("test.xml"));
-		assertEquals("\ntop\n\n\t\n\t\tt1\n\t\tt2\n\t\tt3\n\t\n\t\n\t\tt4\n\t\tt5\n\t\tt6\n\t\n\nmiddle\n\n\tprefix\n\t\n\t\tt7\n\t\tt8\n\t\tt9\n\t\n\tsuffix\n\nbottom\n", xml.text());		
-		assertEquals("t1t2t3t4t5t6t7t8t9", xml.find("//li").text());		
-	}
-	
-	@Test
 	public void testAdd() throws IOException {
 		XML xml = XML.load(getClass().getResource("test.xml"));
 		assertEquals("<li>t1</li><li>t2</li><li>t4</li><li>t7</li>", xml.find("(//li[position()=2])[1]").add("//li[position()=1]").toString());
@@ -333,5 +320,55 @@ public class XMLTest {
 		assertEquals("<body>\ntop\n<div class=\"s1\">\n\t\n\t\n</div>\nmiddle\n<div class=\"s2\">\n\tprefix\n\t\n\tsuffix\n</div>\nbottom\n</body>", xml.toString());
 	}
 	
+	@Test
+	public void testSiblings() throws IOException {
+		XML xml = XML.load(getClass().getResource("test.xml"));
+		assertEquals("<li>t1</li><li>t3</li><li>t4</li><li>t6</li><li>t7</li><li>t9</li>", xml.find("//li[position()=2]").siblings().toString());
+		assertEquals("<li>t3</li>", xml.find("//li[position()=2]").siblings("text()='t3'").toString());
+	}
+		
+	@Test
+	public void testText() throws IOException {
+		XML xml = XML.load(getClass().getResource("test.xml"));
+		assertEquals("\ntop\n\n\t\n\t\tt1\n\t\tt2\n\t\tt3\n\t\n\t\n\t\tt4\n\t\tt5\n\t\tt6\n\t\n\nmiddle\n\n\tprefix\n\t\n\t\tt7\n\t\tt8\n\t\tt9\n\t\n\tsuffix\n\nbottom\n", xml.text());		
+		assertEquals("t1t2t3t4t5t6t7t8t9", xml.find("//li").text());		
+		assertEquals("<li>text</li><li>text</li><li>text</li><li>text</li><li>text</li><li>text</li><li>text</li><li>text</li><li>text</li>", xml.find("//li").text("text").toString());		
+	}
+		
+	@Test
+	public void testUnwrap() throws IOException {
+		XML xml = XML.load(getClass().getResource("test.xml"));
+		assertEquals("<ul class=\"s11\"/><ul class=\"s12\"/><ul class=\"s21\"/>", xml.find("//ul").unwrap().toString());
+		assertEquals("<body>\ntop\n<div class=\"s1\">\n\t\n\t\t<li>t1</li>\n\t\t<li>t2</li>\n\t\t<li>t3</li>\n\t\n\t\n\t\t<li>t4</li>\n\t\t<li>t5</li>\n\t\t<li>t6</li>\n\t\n</div>\nmiddle\n<div class=\"s2\">\n\tprefix\n\t\n\t\t<li>t7</li>\n\t\t<li>t8</li>\n\t\t<li>t9</li>\n\t\n\tsuffix\n</div>\nbottom\n</body>", xml.toString());
+	}
 	
+	@Test
+	public void testWrap() throws IOException {
+		XML xml = XML.load(getClass().getResource("test.xml"));
+		assertEquals("<li>t1</li><li>t2</li><li>t3</li><li>t4</li><li>t5</li><li>t6</li><li>t7</li><li>t8</li><li>t9</li>", xml.find("//li").wrap("<div class=\"w1\"><div class=\"w11\"></div></div><div class=\"w2\"></div>").toString());
+		assertEquals("<body>\ntop\n<div class=\"s1\">\n\t<ul class=\"s11\">\n\t\t<div class=\"w1\"><div class=\"w11\"><li>t1</li></div></div>\n\t\t<div class=\"w1\"><div class=\"w11\"><li>t2</li></div></div>\n\t\t<div class=\"w1\"><div class=\"w11\"><li>t3</li></div></div>\n\t</ul>\n\t<ul class=\"s12\">\n\t\t<div class=\"w1\"><div class=\"w11\"><li>t4</li></div></div>\n\t\t<div class=\"w1\"><div class=\"w11\"><li>t5</li></div></div>\n\t\t<div class=\"w1\"><div class=\"w11\"><li>t6</li></div></div>\n\t</ul>\n</div>\nmiddle\n<div class=\"s2\">\n\tprefix\n\t<ul class=\"s21\">\n\t\t<div class=\"w1\"><div class=\"w11\"><li>t7</li></div></div>\n\t\t<div class=\"w1\"><div class=\"w11\"><li>t8</li></div></div>\n\t\t<div class=\"w1\"><div class=\"w11\"><li>t9</li></div></div>\n\t</ul>\n\tsuffix\n</div>\nbottom\n</body>", xml.toString());
+	}
+	
+	@Test
+	public void testWrapAll() throws IOException {
+		XML xml = XML.load(getClass().getResource("test.xml"));
+		assertEquals("<li>t1</li><li>t2</li><li>t3</li><li>t4</li><li>t5</li><li>t6</li><li>t7</li><li>t8</li><li>t9</li>", xml.find("//li").wrapAll("<div class=\"w1\"><div class=\"w11\"></div></div><div class=\"w2\"></div>").toString());
+		assertEquals("<body>\ntop\n<div class=\"s1\">\n\t<ul class=\"s11\">\n\t\t<div class=\"w1\"><div class=\"w11\"><li>t1</li><li>t2</li><li>t3</li><li>t4</li><li>t5</li><li>t6</li><li>t7</li><li>t8</li><li>t9</li></div></div>\n\t\t\n\t\t\n\t</ul>\n\t<ul class=\"s12\">\n\t\t\n\t\t\n\t\t\n\t</ul>\n</div>\nmiddle\n<div class=\"s2\">\n\tprefix\n\t<ul class=\"s21\">\n\t\t\n\t\t\n\t\t\n\t</ul>\n\tsuffix\n</div>\nbottom\n</body>", xml.toString());
+	}
+	
+	@Test
+	public void testWrapInner() throws IOException {
+		XML xml = XML.load(getClass().getResource("test.xml"));
+		assertEquals("<li><div class=\"w1\"><div class=\"w11\">t1</div></div></li><li><div class=\"w1\"><div class=\"w11\">t2</div></div></li><li><div class=\"w1\"><div class=\"w11\">t3</div></div></li><li><div class=\"w1\"><div class=\"w11\">t4</div></div></li><li><div class=\"w1\"><div class=\"w11\">t5</div></div></li><li><div class=\"w1\"><div class=\"w11\">t6</div></div></li><li><div class=\"w1\"><div class=\"w11\">t7</div></div></li><li><div class=\"w1\"><div class=\"w11\">t8</div></div></li><li><div class=\"w1\"><div class=\"w11\">t9</div></div></li>", xml.find("//li").wrapInner("<div class=\"w1\"><div class=\"w11\"></div></div><div class=\"w2\"></div>").toString());
+		assertEquals("<body>\ntop\n<div class=\"s1\">\n\t<ul class=\"s11\">\n\t\t<li><div class=\"w1\"><div class=\"w11\">t1</div></div></li>\n\t\t<li><div class=\"w1\"><div class=\"w11\">t2</div></div></li>\n\t\t<li><div class=\"w1\"><div class=\"w11\">t3</div></div></li>\n\t</ul>\n\t<ul class=\"s12\">\n\t\t<li><div class=\"w1\"><div class=\"w11\">t4</div></div></li>\n\t\t<li><div class=\"w1\"><div class=\"w11\">t5</div></div></li>\n\t\t<li><div class=\"w1\"><div class=\"w11\">t6</div></div></li>\n\t</ul>\n</div>\nmiddle\n<div class=\"s2\">\n\tprefix\n\t<ul class=\"s21\">\n\t\t<li><div class=\"w1\"><div class=\"w11\">t7</div></div></li>\n\t\t<li><div class=\"w1\"><div class=\"w11\">t8</div></div></li>\n\t\t<li><div class=\"w1\"><div class=\"w11\">t9</div></div></li>\n\t</ul>\n\tsuffix\n</div>\nbottom\n</body>", xml.toString());
+	}
+	
+	@Test
+	public void testXml() throws IOException {
+		XML xml = XML.load(getClass().getResource("test.xml"));
+		assertEquals("t1", xml.find("//li").xml());
+		assertEquals("<li><span>xml</span></li><li><span>xml</span></li><li><span>xml</span></li><li><span>xml</span></li><li><span>xml</span></li><li><span>xml</span></li><li><span>xml</span></li><li><span>xml</span></li><li><span>xml</span></li>", xml.find("//li").xml("<span>xml</span>").toString());
+		assertEquals("<li>xml</li><li>xml</li><li>xml</li><li>xml</li><li>xml</li><li>xml</li><li>xml</li><li>xml</li><li>xml</li>", xml.find("//li").xml("xml").toString());
+	}
+
 }

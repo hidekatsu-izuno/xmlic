@@ -938,11 +938,19 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	public Nodes insertBefore(String xpath) {
+		if (xpath == null || xpath.isEmpty() || isEmpty()) {
+			return this;
+		}
+		
 		getOwner().find(xpath).before(this);
 		return this;
 	}
 	
 	public Nodes insertBefore(Nodes nodes) {
+		if (nodes == null || nodes.isEmpty() || isEmpty()) {
+			return this;
+		}
+		
 		nodes.before(this);
 		return this;
 	}
@@ -977,11 +985,19 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	public Nodes insertAfter(String xpath) {
+		if (xpath == null || xpath.isEmpty() || isEmpty()) {
+			return this;
+		}
+		
 		getOwner().find(xpath).after(this);
 		return this;
 	}
 	
 	public Nodes insertAfter(Nodes nodes) {
+		if (nodes == null || nodes.isEmpty() || isEmpty()) {
+			return this;
+		}
+		
 		nodes.after(this);
 		return this;
 	}
@@ -991,7 +1007,8 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	public Nodes wrap(Nodes nodes) {
-		if (nodes == null) return this;
+		if (nodes == null || nodes.isEmpty()) return this;
+		if (nodes.get(0) == null || nodes.get(0).getNodeType() != Node.ELEMENT_NODE) return this;
 		
 		for (Node self : this) {
 			if (self == null) continue;
@@ -1000,18 +1017,9 @@ public class Nodes extends ArrayList<Node> {
 			Node parent = self.getParentNode();
 			if (parent == null) continue;
 			
-			Node wrapper = nodes.get(0);
-			if (wrapper.getParentNode() != null) {
-				wrapper = wrapper.cloneNode(true);
-			}
-			
-			Node leaf = wrapper;
-			Node next = null;
-			while ((next = getFirstElementChild(leaf)) != null) {
-				leaf = next;
-			}
-			leaf.appendChild(parent.replaceChild(self, wrapper));
-			break;
+			Node root = nodes.get(0).cloneNode(true);
+			Node leaf = getFirstLeaf(root);
+			leaf.appendChild(parent.replaceChild(root, self));
 		}
 		return this;
 	}
@@ -1021,28 +1029,19 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	public Nodes wrapInner(Nodes nodes) {
-		if (nodes == null) return this;
+		if (nodes == null || nodes.isEmpty()) return this;
+		if (nodes.get(0) == null || nodes.get(0).getNodeType() != Node.ELEMENT_NODE) return this;
 		
 		for (Node self : this) {
 			if (self == null) continue;
 			if (self.getNodeType() != Node.ELEMENT_NODE) continue;
 			
-			Node wrapper = nodes.get(0);
-			if (wrapper.getParentNode() != null) {
-				wrapper = wrapper.cloneNode(true);
+			Node root = nodes.get(0).cloneNode(true);
+			Node leaf = getFirstLeaf(root);
+			while (self.hasChildNodes()) {
+				leaf.appendChild(self.getFirstChild());
 			}
-			
-			Node leaf = wrapper;
-			Node next = null;
-			while ((next = getFirstElementChild(leaf)) != null) {
-				leaf = next;
-			}
-			NodeList children = self.getChildNodes();
-			for (int i = 0; i < children.getLength(); i++) {
-				leaf.appendChild(children.item(i));
-			}
-			self.appendChild(wrapper);
-			break;
+			self.appendChild(root);
 		}
 		return this;
 	}
@@ -1052,28 +1051,25 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	public Nodes wrapAll(Nodes nodes) {
-		if (nodes == null) return this;
+		if (nodes == null || nodes.isEmpty()) return this;
+		if (nodes.get(0) == null || nodes.get(0).getNodeType() != Node.ELEMENT_NODE) return this;
+		if (isEmpty() || get(0) == null) return this;
 		
-		Node leaf = null;
+		Node root = nodes.get(0);
+		if (root.getParentNode() != null) {
+			root = root.cloneNode(true);
+		}
+		Node leaf = getFirstLeaf(root);
+		
+		Node parent = get(0).getParentNode();
+		if (parent == null) return this;
+		
 		for (Node self : this) {
 			if (self == null) continue;
-			if (self.getNodeType() != Node.ELEMENT_NODE) continue;
+			if (self.getNodeType() != Node.ELEMENT_NODE) continue;	
 			
-			Node parent = self.getParentNode();
-			if (parent == null) continue;
-			
-			if (leaf == null) {
-				Node wrapper = nodes.get(0);
-				if (wrapper.getParentNode() != null) {
-					wrapper = wrapper.cloneNode(true);
-				}
-				
-				leaf = wrapper;
-				Node next = null;
-				while ((next = getFirstElementChild(leaf)) != null) {
-					leaf = next;
-				}
-				leaf.appendChild(parent.replaceChild(self, wrapper));
+			if (root.getParentNode() == null) {
+				leaf.appendChild(parent.replaceChild(root, self));
 			} else {
 				leaf.appendChild(self);
 			}
@@ -1085,19 +1081,18 @@ public class Nodes extends ArrayList<Node> {
 		for (Node self : this) {
 			if (self == null) continue;
 			if (self.getNodeType() != Node.ELEMENT_NODE) continue;
-			
+
 			Node parent = self.getParentNode();
 			if (parent == null) continue;
 			
 			Node next = self.getNextSibling();
-			NodeList children = self.getChildNodes();
 			parent.removeChild(self);
-			for (int i = 0; i < children.getLength(); i++) {
-				Node child = children.item(i);
+			while (self.hasChildNodes()) {
+				Node child = self.getFirstChild();
 				if (next != null) {
-					self.insertBefore(child, next);
+					parent.insertBefore(child, next);
 				} else {
-					self.appendChild(child);
+					parent.appendChild(child);
 				}
 			}
 		}
@@ -1286,16 +1281,19 @@ public class Nodes extends ArrayList<Node> {
 		return sb.toString();
 	}
 	
-	private static Node getFirstElementChild(Node node) {
-		if (node.hasChildNodes()) return null;
+	private static Node getFirstLeaf(Node node) {
+		if (!node.hasChildNodes()) return node;
 		
 		NodeList children = node.getChildNodes();
 		for (int i = 0; i < children.getLength(); i++) {
 			Node child = children.item(i);
 			if (child == null) continue;
-			if (child.getNodeType() != Node.ELEMENT_NODE) continue;
 			
-			return child;
+			if (child.hasChildNodes()) {
+				return getFirstLeaf(child);
+			} else {
+				return child;
+			}
 		}
 		return null;
 	}
