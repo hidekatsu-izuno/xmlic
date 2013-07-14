@@ -76,7 +76,7 @@ public class XMLTest {
 	@Test
 	public void testClone() throws IOException {
 		XML xml = XML.load(getClass().getResource("test.xml"));
-		assertEquals("<body>\ntop\n<div class=\"s1\">\n\t<ul class=\"s11\">\n\t\t<li>t1</li>\n\t\t<li>t2</li>\n\t\t<li>t3</li>\n\t</ul>\n\t<ul class=\"s12\">\n\t\t<li>t4</li>\n\t\t<li>t5</li>\n\t\t<li>t6</li>\n\t</ul>\n</div>\nmiddle\n<div class=\"s2\">\n\tprefix\n\t<ul class=\"s21\">\n\t\t<li>t7</li>\n\t\t<li>t8</li>\n\t\t<li>t9</li>\n\t</ul>\n\tsuffix\n</div>\nbottom\n</body>", xml.clone().toString());		
+		assertEquals("<body>\ntop\n<div class=\"s1\">\n\t<ul class=\"s11\">\n\t\t<li>t1</li>\n\t\t<li>t2</li>\n\t\t<li>t3</li>\n\t</ul>\n\t<ul class=\"s12\">\n\t\t<li>t4</li>\n\t\t<li>t5</li>\n\t\t<li>t6</li>\n\t</ul>\n</div>\nmiddle\n<div class=\"s2\">\n\tprefix\n\t<ul class=\"s21\">\n\t\t<li>t7</li>\n\t\t<li>t8</li>\n\t\t<li>t9</li>\n\t</ul>\n\tsuffix\n</div>\nbottom\n</body>", xml.clone().toString());	
 		assertEquals("<li>t1</li><li>t4</li><li>t7</li>", xml.find("//li[position()=1]").clone().toString());
 	}
 	
@@ -99,7 +99,8 @@ public class XMLTest {
 	@Test
 	public void testEnd() throws IOException {
 		XML xml = XML.load(getClass().getResource("test.xml"));
-		assertEquals("<body>\ntop\n<div class=\"s1\">\n\t<ul class=\"s11\">\n\t\t<li>t1</li>\n\t\t<li>t2</li>\n\t\t<li>t3</li>\n\t</ul>\n\t<ul class=\"s12\">\n\t\t<li>t4</li>\n\t\t<li>t5</li>\n\t\t<li>t6</li>\n\t</ul>\n</div>\nmiddle\n<div class=\"s2\">\n\tprefix\n\t<ul class=\"s21\">\n\t\t<li>t7</li>\n\t\t<li>t8</li>\n\t\t<li>t9</li>\n\t</ul>\n\tsuffix\n</div>\nbottom\n</body>", xml.end().toString());		
+		assertEquals("", xml.document().end().toString());		
+		assertEquals("", xml.document().end().end().toString());		
 		assertEquals("<ul class=\"s11\">\n\t\t<li>t1</li>\n\t\t<li>t2</li>\n\t\t<li>t3</li>\n\t</ul><ul class=\"s21\">\n\t\t<li>t7</li>\n\t\t<li>t8</li>\n\t\t<li>t9</li>\n\t</ul>", xml.find("//ul[position()=1]").children().end().toString());
 	}
 	
@@ -330,7 +331,7 @@ public class XMLTest {
 	@Test
 	public void testText() throws IOException {
 		XML xml = XML.load(getClass().getResource("test.xml"));
-		assertEquals("\ntop\n\n\t\n\t\tt1\n\t\tt2\n\t\tt3\n\t\n\t\n\t\tt4\n\t\tt5\n\t\tt6\n\t\n\nmiddle\n\n\tprefix\n\t\n\t\tt7\n\t\tt8\n\t\tt9\n\t\n\tsuffix\n\nbottom\n", xml.text());		
+		assertEquals("\ntop\n\n\t\n\t\tt1\n\t\tt2\n\t\tt3\n\t\n\t\n\t\tt4\n\t\tt5\n\t\tt6\n\t\n\nmiddle\n\n\tprefix\n\t\n\t\tt7\n\t\tt8\n\t\tt9\n\t\n\tsuffix\n\nbottom\n", xml.document().text());		
 		assertEquals("t1t2t3t4t5t6t7t8t9", xml.find("//li").text());		
 		assertEquals("<li>text</li><li>text</li><li>text</li><li>text</li><li>text</li><li>text</li><li>text</li><li>text</li><li>text</li>", xml.find("//li").text("text").toString());		
 	}

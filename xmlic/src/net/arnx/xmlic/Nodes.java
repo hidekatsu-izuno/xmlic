@@ -1,6 +1,7 @@
 package net.arnx.xmlic;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.TreeSet;
@@ -26,24 +27,23 @@ public class Nodes extends ArrayList<Node> {
 	private XML owner;
 	private Nodes back;
 	
-	Nodes(Nodes back, int size) {
+	Nodes(XML owner, Nodes back, int size) {
 		super(size);
-		if (this instanceof XML) {
-			this.back = (XML)this;
-			this.owner = (XML)this;
-		} else {
-			this.back = back;
-			this.owner = back.getOwner();
-		}
+		this.owner = owner;
+		this.back = back;
+	}
+	
+	Nodes(Nodes back, int size) {
+		this(back.getOwner(), back, size);
 	}
 	
 	Nodes(Nodes back, Node node) {
-		this(back, 1);
+		this(back.getOwner(), back, 1);
 		add(node);
 	}
 	
 	Nodes(Nodes back, Nodes nodes) {
-		this(back, nodes.size());
+		this(back.getOwner(), back, nodes.size());
 		for (Node node : nodes) {
 			add(node.cloneNode(true));
 		}
@@ -104,7 +104,7 @@ public class Nodes extends ArrayList<Node> {
 					localName = name.substring(index + 1);
 					if (localName.isEmpty()) return null;
 					
-					uri = getOwner().getXPathNSResolver().lookupNamespaceURI(name.substring(0, index));
+					uri = getOwner().nsResolver.lookupNamespaceURI(name.substring(0, index));
 					if (uri == null) return null;
 				} else {
 					localName = name;
@@ -138,7 +138,7 @@ public class Nodes extends ArrayList<Node> {
 					localName = name.substring(index + 1);
 					if (localName.isEmpty()) return null;
 					
-					uri = getOwner().getXPathNSResolver().lookupNamespaceURI(name.substring(0, index));
+					uri = getOwner().nsResolver.lookupNamespaceURI(name.substring(0, index));
 					if (uri == null) return null;
 				} else {
 					localName = name;
@@ -171,7 +171,7 @@ public class Nodes extends ArrayList<Node> {
 					localName = name.substring(index + 1);
 					if (localName.isEmpty()) return null;
 					
-					uri = getOwner().getXPathNSResolver().lookupNamespaceURI(name.substring(0, index));
+					uri = getOwner().nsResolver.lookupNamespaceURI(name.substring(0, index));
 					if (uri == null) return null;
 				} else {
 					localName = name;
@@ -200,7 +200,7 @@ public class Nodes extends ArrayList<Node> {
 	public boolean is(String filter) {
 		if (filter == null || isEmpty()) return false;
 		
-		XPathExpression expr = DOMFactory.createXPathExpression("boolean(count(self::node()[" + filter + "]))", owner.getXPathNSResolver());
+		XPathExpression expr = DOMFactory.createXPathExpression("boolean(count(self::node()[" + filter + "]))", owner.nsResolver);
 		XPathResult result = null;
 		
 		for (Node node : this) {
@@ -213,7 +213,7 @@ public class Nodes extends ArrayList<Node> {
 	public int index(String filter) {
 		if (filter == null || filter.isEmpty() || isEmpty()) return -1;
 		
-		XPathExpression expr = DOMFactory.createXPathExpression("boolean(count(self::node()[" + filter + "]))", owner.getXPathNSResolver());
+		XPathExpression expr = DOMFactory.createXPathExpression("boolean(count(self::node()[" + filter + "]))", owner.nsResolver);
 		XPathResult result = null;
 		
 		for (int i = 0; i < size(); i++) {
@@ -242,7 +242,7 @@ public class Nodes extends ArrayList<Node> {
 			return new Nodes(this, 0);
 		}
 		
-		XPathExpression expr = DOMFactory.createXPathExpression("boolean(count(child::node()[" + filter + "]))", owner.getXPathNSResolver());
+		XPathExpression expr = DOMFactory.createXPathExpression("boolean(count(child::node()[" + filter + "]))", owner.nsResolver);
 		XPathResult result = null;
 		
 		Nodes nodes = new Nodes(this, size());
@@ -252,6 +252,58 @@ public class Nodes extends ArrayList<Node> {
 		}
 		unique(nodes);
 		return nodes;
+	}
+	
+	@Override
+	public void add(int index, Node node) {
+		if (isExternalNode(node)) {
+			node = getOwner().doc.importNode(node, true);
+		}
+		super.add(index, node);
+	}
+	
+	@Override
+	public boolean add(Node node) {
+		if (isExternalNode(node)) {
+			node = getOwner().doc.importNode(node, true);
+		}
+		return super.add(node);
+	}
+	
+	@Override
+	public boolean addAll(int index, Collection<? extends Node> c) {
+		boolean result = super.addAll(index, c);
+		if (result) {
+			for (int i = index; i < index + c.size(); i++) {
+				Node node = super.get(i);
+				if (isExternalNode(node)) {
+					super.set(i, getOwner().doc.importNode(node, true));
+				}
+			}
+		}
+		return result;
+	}
+	
+	@Override
+	public boolean addAll(Collection<? extends Node> c) {
+		boolean result = super.addAll(c);
+		if (result) {
+			for (int i = 0; i < c.size(); i++) {
+				Node node = super.get(i);
+				if (isExternalNode(node)) {
+					super.set(i, getOwner().doc.importNode(node, true));
+				}
+			}
+		}
+		return result;
+	}
+	
+	@Override
+	public Node set(int index, Node node) {
+		if (isExternalNode(node)) {
+			node = getOwner().doc.importNode(node, true);
+		}
+		return super.set(index, node);
 	}
 	
 	public Nodes add(Nodes nodes) {
@@ -271,7 +323,7 @@ public class Nodes extends ArrayList<Node> {
 			return new Nodes(this, this);
 		}
 		
-		XPathExpression expr = DOMFactory.createXPathExpression(xpath, owner.getXPathNSResolver());
+		XPathExpression expr = DOMFactory.createXPathExpression(xpath, owner.nsResolver);
 		XPathResult result = null;
 		
 		Nodes results = new Nodes(this, size() * 2);
@@ -305,7 +357,7 @@ public class Nodes extends ArrayList<Node> {
 			return new Nodes(this, this);
 		}
 		
-		XPathExpression expr = DOMFactory.createXPathExpression("boolean(count(self::node()[" + filter + "]))", owner.getXPathNSResolver());
+		XPathExpression expr = DOMFactory.createXPathExpression("boolean(count(self::node()[" + filter + "]))", owner.nsResolver);
 		XPathResult result = null;
 		
 		Nodes results = new Nodes(this, size() * 2);
@@ -319,6 +371,9 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	public Nodes end() {
+		if (back == null) {
+			return new Nodes(getOwner(), null, 0);
+		}
 		return back;
 	}
 	
@@ -327,20 +382,20 @@ public class Nodes extends ArrayList<Node> {
 			return new Nodes(this, 0);
 		}
 		
-		XPathExpression expr = DOMFactory.createXPathExpression(xpath, owner.getXPathNSResolver());
+		XPathExpression expr = DOMFactory.createXPathExpression(xpath, owner.nsResolver);
 		XPathResult result = null;
 		
-		Nodes nodes = new Nodes(this, size());
+		Nodes results = new Nodes(this, size());
 		for (Node self : this) {
 			result = (XPathResult)expr.evaluate(self, XPathResult.UNORDERED_NODE_ITERATOR_TYPE, result);
 			Node node;
 			while ((node = result.iterateNext()) != null) {
 				if (node.getNodeType() != Node.ELEMENT_NODE) continue;
-				nodes.add(node);
+				results.add(node);
 			}
 		}
-		unique(nodes);
-		return nodes;
+		unique(results);
+		return results;
 	}
 	
 	public Nodes filter(String filter) {
@@ -348,16 +403,16 @@ public class Nodes extends ArrayList<Node> {
 			return new Nodes(this, 0);
 		}
 		
-		XPathExpression expr = DOMFactory.createXPathExpression("boolean(count(self::node()[" + filter + "]))", owner.getXPathNSResolver());
+		XPathExpression expr = DOMFactory.createXPathExpression("boolean(count(self::node()[" + filter + "]))", owner.nsResolver);
 		XPathResult result = null;
 		
-		Nodes nodes = new Nodes(this, size());
+		Nodes results = new Nodes(this, size());
 		for (Node self : this) {
 			result = (XPathResult)expr.evaluate(self, XPathResult.BOOLEAN_TYPE, result);
-			if (result.getBooleanValue()) nodes.add(self);
+			if (result.getBooleanValue()) results.add(self);
 		}
-		unique(nodes);
-		return nodes;
+		unique(results);
+		return results;
 	}
 	
 	public Nodes filter(Filter<Node> filter) {
@@ -365,12 +420,12 @@ public class Nodes extends ArrayList<Node> {
 			return new Nodes(this, 0);
 		}
 		
-		Nodes nodes = new Nodes(this, size());
+		Nodes results = new Nodes(this, size());
 		for (Node self : this) {
-			if (filter.accept(self)) nodes.add(self);
+			if (filter.accept(self)) results.add(self);
 		}
-		unique(nodes);
-		return nodes;
+		unique(results);
+		return results;
 	}
 	
 	public Nodes not(String filter) {
@@ -380,16 +435,16 @@ public class Nodes extends ArrayList<Node> {
 			return new Nodes(this, 0);
 		}
 		
-		XPathExpression expr = DOMFactory.createXPathExpression("boolean(count(self::node()[" + filter + "]))", owner.getXPathNSResolver());
+		XPathExpression expr = DOMFactory.createXPathExpression("boolean(count(self::node()[" + filter + "]))", owner.nsResolver);
 		XPathResult result = null;
 		
-		Nodes nodes = new Nodes(this, size());
+		Nodes results = new Nodes(this, size());
 		for (Node self : this) {
 			result = (XPathResult)expr.evaluate(self, XPathResult.BOOLEAN_TYPE, result);
-			if (!result.getBooleanValue()) nodes.add(self);
+			if (!result.getBooleanValue()) results.add(self);
 		}
-		unique(nodes);
-		return nodes;
+		unique(results);
+		return results;
 	}
 	
 	public Nodes parent() {
@@ -413,22 +468,22 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	private Nodes parentsInternal(SelectMode mode) {
-		Nodes nodes = new Nodes(this, size() * 2);
+		Nodes results = new Nodes(this, size() * 2);
 		for (Node self : this) {
 			if (self == null) continue;
 			
 			Node parent = self;
 			while ((parent = parent.getParentNode()) != null) {
 				if (parent.getNodeType() != Node.ELEMENT_NODE) break;
-				nodes.add(parent);
+				results.add(parent);
 				if (mode == SelectMode.FIRST) break;
 			}
 		}
-		if (mode != SelectMode.FIRST && nodes.size() > 1) {
-			unique(nodes);
-			Collections.reverse(nodes);
+		if (mode != SelectMode.FIRST && results.size() > 1) {
+			unique(results);
+			Collections.reverse(results);
 		}
-		return nodes;
+		return results;
 	}
 	
 	private Nodes parentsInternal(String filter, SelectMode mode) {
@@ -436,10 +491,10 @@ public class Nodes extends ArrayList<Node> {
 			return new Nodes(this, 0);
 		}
 		
-		XPathExpression expr = DOMFactory.createXPathExpression("boolean(count(self::node()[" + filter + "]))", owner.getXPathNSResolver());
+		XPathExpression expr = DOMFactory.createXPathExpression("boolean(count(self::node()[" + filter + "]))", owner.nsResolver);
 		XPathResult result = null;
 		
-		Nodes nodes = new Nodes(this, size() * 2);
+		Nodes results = new Nodes(this, size() * 2);
 		for (Node self : this) {
 			if (self == null) continue;
 			
@@ -449,19 +504,19 @@ public class Nodes extends ArrayList<Node> {
 				
 				result = (XPathResult)expr.evaluate(parent, XPathResult.BOOLEAN_TYPE, result);
 				if (mode == SelectMode.UNTIL) {
-					nodes.add(parent);
+					results.add(parent);
 					if (result.getBooleanValue()) break;
 				} else if (result.getBooleanValue()) {
-					nodes.add(parent);
+					results.add(parent);
 				}
 				if (mode == SelectMode.FIRST) break;
 			}
 		}
-		if (mode != SelectMode.FIRST && nodes.size() > 1) {
-			unique(nodes);
-			Collections.reverse(nodes);
+		if (mode != SelectMode.FIRST && results.size() > 1) {
+			unique(results);
+			Collections.reverse(results);
 		}
-		return nodes;
+		return results;
 	}
 	
 	public Nodes closest(String filter) {
@@ -469,10 +524,10 @@ public class Nodes extends ArrayList<Node> {
 			return new Nodes(this, 0);
 		}
 		
-		XPathExpression expr = DOMFactory.createXPathExpression("boolean(count(self::node()[" + filter + "]))", owner.getXPathNSResolver());
+		XPathExpression expr = DOMFactory.createXPathExpression("boolean(count(self::node()[" + filter + "]))", owner.nsResolver);
 		XPathResult result = null;
 		
-		Nodes nodes = new Nodes(this, size() * 2);
+		Nodes results = new Nodes(this, size() * 2);
 		for (Node self : this) {
 			if (self == null) continue;
 			
@@ -482,17 +537,17 @@ public class Nodes extends ArrayList<Node> {
 				
 				result = (XPathResult)expr.evaluate(current, XPathResult.BOOLEAN_TYPE, result);
 				if (result.getBooleanValue()) {
-					nodes.add(current);
+					results.add(current);
 					break;
 				}
 			} while ((current = current.getParentNode()) != null);
 		}
-		unique(nodes);
-		return nodes;
+		unique(results);
+		return results;
 	}
 	
 	public Nodes children() {
-		Nodes nodes = new Nodes(this, size() * 2);
+		Nodes results = new Nodes(this, size() * 2);
 		for (Node self : this) {
 			if (!self.hasChildNodes()) continue;
 			
@@ -502,10 +557,10 @@ public class Nodes extends ArrayList<Node> {
 				if (child == null) continue;
 				if (child.getNodeType() != Node.ELEMENT_NODE) continue;
 				
-				nodes.add(child);
+				results.add(child);
 			}
 		}
-		return nodes;
+		return results;
 	}
 	
 	public Nodes children(String filter) {
@@ -513,10 +568,10 @@ public class Nodes extends ArrayList<Node> {
 			return new Nodes(this, 0);
 		}
 		
-		XPathExpression expr = DOMFactory.createXPathExpression("boolean(count(self::node()[" + filter + "]))", owner.getXPathNSResolver());
+		XPathExpression expr = DOMFactory.createXPathExpression("boolean(count(self::node()[" + filter + "]))", owner.nsResolver);
 		XPathResult result = null;
 		
-		Nodes nodes = new Nodes(this, size() * 2);
+		Nodes results = new Nodes(this, size() * 2);
 		for (Node self : this) {
 			if (!self.hasChildNodes()) continue;
 			
@@ -527,14 +582,14 @@ public class Nodes extends ArrayList<Node> {
 				if (child.getNodeType() != Node.ELEMENT_NODE) continue;
 				
 				result = (XPathResult)expr.evaluate(child, XPathResult.BOOLEAN_TYPE, result);
-				if (result.getBooleanValue()) nodes.add(child);
+				if (result.getBooleanValue()) results.add(child);
 			}
 		}
-		return nodes;
+		return results;
 	}
 	
 	public Nodes contents() {
-		Nodes nodes = new Nodes(this, size() * 2);
+		Nodes results = new Nodes(this, size() * 2);
 		for (Node self : this) {
 			if (!self.hasChildNodes()) continue;
 			
@@ -543,10 +598,10 @@ public class Nodes extends ArrayList<Node> {
 				Node child = children.item(i);
 				if (child == null) continue;
 				
-				nodes.add(child);
+				results.add(child);
 			}
 		}
-		return nodes;
+		return results;
 	}
 	
 	public Nodes contents(String filter) {
@@ -554,10 +609,10 @@ public class Nodes extends ArrayList<Node> {
 			return new Nodes(this, 0);
 		}
 		
-		XPathExpression expr = DOMFactory.createXPathExpression("boolean(count(self::node()[" + filter + "]))", owner.getXPathNSResolver());
+		XPathExpression expr = DOMFactory.createXPathExpression("boolean(count(self::node()[" + filter + "]))", owner.nsResolver);
 		XPathResult result = null;
 		
-		Nodes nodes = new Nodes(this, size() * 2);
+		Nodes results = new Nodes(this, size() * 2);
 		for (Node self : this) {
 			if (!self.hasChildNodes()) continue;
 			
@@ -567,10 +622,10 @@ public class Nodes extends ArrayList<Node> {
 				if (child == null) continue;
 				
 				result = (XPathResult)expr.evaluate(child, XPathResult.BOOLEAN_TYPE, result);
-				if (result.getBooleanValue()) nodes.add(child);
+				if (result.getBooleanValue()) results.add(child);
 			}
 		}
-		return nodes;
+		return results;
 	}
 	
 	public Nodes first() {
@@ -602,22 +657,22 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	private Nodes prevInternal(SelectMode mode) {
-		Nodes nodes = new Nodes(this, size());
+		Nodes results = new Nodes(this, size());
 		for (Node self : this) {
 			if (self == null) continue;
 			
 			Node prev = self;
 			while ((prev = prev.getPreviousSibling()) != null) {
 				if (prev.getNodeType() != Node.ELEMENT_NODE) continue;
-				nodes.add(prev);
+				results.add(prev);
 				if (mode == SelectMode.FIRST) break;
 			}
 		}
-		if (mode != SelectMode.FIRST && nodes.size() > 1) {
-			unique(nodes);
-			Collections.reverse(nodes);
+		if (mode != SelectMode.FIRST && results.size() > 1) {
+			unique(results);
+			Collections.reverse(results);
 		}
-		return nodes;
+		return results;
 	}
 	
 	private Nodes prevInternal(String filter, SelectMode mode) {
@@ -625,10 +680,10 @@ public class Nodes extends ArrayList<Node> {
 			return new Nodes(this, 0);
 		}
 		
-		XPathExpression expr = DOMFactory.createXPathExpression("boolean(count(self::node()[" + filter + "]))", owner.getXPathNSResolver());
+		XPathExpression expr = DOMFactory.createXPathExpression("boolean(count(self::node()[" + filter + "]))", owner.nsResolver);
 		XPathResult result = null;
 		
-		Nodes nodes = new Nodes(this, size());
+		Nodes results = new Nodes(this, size());
 		for (Node self : this) {
 			if (self == null) continue;
 			
@@ -638,19 +693,19 @@ public class Nodes extends ArrayList<Node> {
 
 				result = (XPathResult)expr.evaluate(prev, XPathResult.BOOLEAN_TYPE, result);
 				if (mode == SelectMode.UNTIL) {
-					nodes.add(prev);
+					results.add(prev);
 					if (result.getBooleanValue()) break;
 				} else if (result.getBooleanValue()) {
-					nodes.add(prev);
+					results.add(prev);
 				}
 				if (mode == SelectMode.FIRST) break;
 			}
 		}
-		if (mode != SelectMode.FIRST && nodes.size() > 1) {
-			unique(nodes);
-			Collections.reverse(nodes);
+		if (mode != SelectMode.FIRST && results.size() > 1) {
+			unique(results);
+			Collections.reverse(results);
 		}
-		return nodes;
+		return results;
 	}
 	
 	public Nodes next() {
@@ -697,7 +752,7 @@ public class Nodes extends ArrayList<Node> {
 			return new Nodes(this, 0);
 		}
 		
-		XPathExpression expr = DOMFactory.createXPathExpression("boolean(count(self::node()[" + filter + "]))", owner.getXPathNSResolver());
+		XPathExpression expr = DOMFactory.createXPathExpression("boolean(count(self::node()[" + filter + "]))", owner.nsResolver);
 		XPathResult result = null;
 		
 		Nodes results = new Nodes(this, size() * 2);
@@ -752,7 +807,7 @@ public class Nodes extends ArrayList<Node> {
 			return new Nodes(this, 0);
 		}
 		
-		XPathExpression expr = DOMFactory.createXPathExpression("boolean(count(self::node()[" + filter + "]))", owner.getXPathNSResolver());
+		XPathExpression expr = DOMFactory.createXPathExpression("boolean(count(self::node()[" + filter + "]))", owner.nsResolver);
 		XPathResult result = null;
 		
 		Nodes results = new Nodes(this, size());
@@ -1193,7 +1248,7 @@ public class Nodes extends ArrayList<Node> {
 			return this;
 		}
 			
-		XPathExpression expr = DOMFactory.createXPathExpression(xpath, owner.getXPathNSResolver());
+		XPathExpression expr = DOMFactory.createXPathExpression(xpath, owner.nsResolver);
 		XPathResult result = null;
 		
 		for (Node self : this) {
@@ -1213,12 +1268,9 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	public Nodes clone() {
-		if (this instanceof XML) {
-			XML xml = (XML)this;
-			return new XML((Document)xml.getDocument().cloneNode(true), xml.getXPathNSResolver());
-		} else {
-			return new Nodes(getOwner(), this);
-		}
+		Nodes clone = new Nodes(getOwner(), back, size());
+		clone.addAll(this);
+		return clone;
 	}
 	
 	public String xml() {
@@ -1281,6 +1333,14 @@ public class Nodes extends ArrayList<Node> {
 		return sb.toString();
 	}
 	
+	private boolean isExternalNode(Node node) {
+		if (node == null) return false;
+		if (node instanceof Document) return false;
+		if (node.getOwnerDocument() == getOwner().doc) return false;
+		
+		return true;
+	}
+	
 	private static Node getFirstLeaf(Node node) {
 		if (!node.hasChildNodes()) return node;
 		
@@ -1312,10 +1372,10 @@ public class Nodes extends ArrayList<Node> {
 				if (compare != 0) {
 					if ((compare & Node.DOCUMENT_POSITION_DISCONNECTED) != 0
 							|| (!DOMFactory.isSortDetachedSupported() &&  b.compareDocumentPosition(a) == compare)) {
-						if (a instanceof Document || contains(nodes.getOwner().getDocument(), a)) {
+						if (a instanceof Document || contains(nodes.getOwner().doc, a)) {
 							return -1;
 						}
-						if (b instanceof Document || contains(nodes.getOwner().getDocument(), b)) {
+						if (b instanceof Document || contains(nodes.getOwner().doc, b)) {
 							return 1;
 						}
 						return 0;

@@ -16,7 +16,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
-import java.util.Set;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
@@ -37,8 +36,7 @@ import org.w3c.dom.ls.LSResourceResolver;
 import org.w3c.dom.ls.LSSerializer;
 import org.w3c.dom.xpath.XPathNSResolver;
 
-public class XML extends Nodes {
-	private static final long serialVersionUID = 1L;
+public class XML {
 	private static final URI NULL_URI = URI.create("");
 	
 	public static XML load(URL url) throws IOException {
@@ -88,8 +86,8 @@ public class XML extends Nodes {
 		}
 	}
 	
-	private Document doc;
-	private XPathNSResolver nsResolver;
+	final Document doc;
+	final XPathNSResolver nsResolver;
 	
 	public XML(String name) {
 		this(name, Collections.<String, String>emptyMap());
@@ -135,28 +133,25 @@ public class XML extends Nodes {
 	}
 	
 	public XML(Document doc, XPathNSResolver nsResolver) {
-		super(null, 1);
-		this.nsResolver = nsResolver;
 		this.doc = doc;
-		super.add(doc);
+		this.nsResolver = nsResolver;
 	}
 	
-	public Document getDocument() {
-		return doc;
-	}
-	
-	public XPathNSResolver getXPathNSResolver() {
-		return nsResolver;
+	public Nodes document() {
+		Nodes nodes = new Nodes(this, null, 1);
+		nodes.add(doc);
+		return nodes;
 	}
 	
 	public Nodes createNodes(Node node) {
 		if (node == null) {
-			return new Nodes(this, 0);
+			return new Nodes(document(), 0);
 		}
+		
 		if (node.getOwnerDocument() != doc) {
 			node = doc.importNode(node, true);
 		}
-		return new Nodes(this, node);
+		return new Nodes(document(), node);
 	}
 	
 	public Nodes createNodes(Node... list) {
@@ -165,42 +160,31 @@ public class XML extends Nodes {
 	
 	public Nodes createNodes(Collection<Node> list) {
 		if (list == null || list.isEmpty()) {
-			return new Nodes(this, 0);
+			return new Nodes(document(), 0);
 		}
 		
-		Nodes nodes = new Nodes(this, list.size());
-		for (Node node : list) {
-			if (node.getOwnerDocument() != doc) {
-				node = doc.importNode(node, true);
-			}
-			nodes.add(node);
-		}
-		if (!(list instanceof Set<?>)) {
-			unique(nodes);
-		}
+		Nodes nodes = new Nodes(document(), list.size());
+		nodes.addAll(list);
+		Nodes.unique(nodes);
 		return nodes;
 	}
 	
 	public Nodes createNodes(NodeList list) {
 		if (list == null || list.getLength() == 0) {
-			return new Nodes(this, 0);
+			return new Nodes(document(), 0);
 		}
 		
-		Nodes nodes = new Nodes(this, list.getLength());
+		Nodes nodes = new Nodes(document(), list.getLength());
 		for (int i = 0; i < list.getLength(); i++) {
-			Node node = list.item(i);
-			if (node.getOwnerDocument() != doc) {
-				node = doc.importNode(node, true);
-			}
-			nodes.add(node);
+			nodes.add(list.item(i));
 		}
-		unique(nodes);
+		Nodes.unique(nodes);
 		return nodes;
 	}
 	
 	public Nodes createNodes(String text) {
 		if (text == null || text.isEmpty()) {
-			return new Nodes(this, 0);
+			return new Nodes(document(), 0);
 		}
 		
 		LSParser parser = DOMFactory.createLSParser();
@@ -211,11 +195,19 @@ public class XML extends Nodes {
 		Document newDoc = parser.parse(DOMFactory.createLSInput(NULL_URI, "<x>" + text + "</x>"));
 		NodeList list = doc.importNode(newDoc.getDocumentElement(), true).getChildNodes();
 
-		Nodes nodes = new Nodes(this, list.getLength());
+		Nodes nodes = new Nodes(document(), list.getLength());
 		for (int i = 0; i < list.getLength(); i++) {
 			nodes.add(list.item(i));
 		}
 		return nodes;
+	}
+	
+	public XML clone() {
+		return new XML((Document)doc.cloneNode(true), nsResolver);
+	}
+	
+	public Nodes find(String xpath) {
+		return document().find(xpath);
 	}
 	
 	public XML transform(Transformer t) throws TransformerException {
@@ -240,8 +232,6 @@ public class XML extends Nodes {
 	}
 	
 	private void writeTo(LSOutput output, boolean declaration, String encoding, boolean prettyPrint) throws IOException {
-		if (isEmpty()) return;
-		
 		if (encoding != null) output.setEncoding(encoding);
 		
 		LSSerializer serializer = DOMFactory.createLSSerializer();
@@ -250,7 +240,7 @@ public class XML extends Nodes {
 		conf.setParameter("xml-declaration", declaration);
 		if (encoding != null) output.setEncoding(encoding);
 		
-		serializer.write(get(0), output);
+		serializer.write(doc, output);
 	}
 	
 	private static class ResourceResolver implements LSResourceResolver, URIResolver {
@@ -291,5 +281,16 @@ public class XML extends Nodes {
 				return URI.create(href);
 			}
 		}
+	}
+	
+	@Override
+	public String toString() {
+		LSSerializer serializer = DOMFactory.createLSSerializer();
+		DOMConfiguration conf = serializer.getDomConfig();
+		conf.setParameter("format-pretty-print", false);
+		conf.setParameter("xml-declaration", false);
+		StringBuilder sb = new StringBuilder();
+		sb.append(serializer.writeToString(doc));
+		return sb.toString();
 	}
 }
