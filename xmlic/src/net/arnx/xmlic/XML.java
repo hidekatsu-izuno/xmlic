@@ -143,7 +143,7 @@ public class XML {
 		return nodes;
 	}
 	
-	public Nodes createNodes(Node node) {
+	public Nodes convert(Node node) {
 		if (node == null) {
 			return new Nodes(document(), 0);
 		}
@@ -154,11 +154,11 @@ public class XML {
 		return new Nodes(document(), node);
 	}
 	
-	public Nodes createNodes(Node... list) {
-		return createNodes(Arrays.asList((Node[])list));
+	public Nodes convert(Node... list) {
+		return convert(Arrays.asList((Node[])list));
 	}
 	
-	public Nodes createNodes(Collection<Node> list) {
+	public Nodes convert(Collection<Node> list) {
 		if (list == null || list.isEmpty()) {
 			return new Nodes(document(), 0);
 		}
@@ -169,7 +169,7 @@ public class XML {
 		return nodes;
 	}
 	
-	public Nodes createNodes(NodeList list) {
+	public Nodes convert(NodeList list) {
 		if (list == null || list.getLength() == 0) {
 			return new Nodes(document(), 0);
 		}
@@ -182,7 +182,7 @@ public class XML {
 		return nodes;
 	}
 	
-	public Nodes createNodes(String text) {
+	public Nodes parse(String text) {
 		if (text == null || text.isEmpty()) {
 			return new Nodes(document(), 0);
 		}

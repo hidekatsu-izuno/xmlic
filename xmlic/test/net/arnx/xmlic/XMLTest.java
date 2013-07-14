@@ -145,10 +145,10 @@ public class XMLTest {
 	@Test
 	public void testGet() throws IOException {
 		XML xml = XML.load(getClass().getResource("test.xml"));
-		assertEquals("<li>t1</li>", xml.createNodes(xml.find("//li[position()=1]").get(0)).toString());
-		assertEquals("<li>t1</li>", xml.createNodes(xml.find("//li[position()=1]").get(-3)).toString());
-		assertEquals("<li>t7</li>", xml.createNodes(xml.find("//li[position()=1]").get(2)).toString());
-		assertEquals("<li>t7</li>", xml.createNodes(xml.find("//li[position()=1]").get(-1)).toString());
+		assertEquals("<li>t1</li>", xml.convert(xml.find("//li[position()=1]").get(0)).toString());
+		assertEquals("<li>t1</li>", xml.convert(xml.find("//li[position()=1]").get(-3)).toString());
+		assertEquals("<li>t7</li>", xml.convert(xml.find("//li[position()=1]").get(2)).toString());
+		assertEquals("<li>t7</li>", xml.convert(xml.find("//li[position()=1]").get(-1)).toString());
 		assertNull(xml.find("//li[position()=1]").get(3));
 		assertNull(xml.find("//li[position()=1]").get(-4));
 	}
@@ -308,8 +308,8 @@ public class XMLTest {
 	@Test
 	public void testReplaceAll() throws IOException {
 		XML xml = XML.load(getClass().getResource("test.xml"));
-		assertEquals("<ol><li>replace</li></ol><ol><li>replace</li></ol><ol><li>replace</li></ol>", xml.createNodes("<ol><li>replace</li></ol>").replaceAll("//ul").toString());
-		assertEquals("", xml.createNodes("<ol><li>replace</li></ol>").replaceAll("").toString());
+		assertEquals("<ol><li>replace</li></ol><ol><li>replace</li></ol><ol><li>replace</li></ol>", xml.parse("<ol><li>replace</li></ol>").replaceAll("//ul").toString());
+		assertEquals("", xml.parse("<ol><li>replace</li></ol>").replaceAll("").toString());
 	}
 	
 	@Test

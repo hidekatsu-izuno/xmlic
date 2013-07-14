@@ -862,7 +862,7 @@ public class Nodes extends ArrayList<Node> {
 	public Nodes prepend(String xml) {
 		if (xml == null || xml.isEmpty()) return this;
 		
-		return prepend(getOwner().createNodes(xml));
+		return prepend(getOwner().parse(xml));
 	}
 	
 	public Nodes prepend(Nodes nodes) {
@@ -920,7 +920,7 @@ public class Nodes extends ArrayList<Node> {
 	public Nodes append(String xml) {
 		if (xml == null || xml.isEmpty()) return this;
 		
-		return append(getOwner().createNodes(xml));
+		return append(getOwner().parse(xml));
 	}
 	
 	public Nodes append(Nodes nodes) {
@@ -966,7 +966,7 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	public Nodes before(String xml) {
-		return before(getOwner().createNodes(xml));
+		return before(getOwner().parse(xml));
 	}
 	
 	public Nodes before(Nodes nodes) {
@@ -1011,7 +1011,7 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	public Nodes after(String xml) {
-		return after(getOwner().createNodes(xml));
+		return after(getOwner().parse(xml));
 	}
 	
 	public Nodes after(Nodes nodes) {
@@ -1058,7 +1058,7 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	public Nodes wrap(String xml) {
-		return wrap(getOwner().createNodes(xml));
+		return wrap(getOwner().parse(xml));
 	}
 	
 	public Nodes wrap(Nodes nodes) {
@@ -1080,7 +1080,7 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	public Nodes wrapInner(String xml) {
-		return wrapInner(getOwner().createNodes(xml));
+		return wrapInner(getOwner().parse(xml));
 	}
 	
 	public Nodes wrapInner(Nodes nodes) {
@@ -1102,7 +1102,7 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	public Nodes wrapAll(String xml) {
-		return wrapAll(getOwner().createNodes(xml));
+		return wrapAll(getOwner().parse(xml));
 	}
 	
 	public Nodes wrapAll(Nodes nodes) {
@@ -1155,7 +1155,7 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	public Nodes replaceWith(String xml) {
-		return replaceWith(getOwner().createNodes(xml));
+		return replaceWith(getOwner().parse(xml));
 	}
 	
 	public Nodes replaceWith(Nodes nodes) {
