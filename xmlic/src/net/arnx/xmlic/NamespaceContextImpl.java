@@ -1,5 +1,6 @@
 package net.arnx.xmlic;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -12,7 +13,9 @@ import java.util.Set;
 import javax.xml.XMLConstants;
 import javax.xml.namespace.NamespaceContext;
 
-class NamespaceContextImpl implements NamespaceContext {
+class NamespaceContextImpl implements NamespaceContext, Serializable {
+	private static final long serialVersionUID = 1L;
+	
 	private Map<String, List<String>> map = Collections.synchronizedMap(new LinkedHashMap<String, List<String>>());
 	
 	public NamespaceContextImpl() {

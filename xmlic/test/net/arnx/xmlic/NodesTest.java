@@ -427,4 +427,17 @@ public class NodesTest {
 		assertEquals("<li><span>xml</span></li><li><span>xml</span></li><li><span>xml</span></li><li><span>xml</span></li><li><span>xml</span></li><li><span>xml</span></li><li><span>xml</span></li><li><span>xml</span></li><li><span>xml</span></li>", xml.find("//li").xml("<span>xml</span>").toString());
 		assertEquals("<li>xml</li><li>xml</li><li>xml</li><li>xml</li><li>xml</li><li>xml</li><li>xml</li><li>xml</li><li>xml</li>", xml.find("//li").xml("xml").toString());
 	}
+	
+	@Test
+	public void testEscape() {
+		assertEquals("abc[]", Nodes.escape("abc[]"));
+		assertEquals("abc[]", Nodes.escape("abc]"));
+		assertEquals("abc[]aaa[]", Nodes.escape("abc]aaa["));
+		assertEquals("abc[]a[]a[]a[[[]]]", Nodes.escape("abc]a[]a]a[[["));
+		
+		assertEquals("abc'['[]", Nodes.escape("abc'[']"));
+		assertEquals("ab\"c]\"de", Nodes.escape("ab\"c]\"de"));
+		assertEquals("a\"bc]a'\"aa'['", Nodes.escape("a\"bc]a'\"aa'["));
+		assertEquals("ab'c]\"a['[]a[]a\"['['[\"", Nodes.escape("ab'c]\"a[']a]a\"['['["));
+	}
 }

@@ -18,14 +18,14 @@ import org.w3c.dom.ls.LSSerializer;
 public class Nodes extends ArrayList<Node> {
 	private static final long serialVersionUID = 1L;
 	
-	private static enum SelectMode {
+	static enum SelectMode {
 		FIRST,
 		UNTIL,
 		ALL
 	}
 	
-	private XML owner;
-	private Nodes back;
+	final XML owner;
+	final Nodes back;
 	
 	Nodes(XML owner, Nodes back, int size) {
 		super(size);
@@ -74,7 +74,7 @@ public class Nodes extends ArrayList<Node> {
 			if (uri != null && !self.isDefaultNamespace(uri)) {
 				String prefix = self.lookupPrefix(uri);
 				if (prefix == null) {
-					prefix = getOwner().nsResolver.getPrefix(uri);
+					prefix = getOwner().context.getPrefix(uri);
 				}
 				if (prefix != null) name = prefix + ":" + name;
 			}
@@ -109,7 +109,7 @@ public class Nodes extends ArrayList<Node> {
 		int index = name.indexOf(':');
 		if (index > 0 && index < name.length()-1) {
 			localName = name.substring(index + 1);
-			uri = getOwner().nsResolver.getNamespaceURI(name.substring(0, index));
+			uri = getOwner().context.getNamespaceURI(name.substring(0, index));
 			if (uri == null) localName = name;
 		} else {
 			localName = name;
@@ -133,7 +133,7 @@ public class Nodes extends ArrayList<Node> {
 		int index = name.indexOf(':');
 		if (index > 0 && index < name.length()-1) {
 			localName = name.substring(index + 1);
-			uri = getOwner().nsResolver.getNamespaceURI(name.substring(0, index));
+			uri = getOwner().context.getNamespaceURI(name.substring(0, index));
 			if (uri == null) localName = name;
 		} else {
 			localName = name;
@@ -158,7 +158,7 @@ public class Nodes extends ArrayList<Node> {
 		int index = name.indexOf(':');
 		if (index > 0 && index < name.length()-1) {
 			localName = name.substring(index + 1);
-			uri = getOwner().nsResolver.getNamespaceURI(name.substring(0, index));
+			uri = getOwner().context.getNamespaceURI(name.substring(0, index));
 			if (uri == null) localName = name;
 		} else {
 			localName = name;
@@ -187,7 +187,7 @@ public class Nodes extends ArrayList<Node> {
 		int index = name.indexOf(':');
 		if (index > 0 && index < name.length()-1) {
 			localName = name.substring(index + 1);
-			uri = getOwner().nsResolver.getNamespaceURI(name.substring(0, index));
+			uri = getOwner().context.getNamespaceURI(name.substring(0, index));
 			if (uri == null) localName = name;
 		} else {
 			localName = name;
@@ -479,7 +479,7 @@ public class Nodes extends ArrayList<Node> {
 		return parentsInternal(filter, SelectMode.ALL);
 	}
 	
-	private Nodes parentsInternal(SelectMode mode) {
+	Nodes parentsInternal(SelectMode mode) {
 		Nodes results = new Nodes(this, size() * 2);
 		for (Node self : this) {
 			if (self == null) continue;
@@ -498,7 +498,7 @@ public class Nodes extends ArrayList<Node> {
 		return results;
 	}
 	
-	private Nodes parentsInternal(String filter, SelectMode mode) {
+	Nodes parentsInternal(String filter, SelectMode mode) {
 		if (filter == null || filter.isEmpty() || isEmpty()) {
 			return new Nodes(this, 0);
 		}
@@ -660,7 +660,7 @@ public class Nodes extends ArrayList<Node> {
 		return prevInternal(filter, SelectMode.ALL);
 	}
 	
-	private Nodes prevInternal(SelectMode mode) {
+	Nodes prevInternal(SelectMode mode) {
 		Nodes results = new Nodes(this, size());
 		for (Node self : this) {
 			if (self == null) continue;
@@ -679,7 +679,7 @@ public class Nodes extends ArrayList<Node> {
 		return results;
 	}
 	
-	private Nodes prevInternal(String filter, SelectMode mode) {
+	Nodes prevInternal(String filter, SelectMode mode) {
 		if (filter == null || filter.isEmpty() || isEmpty()) {
 			return new Nodes(this, 0);
 		}
@@ -729,7 +729,7 @@ public class Nodes extends ArrayList<Node> {
 		return nextInternal(filter, SelectMode.ALL);
 	}
 	
-	private Nodes nextInternal(SelectMode mode) {
+	Nodes nextInternal(SelectMode mode) {
 		Nodes results = new Nodes(this, size() * 2);
 		for (Node self : this) {
 			if (self == null) continue;
@@ -748,7 +748,7 @@ public class Nodes extends ArrayList<Node> {
 		return results;
 	}
 	
-	private Nodes nextInternal(String filter, SelectMode mode) {
+	Nodes nextInternal(String filter, SelectMode mode) {
 		if (filter == null || filter.isEmpty() || isEmpty()) {
 			return new Nodes(this, 0);
 		}
@@ -1385,33 +1385,59 @@ public class Nodes extends ArrayList<Node> {
 		nodes.addAll(uniqueSet);
 	}
 	
-	private static boolean contains(Node a, Node b) {
+	static boolean contains(Node a, Node b) {
 		Node bup = (b != null) ? b.getParentNode() : null;
 		return (a == bup || (bup != null && bup instanceof Element 
 				&& (a.compareDocumentPosition(bup) & Node.DOCUMENT_POSITION_CONTAINED_BY) != 0));
 	}
 	
-	private static String escape(String filter) {
+	static String escape(String filter) {
 		StringBuilder sb = new StringBuilder(filter.length());
+		int state = 0; // 0 ' 1 " 2
 		int nest = 0;
 		for (int i = 0; i < filter.length(); i++) {
 			char c = filter.charAt(i);
 			switch (c) {
+			case '\'':
+				if (state == 0) {
+					state = 1;
+				} else if (state == 1) {
+					state = 0;
+				}
+				sb.append(c);
+				break;
+			case '"':
+				if (state == 0) {
+					state = 2;
+				} else if (state == 2) {
+					state = 0;
+				}
+				sb.append(c);
+				break;
 			case '[':
-				nest++;
+				if (state == 0) {
+					nest++;
+				}
 				sb.append(c);
 				break;
 			case ']':
-				nest--;
-				for (int j = 0; j < -nest; j++) {
-					sb.append('[');
-					nest++;
+				if (state == 0) {
+					nest--;
+					for (int j = 0; j < -nest; j++) {
+						sb.append('[');
+						nest++;
+					}
 				}
 				sb.append(c);
 				break;
 			default:
 				sb.append(c);
 			}
+		}
+		if (state == 1) {
+			sb.append('\'');
+		} else if (state == 2) {
+			sb.append('"');
 		}
 		for (int i = 0; i < nest; i++) {
 			sb.append(']');

@@ -6,9 +6,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
+import java.io.Serializable;
 import java.io.StringReader;
 import java.io.Writer;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -18,6 +18,7 @@ import java.util.Collections;
 import java.util.Map;
 
 import javax.xml.XMLConstants;
+import javax.xml.namespace.NamespaceContext;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -26,10 +27,8 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.URIResolver;
 import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamSource;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
@@ -45,11 +44,12 @@ import org.w3c.dom.NodeList;
 import org.w3c.dom.ls.DOMImplementationLS;
 import org.w3c.dom.ls.LSOutput;
 import org.w3c.dom.ls.LSSerializer;
-import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-public class XML {
+public class XML implements Serializable {
+	private static final long serialVersionUID = 1L;
+
 	public static XML load(File file) throws IOException {
 		return load(file.toURI());
 	}
@@ -74,7 +74,7 @@ public class XML {
 		return load(new InputSource(reader));
 	}
 	
-	private static XML load(InputSource is) throws IOException {
+	static XML load(InputSource is) throws IOException {
 		try {
 			DocumentBuilder db = getDocumentBuilder();
 			db.setEntityResolver(new ResourceResolver());
@@ -101,7 +101,7 @@ public class XML {
 	}
 	
 	final Document doc;
-	final NamespaceContextImpl nsResolver;
+	final NamespaceContext context;
 	final ResourceResolver resolver;
 	
 	public XML() {
@@ -116,13 +116,13 @@ public class XML {
 		this(doc, new NamespaceContextImpl(namespaces));
 	}
 	
-	private XML(Document doc, NamespaceContextImpl resolver) {
+	XML(Document doc, NamespaceContext context) {
 		this.doc = doc;
-		this.nsResolver = resolver;
+		this.context = context;
 		this.resolver = new ResourceResolver();
 	}
 	
-	private static Document createDocumentNS() {
+	static Document createDocumentNS() {
 		DocumentBuilder db = getDocumentBuilder();
 		return db.newDocument();
 	}
@@ -224,7 +224,7 @@ public class XML {
 	}
 	
 	public XML clone() {
-		return new XML((Document)doc.cloneNode(true), nsResolver);
+		return new XML((Document)doc.cloneNode(true), context);
 	}
 	
 	public Transformer stylesheet() throws TransformerConfigurationException {
@@ -237,7 +237,7 @@ public class XML {
 		t.setURIResolver(new ResourceResolver());
 		DOMResult result = new DOMResult();
 		t.transform(new DOMSource(doc), result);
-		return new XML((Document)result.getNode(), nsResolver);
+		return new XML((Document)result.getNode(), context);
 	}
 	
 	public void writeTo(File file, boolean declaration, String encoding, boolean prettyPrint) throws IOException {
@@ -258,7 +258,7 @@ public class XML {
 		writeTo(output, declaration, encoding, prettyPrint);
 	}
 	
-	private void writeTo(LSOutput output, boolean declaration, String encoding, boolean prettyPrint) throws IOException {
+	void writeTo(LSOutput output, boolean declaration, String encoding, boolean prettyPrint) throws IOException {
 		LSSerializer serializer = createLSSerializer(doc);
 		DOMConfiguration conf = serializer.getDomConfig();
 		conf.setParameter("format-pretty-print", prettyPrint);
@@ -268,7 +268,7 @@ public class XML {
 		serializer.write(doc, output);
 	}
 	
-	private static DocumentBuilder getDocumentBuilder() {
+	static DocumentBuilder getDocumentBuilder() {
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		dbf.setCoalescing(true);
 		dbf.setNamespaceAware(true);
@@ -281,7 +281,7 @@ public class XML {
 	
 	XPathExpression compileXPath(String xpath) {
 		XPath xpc = XPathFactory.newInstance().newXPath();
-		xpc.setNamespaceContext(nsResolver);
+		xpc.setNamespaceContext(context);
 		try {
 			return xpc.compile(xpath);
 		} catch (XPathExpressionException e) {
@@ -302,45 +302,6 @@ public class XML {
 			return (NodeList)expr.evaluate(node, XPathConstants.NODESET);
 		} catch (XPathExpressionException e) {
 			throw new IllegalArgumentException(e.getMessage(), e);
-		}
-	}
-	
-	static class ResourceResolver implements EntityResolver, URIResolver {
-		@Override
-		public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
-			if (systemId == null) return null;
-			
-			try {
-				URI uri = toURI(publicId, systemId);
-				return new InputSource(uri.toURL().openConnection().getInputStream());
-			} catch (MalformedURLException e) {
-				return null;
-			} catch (IOException e) {
-				return null;
-			}
-		}
-		
-		@Override
-		public Source resolve(String href, String base) throws TransformerException {
-			if (href == null) return null;
-			
-			try {
-				URI uri = toURI(base, href);
-				return new StreamSource(uri.toURL().openConnection().getInputStream(),
-						uri.normalize().toASCIIString());
-			} catch (MalformedURLException e) {
-				return null;
-			} catch (IOException e) {
-				return null;
-			}
-		}
-		
-		private static URI toURI(String base, String href) {
-			if (base != null && !base.isEmpty()) {
-				return URI.create(base).resolve(href);
-			} else {
-				return URI.create(href);
-			}
 		}
 	}
 	
