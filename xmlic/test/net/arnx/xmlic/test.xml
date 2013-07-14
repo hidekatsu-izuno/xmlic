@@ -1,0 +1,26 @@
+<body>
+top
+<div class="s1">
+	<ul class="s11">
+		<li>t1</li>
+		<li>t2</li>
+		<li>t3</li>
+	</ul>
+	<ul class="s12">
+		<li>t4</li>
+		<li>t5</li>
+		<li>t6</li>
+	</ul>
+</div>
+middle
+<div class="s2">
+	prefix
+	<ul class="s21">
+		<li>t7</li>
+		<li>t8</li>
+		<li>t9</li>
+	</ul>
+	suffix
+</div>
+bottom
+</body>
