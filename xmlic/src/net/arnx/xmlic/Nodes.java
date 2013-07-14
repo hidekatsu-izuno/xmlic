@@ -6,6 +6,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.TreeSet;
 
+import net.arnx.xmlic.DOMFactory.XPathNSResolverImpl;
+
 import org.w3c.dom.DOMConfiguration;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -66,6 +68,24 @@ public class Nodes extends ArrayList<Node> {
 		return ((Element)get(0)).getNamespaceURI();
 	}
 	
+	public Nodes namespaceURI(String uri) {
+		if (isEmpty()) return this;
+		
+		for (Node self : this) {
+			String name = self.getLocalName();
+			if (uri != null && !self.isDefaultNamespace(uri)) {
+				String prefix = self.lookupPrefix(uri);
+				if (prefix == null && getOwner().nsResolver instanceof XPathNSResolverImpl) {
+					prefix = ((XPathNSResolverImpl)getOwner().nsResolver).lookupPrefix(uri);
+				}
+				if (prefix != null) name = prefix + ":" + name;
+			}
+			getOwner().doc.renameNode(self, uri, name);
+		}
+		
+		return this;
+	}
+	
 	public String prefix() {
 		if (isEmpty() || !(get(0) instanceof Element)) return null;
 		return ((Element)get(0)).getPrefix();
@@ -74,6 +94,35 @@ public class Nodes extends ArrayList<Node> {
 	public String localName() {
 		if (isEmpty() || !(get(0) instanceof Element)) return null;
 		return ((Element)get(0)).getLocalName();
+	}
+	
+	public String name() {
+		if (isEmpty() || !(get(0) instanceof Element)) return null;
+		return ((Element)get(0)).getTagName();
+	}
+	
+	public Nodes rename(String name) {
+		if (name == null) throw new IllegalArgumentException("name is null");
+		if (isEmpty()) return this;
+		
+		String uri = null;
+		String localName = null;
+		
+		int index = name.indexOf(':');
+		if (index > 0 && index < name.length()-1) {
+			localName = name.substring(index + 1);
+			uri = getOwner().nsResolver.lookupNamespaceURI(name.substring(0, index));
+			if (uri == null) localName = name;
+		} else {
+			localName = name;
+		}
+		if (localName.isEmpty()) return null;
+		
+		for (Node self : this) {
+			getOwner().doc.renameNode(self, uri, name);
+		}
+		
+		return this;
 	}
 	
 	public String attr(String name) {
@@ -96,7 +145,7 @@ public class Nodes extends ArrayList<Node> {
 		if (uri != null) {
 			return ((Element)get(0)).getAttributeNS(uri, localName);
 		} else {
-			return ((Element)get(0)).getAttribute(localName);
+			return ((Element)get(0)).getAttribute(name);
 		}
 	}
 	
@@ -122,9 +171,9 @@ public class Nodes extends ArrayList<Node> {
 			if (!(self instanceof Element)) continue;
 			
 			if (uri != null) {
-				((Element)self).setAttributeNS(uri, localName, value);
+				((Element)self).setAttributeNS(uri, name, value);
 			} else {
-				((Element)self).setAttribute(localName, value);
+				((Element)self).setAttribute(name, value);
 			}
 		}
 		return this;

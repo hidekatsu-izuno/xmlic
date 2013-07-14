@@ -7,9 +7,10 @@ import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
 import java.net.URI;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 import javax.xml.XMLConstants;
 import javax.xml.transform.Source;
@@ -191,8 +192,8 @@ public class DOMFactory {
 		return (src != null) ? getTransformerFactory().newTransformer(src) : null;
 	}
 	
-	private static class XPathNSResolverImpl implements XPathNSResolver {
-		private ConcurrentMap<String, String> map = new ConcurrentHashMap<String, String>();
+	static class XPathNSResolverImpl implements XPathNSResolver {
+		private Map<String, String> map = Collections.synchronizedMap(new LinkedHashMap<String, String>());
 		
 		public XPathNSResolverImpl(Map<String, String> namespaces) {
 			map = new ConcurrentHashMap<String, String>(namespaces);
@@ -203,6 +204,16 @@ public class DOMFactory {
 		@Override
 		public String lookupNamespaceURI(String prefix) {
 			return map.get(prefix);
+		}
+		
+		public String lookupPrefix(String uri) {
+			if (uri == null) uri = XMLConstants.NULL_NS_URI;
+			for (Map.Entry<String, String> entry : map.entrySet()) {
+				if (uri.equals(entry.getValue())) {
+					return entry.getKey();
+				}
+			}
+			return null;
 		}
 	}
 }

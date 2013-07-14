@@ -90,47 +90,32 @@ public class XML {
 	final Document doc;
 	final XPathNSResolver nsResolver;
 	
-	public XML(String name) {
-		this(name, Collections.<String, String>emptyMap());
+	public XML() {
+		this(Collections.<String, String>emptyMap());
 	}
 	
-	public XML(String name, Map<String, String> namespaces) {
-		this(name, DOMFactory.createXPathNSResolver(namespaces));
+	public XML(Map<String, String> namespaces) {
+		this(DOMFactory.createXPathNSResolver(namespaces));
 	}
 	
-	public XML(String name, XPathNSResolver nsResolver) {
-		this(createDocumentNS(name, nsResolver), nsResolver);
+	public XML(XPathNSResolver nsResolver) {
+		this(createDocumentNS(nsResolver), nsResolver);
 	}
 	
-	private static Document createDocumentNS(String name, XPathNSResolver nsResolver) {
-		int index = name.indexOf(':');
-		String uri = null;
-		String localName;
-		if (index != -1) {
-			if (index == 0 || index + 1 >= name.length()) {
-				localName = name;
-			} else {
-				localName = name.substring(index + 1);
-				if (!localName.isEmpty()) {
-					uri = nsResolver.lookupNamespaceURI(name.substring(0, index));
-					if (uri == null) localName = name;
-				} else {
-					localName = name;
-				}
-			}
-		} else {
-			localName = name;
+	private static Document createDocumentNS(XPathNSResolver nsResolver) {
+		Document doc = DOMFactory.createDocument(null, "x");
+		while (doc.hasChildNodes()) {
+			doc.removeChild(doc.getLastChild());
 		}
-		
-		return DOMFactory.createDocument(uri, localName);
-	}
-	
-	public XML(Document doc, Map<String, String> namespaces) {
-		this(doc, DOMFactory.createXPathNSResolver(namespaces));
+		return doc;
 	}
 	
 	public XML(Document doc) {
 		this(doc, DOMFactory.createXPathNSResolver(doc));
+	}
+	
+	public XML(Document doc, Map<String, String> namespaces) {
+		this(doc, DOMFactory.createXPathNSResolver(namespaces));
 	}
 	
 	public XML(Document doc, XPathNSResolver nsResolver) {
@@ -248,7 +233,7 @@ public class XML {
 		serializer.write(doc, output);
 	}
 	
-	private static class ResourceResolver implements LSResourceResolver, URIResolver {
+	static class ResourceResolver implements LSResourceResolver, URIResolver {
 		@Override
 		public LSInput resolveResource(String type, String namespaceURI, 
 				String publicId, String systemId, String baseURI) {
