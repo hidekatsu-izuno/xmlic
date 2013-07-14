@@ -62,89 +62,64 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	public String namespaceURI() {
-		for (Node self : this) {
-			if (!(self instanceof Element)) continue;
-			
-			return ((Element)self).getNamespaceURI();
-		}
-		return null;
+		if (isEmpty() || !(get(0) instanceof Element)) return null;
+		return ((Element)get(0)).getNamespaceURI();
 	}
 	
 	public String prefix() {
-		for (Node self : this) {
-			if (!(self instanceof Element)) continue;
-
-			return ((Element)self).getPrefix();
-		}
-		return null;
+		if (isEmpty() || !(get(0) instanceof Element)) return null;
+		return ((Element)get(0)).getPrefix();
 	}
 	
 	public String localName() {
-		for (Node self : this) {
-			if (!(self instanceof Element)) continue;
-			
-			return ((Element)self).getLocalName();
-		}
-		return null;
+		if (isEmpty() || !(get(0) instanceof Element)) return null;
+		return ((Element)get(0)).getLocalName();
 	}
 	
 	public String attr(String name) {
 		if (name == null) throw new IllegalArgumentException("name is null");
+		if (isEmpty() || !(get(0) instanceof Element)) return null;
 		
 		String uri = null;
 		String localName = null;
 		
-		for (Node self : this) {
-			if (!(self instanceof Element)) continue;
-			
-			if (localName == null) {
-				int index = name.indexOf(':');
-				if (index != -1) {
-					if (index == 0 || index + 1 >= name.length()) return null; 
-					localName = name.substring(index + 1);
-					if (localName.isEmpty()) return null;
-					
-					uri = getOwner().nsResolver.lookupNamespaceURI(name.substring(0, index));
-					if (uri == null) return null;
-				} else {
-					localName = name;
-					if (localName.isEmpty()) return null;
-				}
-			}
-			
-			if (uri != null) {
-				return ((Element)self).getAttributeNS(uri, localName);
-			} else {
-				return ((Element)self).getAttribute(localName);
-			}
+		int index = name.indexOf(':');
+		if (index > 0 && index < name.length()-1) {
+			localName = name.substring(index + 1);
+			uri = getOwner().nsResolver.lookupNamespaceURI(name.substring(0, index));
+			if (uri == null) localName = name;
+		} else {
+			localName = name;
 		}
-		return null;
+		if (localName.isEmpty()) return null;
+
+		if (uri != null) {
+			return ((Element)get(0)).getAttributeNS(uri, localName);
+		} else {
+			return ((Element)get(0)).getAttribute(localName);
+		}
 	}
 	
 	public Nodes attr(String name, String value) {
 		if (name == null) throw new IllegalArgumentException("name is null");
+		if (isEmpty()) return this;
 		if (value == null) value = "";
 		
 		String uri = null;
 		String localName = null;
+
+		int index = name.indexOf(':');
+		if (index > 0 && index < name.length()-1) {
+			localName = name.substring(index + 1);
+			uri = getOwner().nsResolver.lookupNamespaceURI(name.substring(0, index));
+			if (uri == null) localName = name;
+		} else {
+			localName = name;
+		}
+		if (localName.isEmpty()) return this;
 		
 		for (Node self : this) {
 			if (!(self instanceof Element)) continue;
-			
-			if (localName == null) {
-				int index = name.indexOf(':');
-				if (index != -1) {
-					if (index == 0 || index + 1 >= name.length()) return null; 
-					localName = name.substring(index + 1);
-					if (localName.isEmpty()) return null;
-					
-					uri = getOwner().nsResolver.lookupNamespaceURI(name.substring(0, index));
-					if (uri == null) return null;
-				} else {
-					localName = name;
-					if (localName.isEmpty()) return null;
-				}
-			}
 			
 			if (uri != null) {
 				((Element)self).setAttributeNS(uri, localName, value);
@@ -157,27 +132,23 @@ public class Nodes extends ArrayList<Node> {
 	
 	public Nodes removeAttr(String name) {
 		if (name == null) return this;
+		if (isEmpty()) return this;
 		
 		String uri = null;
 		String localName = null;
 		
+		int index = name.indexOf(':');
+		if (index > 0 && index < name.length()-1) {
+			localName = name.substring(index + 1);
+			uri = getOwner().nsResolver.lookupNamespaceURI(name.substring(0, index));
+			if (uri == null) localName = name;
+		} else {
+			localName = name;
+		}
+		if (localName.isEmpty()) return this;
+		
 		for (Node self : this) {
 			if (!(self instanceof Element)) continue;
-			
-			if (localName == null) {
-				int index = name.indexOf(':');
-				if (index != -1) {
-					if (index == 0 || index + 1 >= name.length()) return null; 
-					localName = name.substring(index + 1);
-					if (localName.isEmpty()) return null;
-					
-					uri = getOwner().nsResolver.lookupNamespaceURI(name.substring(0, index));
-					if (uri == null) return null;
-				} else {
-					localName = name;
-					if (localName.isEmpty()) return null;
-				}
-			}
 						
 			if (uri != null) {
 				((Element)self).removeAttributeNS(uri, localName);

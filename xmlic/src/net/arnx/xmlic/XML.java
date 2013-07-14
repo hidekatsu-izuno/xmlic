@@ -19,6 +19,7 @@ import java.util.Map;
 
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.URIResolver;
 import javax.xml.transform.dom.DOMResult;
@@ -208,6 +209,10 @@ public class XML {
 	
 	public Nodes find(String xpath) {
 		return document().find(xpath);
+	}
+	
+	public Transformer stylesheet() throws TransformerConfigurationException {
+		return DOMFactory.createTransformer(doc);
 	}
 	
 	public XML transform(Transformer t) throws TransformerException {
