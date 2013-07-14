@@ -218,7 +218,7 @@ public class Nodes extends ArrayList<Node> {
 	public boolean is(String filter) {
 		if (filter == null || isEmpty()) return false;
 		
-		XPathExpression expr = getOwner().compileXPath("boolean(count(self::node()[" + filter + "]))");
+		XPathExpression expr = getOwner().compileXPath("boolean(self::node()[" + escape(filter) + "])");
 		for (Node node : this) {
 			if (getOwner().evaluteAsBoolean(expr, node)) {
 				return true;
@@ -230,7 +230,7 @@ public class Nodes extends ArrayList<Node> {
 	public int index(String filter) {
 		if (filter == null || filter.isEmpty() || isEmpty()) return -1;
 		
-		XPathExpression expr = getOwner().compileXPath("boolean(count(self::node()[" + filter + "]))");
+		XPathExpression expr = getOwner().compileXPath("boolean(self::node()[" + escape(filter) + "])");
 		for (int i = 0; i < size(); i++) {
 			if (getOwner().evaluteAsBoolean(expr, get(i))) {
 				return i;
@@ -258,7 +258,7 @@ public class Nodes extends ArrayList<Node> {
 			return new Nodes(this, 0);
 		}
 		
-		XPathExpression expr = getOwner().compileXPath("boolean(count(child::node()[" + filter + "]))");
+		XPathExpression expr = getOwner().compileXPath("boolean(child::node()[" + escape(filter) + "])");
 		Nodes nodes = new Nodes(this, size());
 		for (Node self : this) {
 			if (getOwner().evaluteAsBoolean(expr, self)) {
@@ -371,7 +371,7 @@ public class Nodes extends ArrayList<Node> {
 			return new Nodes(this, this);
 		}
 		
-		XPathExpression expr = getOwner().compileXPath("boolean(count(self::node()[" + filter + "]))");
+		XPathExpression expr = getOwner().compileXPath("boolean(self::node()[" + escape(filter) + "])");
 		
 		Nodes results = new Nodes(this, size() * 2);
 		results.addAll(this);
@@ -416,7 +416,7 @@ public class Nodes extends ArrayList<Node> {
 			return new Nodes(this, 0);
 		}
 		
-		XPathExpression expr = getOwner().compileXPath("boolean(count(self::node()[" + filter + "]))");
+		XPathExpression expr = getOwner().compileXPath("boolean(self::node()[" + escape(filter) + "])");
 		
 		Nodes results = new Nodes(this, size());
 		for (Node self : this) {
@@ -448,7 +448,7 @@ public class Nodes extends ArrayList<Node> {
 			return new Nodes(this, 0);
 		}
 		
-		XPathExpression expr = getOwner().compileXPath("boolean(count(self::node()[" + filter + "]))");
+		XPathExpression expr = getOwner().compileXPath("boolean(self::node()[" + escape(filter) + "])");
 		Nodes results = new Nodes(this, size());
 		for (Node self : this) {
 			if (!getOwner().evaluteAsBoolean(expr, self)) {
@@ -503,7 +503,7 @@ public class Nodes extends ArrayList<Node> {
 			return new Nodes(this, 0);
 		}
 		
-		XPathExpression expr = getOwner().compileXPath("boolean(count(self::node()[" + filter + "]))");
+		XPathExpression expr = getOwner().compileXPath("boolean(self::node()[" + escape(filter) + "])");
 		Nodes results = new Nodes(this, size() * 2);
 		for (Node self : this) {
 			if (self == null) continue;
@@ -533,7 +533,7 @@ public class Nodes extends ArrayList<Node> {
 			return new Nodes(this, 0);
 		}
 		
-		XPathExpression expr = getOwner().compileXPath("boolean(count(self::node()[" + filter + "]))");
+		XPathExpression expr = getOwner().compileXPath("boolean(self::node()[" + escape(filter) + "])");
 		Nodes results = new Nodes(this, size() * 2);
 		for (Node self : this) {
 			if (self == null) continue;
@@ -574,7 +574,7 @@ public class Nodes extends ArrayList<Node> {
 			return new Nodes(this, 0);
 		}
 		
-		XPathExpression expr = getOwner().compileXPath("boolean(count(self::node()[" + filter + "]))");
+		XPathExpression expr = getOwner().compileXPath("boolean(self::node()[" + escape(filter) + "])");
 		Nodes results = new Nodes(this, size() * 2);
 		for (Node self : this) {
 			if (!self.hasChildNodes()) continue;
@@ -614,7 +614,7 @@ public class Nodes extends ArrayList<Node> {
 			return new Nodes(this, 0);
 		}
 		
-		XPathExpression expr = getOwner().compileXPath("boolean(count(self::node()[" + filter + "]))");
+		XPathExpression expr = getOwner().compileXPath("boolean(self::node()[" + escape(filter) + "])");
 		Nodes results = new Nodes(this, size() * 2);
 		for (Node self : this) {
 			if (!self.hasChildNodes()) continue;
@@ -684,7 +684,7 @@ public class Nodes extends ArrayList<Node> {
 			return new Nodes(this, 0);
 		}
 		
-		XPathExpression expr = getOwner().compileXPath("boolean(count(self::node()[" + filter + "]))");
+		XPathExpression expr = getOwner().compileXPath("boolean(self::node()[" + escape(filter) + "])");
 		Nodes results = new Nodes(this, size());
 		for (Node self : this) {
 			if (self == null) continue;
@@ -753,7 +753,7 @@ public class Nodes extends ArrayList<Node> {
 			return new Nodes(this, 0);
 		}
 		
-		XPathExpression expr = getOwner().compileXPath("boolean(count(self::node()[" + filter + "]))");
+		XPathExpression expr = getOwner().compileXPath("boolean(self::node()[" + escape(filter) + "])");
 		Nodes results = new Nodes(this, size() * 2);
 		for (Node self : this) {
 			if (self == null) continue;
@@ -805,8 +805,7 @@ public class Nodes extends ArrayList<Node> {
 			return new Nodes(this, 0);
 		}
 		
-		XPathExpression expr = getOwner().compileXPath("boolean(count(self::node()[" + filter + "]))");
-		
+		XPathExpression expr = getOwner().compileXPath("boolean(self::node()[" + escape(filter) + "])");
 		Nodes results = new Nodes(this, size());
 		for (Node self : this) {
 			if (self == null) continue;
@@ -1390,5 +1389,33 @@ public class Nodes extends ArrayList<Node> {
 		Node bup = (b != null) ? b.getParentNode() : null;
 		return (a == bup || (bup != null && bup instanceof Element 
 				&& (a.compareDocumentPosition(bup) & Node.DOCUMENT_POSITION_CONTAINED_BY) != 0));
+	}
+	
+	private static String escape(String filter) {
+		StringBuilder sb = new StringBuilder(filter.length());
+		int nest = 0;
+		for (int i = 0; i < filter.length(); i++) {
+			char c = filter.charAt(i);
+			switch (c) {
+			case '[':
+				nest++;
+				sb.append(c);
+				break;
+			case ']':
+				nest--;
+				for (int j = 0; j < -nest; j++) {
+					sb.append('[');
+					nest++;
+				}
+				sb.append(c);
+				break;
+			default:
+				sb.append(c);
+			}
+		}
+		for (int i = 0; i < nest; i++) {
+			sb.append(']');
+		}
+		return sb.toString();
 	}
 }

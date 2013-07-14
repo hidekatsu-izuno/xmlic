@@ -36,8 +36,10 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
+import org.w3c.dom.Attr;
 import org.w3c.dom.DOMConfiguration;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.ls.DOMImplementationLS;
@@ -207,6 +209,20 @@ public class XML {
 		return document().remove(xpath);
 	}
 	
+	public Nodes removeNamespace(String namespaceURI) {
+		if (namespaceURI == null) namespaceURI = ""; 
+		Nodes root = document();
+		root.find("//*[namespace-uri()=" + escape(namespaceURI) + "]").namespaceURI(null);
+		XPathExpression expr = compileXPath("//namespace::*[self::node()=" + escape(namespaceURI) + "]");
+		NodeList list = evaluateAsNodeList(expr, doc);
+		for (int i = 0; i < list.getLength(); i++) {
+			Attr attr = (Attr)list.item(i);
+			Element elem = attr.getOwnerElement();
+			if (elem != null) elem.removeAttributeNode(attr);
+		}
+		return root;
+	}
+	
 	public XML clone() {
 		return new XML((Document)doc.cloneNode(true), nsResolver);
 	}
@@ -339,6 +355,14 @@ public class XML {
 		return sb.toString();
 	}
 	
+	static String escape(String xpath) {
+		if (xpath.contains("'")) {
+			return "concat('" + xpath.replace("'", "',\"'\",") + "')";
+		} else {
+			return "'" + xpath + "'";
+		}
+	}
+	
 	static DOMImplementationLS getDOMImplementationLS(Document doc) {
 		return (DOMImplementationLS)doc.getImplementation().getFeature("+LS", "3.0");
 	}
@@ -350,5 +374,4 @@ public class XML {
 	static LSOutput createLSOutput(Document doc) {
 		return getDOMImplementationLS(doc).createLSOutput();
 	}
-
 }

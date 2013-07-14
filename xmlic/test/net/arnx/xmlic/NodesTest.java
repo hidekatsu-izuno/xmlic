@@ -427,5 +427,4 @@ public class NodesTest {
 		assertEquals("<li><span>xml</span></li><li><span>xml</span></li><li><span>xml</span></li><li><span>xml</span></li><li><span>xml</span></li><li><span>xml</span></li><li><span>xml</span></li><li><span>xml</span></li><li><span>xml</span></li>", xml.find("//li").xml("<span>xml</span>").toString());
 		assertEquals("<li>xml</li><li>xml</li><li>xml</li><li>xml</li><li>xml</li><li>xml</li><li>xml</li><li>xml</li><li>xml</li>", xml.find("//li").xml("xml").toString());
 	}
-
 }
