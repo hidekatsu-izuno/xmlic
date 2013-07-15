@@ -36,6 +36,7 @@
 		<delete dir="${tmp}/javadoc" />
 		<zip destfile="${dist}/${project.name}-${project.version}.zip" encoding="Windows-31J">
 			<fileset dir="${tmp}" />
+			<fileset dir="." includes="doc/**" />
 			<file name="build.xml"/>
 			<file name="LICENSE.txt"/>
 			<file name="pom.xml"/>
