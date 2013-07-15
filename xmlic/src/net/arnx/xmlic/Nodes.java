@@ -12,7 +12,6 @@ import java.util.TreeSet;
 import javax.xml.XMLConstants;
 import javax.xml.xpath.XPathExpression;
 
-import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -70,14 +69,21 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	public Nodes namespace(String uri) {
+		if (uri == null) uri = "";
+		
 		for (Node self : this) {
+			if (self == null) continue;
+			if (self.getNodeType() != Node.ELEMENT_NODE) continue;
+			
 			String name = self.getLocalName();
-			if (uri != null && !self.isDefaultNamespace(uri)) {
+			if (!self.isDefaultNamespace(uri)) {
 				String prefix = self.lookupPrefix(uri);
 				if (prefix == null) {
 					prefix = getOwner().context.getPrefix(uri);
 				}
-				if (prefix != null) name = prefix + ":" + name;
+				if (prefix != null && !XMLConstants.DEFAULT_NS_PREFIX.equals(prefix)) {
+					name = prefix + ":" + name;
+				}
 			}
 			getOwner().doc.renameNode(self, uri, name);
 		}
@@ -85,42 +91,25 @@ public class Nodes extends ArrayList<Node> {
 		return this;
 	}
 	
-	public Nodes removeNamespace() {
-		find("//*[namespace-uri()]").namespace(null);
-		XPathExpression expr = getOwner().compileXPath("//namespace::*");
-		for (Node self : this) {
-			NodeList list = getOwner().evaluateAsNodeList(expr, self);
-			for (int i = 0; i < list.getLength(); i++) {
-				Attr attr = (Attr)list.item(i);
-				if (XMLConstants.XML_NS_URI.equals(attr.getNodeValue())) continue;
-				if (XMLConstants.XMLNS_ATTRIBUTE_NS_URI.equals(attr.getNodeValue())) continue;
-				
-				Element elem = attr.getOwnerElement();
-				if (elem != null) elem.removeAttributeNode(attr);
-			}
-		}
-		return this;
-	}
-	
 	public Nodes removeNamespace(String uri) {
-		if (uri == null) uri = "";
+		if (uri == null) uri = XMLConstants.DEFAULT_NS_PREFIX;
 		if (XMLConstants.XML_NS_URI.equals(uri)) {
 			throw new IllegalArgumentException("XML namespace can't remove.");
 		} else if (XMLConstants.XMLNS_ATTRIBUTE_NS_URI.equals(uri)) {
 			throw new IllegalArgumentException("XMLNS namespace can't remove.");
 		}
 		
-		find("//*[namespace-uri()=" + escapeText(uri) + "]").namespace(null);
-		
-		XPathExpression expr = getOwner().compileXPath("//namespace::*[self::node()=" + escapeText(uri) + "]");
 		for (Node self : this) {
-			NodeList list = getOwner().evaluateAsNodeList(expr, self);
-			for (int i = 0; i < list.getLength(); i++) {
-				Attr attr = (Attr)list.item(i);
-				Element elem = attr.getOwnerElement();
-				if (elem != null) elem.removeAttributeNode(attr);
-			}			
+			if (self == null) continue;
+			if (self.getNodeType() != Node.ELEMENT_NODE) continue;
+			
+			String suri = self.getNamespaceURI();
+			if (suri == null) suri = XMLConstants.DEFAULT_NS_PREFIX;
+			if (!suri.equals(uri)) continue;
+			
+			getOwner().doc.renameNode(self, "", self.getLocalName());
 		}
+		
 		return this;
 	}
 	
@@ -189,8 +178,8 @@ public class Nodes extends ArrayList<Node> {
 	
 	public Nodes attr(String name, String value) {
 		if (name == null) throw new IllegalArgumentException("name is null");
-		if (isEmpty()) return this;
 		if (value == null) value = "";
+		if (isEmpty()) return this;
 		
 		String uri = null;
 		String localName = null;
@@ -208,11 +197,8 @@ public class Nodes extends ArrayList<Node> {
 		for (Node self : this) {
 			if (!(self instanceof Element)) continue;
 			
-			if (uri != null) {
-				((Element)self).setAttributeNS(uri, name, value);
-			} else {
-				((Element)self).setAttribute(name, value);
-			}
+			Element elem = (Element)self;
+			elem.setAttributeNS(uri, name, value);
 		}
 		return this;
 	}
@@ -259,17 +245,9 @@ public class Nodes extends ArrayList<Node> {
 			
 			String nval = func.translate(i, oval);
 			if (nval == null) {
-				if (uri != null) {
-					elem.removeAttributeNS(uri, localName);
-				} else {
-					elem.removeAttribute(name);
-				}
+				elem.removeAttributeNS(uri, localName);
 			} else if (!nval.equals(oval)) {
-				if (uri != null) {
-					elem.setAttributeNS(uri, localName, nval);
-				} else {
-					elem.setAttribute(name, nval);
-				}
+				elem.setAttributeNS(uri, localName, nval);
 			}
 			
 			i++;
@@ -297,12 +275,7 @@ public class Nodes extends ArrayList<Node> {
 		
 		for (Node self : this) {
 			if (!(self instanceof Element)) continue;
-						
-			if (uri != null) {
-				((Element)self).removeAttributeNS(uri, localName);
-			} else {
-				((Element)self).removeAttribute(localName);
-			}
+			((Element)self).removeAttributeNS(uri, localName);
 		}
 		return this;
 	}
@@ -319,7 +292,7 @@ public class Nodes extends ArrayList<Node> {
 	public boolean is(String filter) {
 		if (filter == null || isEmpty()) return false;
 		
-		XPathExpression expr = getOwner().compileXPath("boolean(self::node()[" + escapeFilter(filter) + "])");
+		XPathExpression expr = getOwner().compileXPath("self::node()[" + escapeFilter(filter) + "]");
 		for (Node node : this) {
 			if (getOwner().evaluteAsBoolean(expr, node)) {
 				return true;
@@ -331,7 +304,7 @@ public class Nodes extends ArrayList<Node> {
 	public int index(String filter) {
 		if (filter == null || filter.isEmpty() || isEmpty()) return -1;
 		
-		XPathExpression expr = getOwner().compileXPath("boolean(self::node()[" + escapeFilter(filter) + "])");
+		XPathExpression expr = getOwner().compileXPath("self::node()[" + escapeFilter(filter) + "]");
 		for (int i = 0; i < size(); i++) {
 			if (getOwner().evaluteAsBoolean(expr, get(i))) {
 				return i;
@@ -373,7 +346,7 @@ public class Nodes extends ArrayList<Node> {
 			return new Nodes(this, 0);
 		}
 		
-		XPathExpression expr = getOwner().compileXPath("boolean(child::node()[" + escapeFilter(filter) + "])");
+		XPathExpression expr = getOwner().compileXPath("child::node()[" + escapeFilter(filter) + "]");
 		Nodes nodes = new Nodes(this, size());
 		for (Node self : this) {
 			if (getOwner().evaluteAsBoolean(expr, self)) {
@@ -486,7 +459,7 @@ public class Nodes extends ArrayList<Node> {
 			return new Nodes(this, this);
 		}
 		
-		XPathExpression expr = getOwner().compileXPath("boolean(self::node()[" + escapeFilter(filter) + "])");
+		XPathExpression expr = getOwner().compileXPath("self::node()[" + escapeFilter(filter) + "]");
 		
 		Nodes results = new Nodes(this, size() * 2);
 		results.addAll(this);
@@ -531,7 +504,7 @@ public class Nodes extends ArrayList<Node> {
 			return new Nodes(this, 0);
 		}
 		
-		XPathExpression expr = getOwner().compileXPath("boolean(self::node()[" + escapeFilter(filter) + "])");
+		XPathExpression expr = getOwner().compileXPath("self::node()[" + escapeFilter(filter) + "]");
 		
 		Nodes results = new Nodes(this, size());
 		for (Node self : this) {
@@ -563,7 +536,7 @@ public class Nodes extends ArrayList<Node> {
 			return new Nodes(this, 0);
 		}
 		
-		XPathExpression expr = getOwner().compileXPath("boolean(self::node()[" + escapeFilter(filter) + "])");
+		XPathExpression expr = getOwner().compileXPath("self::node()[" + escapeFilter(filter) + "]");
 		Nodes results = new Nodes(this, size());
 		for (Node self : this) {
 			if (!getOwner().evaluteAsBoolean(expr, self)) {
@@ -618,7 +591,7 @@ public class Nodes extends ArrayList<Node> {
 			return new Nodes(this, 0);
 		}
 		
-		XPathExpression expr = getOwner().compileXPath("boolean(self::node()[" + escapeFilter(filter) + "])");
+		XPathExpression expr = getOwner().compileXPath("self::node()[" + escapeFilter(filter) + "]");
 		Nodes results = new Nodes(this, size() * 2);
 		for (Node self : this) {
 			if (self == null) continue;
@@ -648,7 +621,7 @@ public class Nodes extends ArrayList<Node> {
 			return new Nodes(this, 0);
 		}
 		
-		XPathExpression expr = getOwner().compileXPath("boolean(self::node()[" + escapeFilter(filter) + "])");
+		XPathExpression expr = getOwner().compileXPath("self::node()[" + escapeFilter(filter) + "]");
 		Nodes results = new Nodes(this, size() * 2);
 		for (Node self : this) {
 			if (self == null) continue;
@@ -689,7 +662,7 @@ public class Nodes extends ArrayList<Node> {
 			return new Nodes(this, 0);
 		}
 		
-		XPathExpression expr = getOwner().compileXPath("boolean(self::node()[" + escapeFilter(filter) + "])");
+		XPathExpression expr = getOwner().compileXPath("self::node()[" + escapeFilter(filter) + "]");
 		Nodes results = new Nodes(this, size() * 2);
 		for (Node self : this) {
 			if (!self.hasChildNodes()) continue;
@@ -729,7 +702,7 @@ public class Nodes extends ArrayList<Node> {
 			return new Nodes(this, 0);
 		}
 		
-		XPathExpression expr = getOwner().compileXPath("boolean(self::node()[" + escapeFilter(filter) + "])");
+		XPathExpression expr = getOwner().compileXPath("self::node()[" + escapeFilter(filter) + "]");
 		Nodes results = new Nodes(this, size() * 2);
 		for (Node self : this) {
 			if (!self.hasChildNodes()) continue;
@@ -799,7 +772,7 @@ public class Nodes extends ArrayList<Node> {
 			return new Nodes(this, 0);
 		}
 		
-		XPathExpression expr = getOwner().compileXPath("boolean(self::node()[" + escapeFilter(filter) + "])");
+		XPathExpression expr = getOwner().compileXPath("self::node()[" + escapeFilter(filter) + "]");
 		Nodes results = new Nodes(this, size());
 		for (Node self : this) {
 			if (self == null) continue;
@@ -868,7 +841,7 @@ public class Nodes extends ArrayList<Node> {
 			return new Nodes(this, 0);
 		}
 		
-		XPathExpression expr = getOwner().compileXPath("boolean(self::node()[" + escapeFilter(filter) + "])");
+		XPathExpression expr = getOwner().compileXPath("self::node()[" + escapeFilter(filter) + "]");
 		Nodes results = new Nodes(this, size() * 2);
 		for (Node self : this) {
 			if (self == null) continue;
@@ -920,7 +893,7 @@ public class Nodes extends ArrayList<Node> {
 			return new Nodes(this, 0);
 		}
 		
-		XPathExpression expr = getOwner().compileXPath("boolean(self::node()[" + escapeFilter(filter) + "])");
+		XPathExpression expr = getOwner().compileXPath("self::node()[" + escapeFilter(filter) + "]");
 		Nodes results = new Nodes(this, size());
 		for (Node self : this) {
 			if (self == null) continue;
