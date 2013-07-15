@@ -129,10 +129,6 @@ public class XML implements Serializable {
 		if (node == null) {
 			return new Nodes(doc(), 0);
 		}
-		
-		if (node.getOwnerDocument() != doc) {
-			node = doc.importNode(node, true);
-		}
 		return new Nodes(doc(), node);
 	}
 	
@@ -199,6 +195,11 @@ public class XML implements Serializable {
 	
 	public Nodes remove(String xpath) {
 		return doc().remove(xpath);
+	}
+	
+	public XML normalize() {
+		doc.normalize();
+		return this;
 	}
 	
 	public XML clone() {

@@ -1458,8 +1458,6 @@ public class Nodes extends ArrayList<Node> {
 			}
 		});
 		
-		System.out.println(nodes);
-		
 		int dis = 0;
 		for (int i = 0; i < nodes.size(); i++) {
 			Node current = nodes.get(i);
