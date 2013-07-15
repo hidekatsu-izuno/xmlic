@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<title>XMLIC - jQuery like DOM traversal and manipulation API</title>
+<link rel="stylesheet" href="css/common.css" />
+<style>
+.sourceforge { position: absolute; top: 5px; right: 10px; }
+</style>
+</head>
+<body>
+<div class="nav">
+<h1 class="logo"><a href="#"><img src="img/xmlic.jpg" alt="XMLIC" width="115" height="34" /></a></h1>
+<div class="bar">version 0.8.0</div>
+<ul class="menu">
+	<li><a href="#introduction">XMLICとは</a></li>
+	<li><a href="#download">ダウンロード</a></li>
+	<li><a href="#usage">基本的な使い方</a></li>
+	<li>API リファレンス
+		<ul>
+		<li><a href="0.8/api/index.html">javadoc</a></li>
+		</ul>
+	</li>
+	<li><a href="#license">ライセンス</a></li>
+	<li><a href="#report">バグ・要望の報告先</a></li>
+	<li><a href="#releasenote">リリースノート</a></li>
+</ul>
+</div>
+<div class="header">
+<h1><span class="title">XMLIC</span> <span class="subtitle">- jQuery like DOM traversal and manipulation API</span></h1>
+<div class="sourceforge"><a href="http://sourceforge.jp/"><img src="http://sourceforge.jp/sflogo.php?group_id=8657&type=1" width="96" height="31" border="0" alt="SourceForge.JP"></a></div>
+<div class="bar">&nbsp;</div>
+</div>
+<div class="main">
+
+<h2 id="introduction" style="margin-top: 0px;">XMLIC（ズムリック）とは</h2>
+<p>jQuery ライクな DOM 操作を実現する Java 用 XML APIです。JDOM や XOM などと異なり、あくまで W3C 標準の DOM に対し検索、操作を行なうため、XSLT など他ライブラリとの高い相互運用性を実現出来ます。<br />
+API の使い方は jQuery に似ていますが、XMLIC は XML の操作に特化しるため、次のような違いがあります。</p>
+<ul>
+<li>CSS セレクタの代わりに XPath を使用します。</li>
+<li>複数ドキュメントを扱うことができます。入出力機能も用意されています。</li>
+<li>XML名前空間を適切に扱うことができます。</li>
+</ul>
+<p>使い方は簡単です。jQuery 利用者ならば、すぐに使いはじめることができるでしょう。</p>
+<pre class="source">
+import net.arnx.xmlic.XML;
+
+<span class="comment">// test.xml を読み込んで div タグに class="alert" という属性を設定します。</span>
+XML.load(new File("test.xml"))
+    .find("//div")
+    .attr("class", "alert");
+</pre>
+
+<h2 id="download">ダウンロード</h2>
+<p><a href="http://sourceforge.jp/projects/xmlic">ダウンロードはこちらから</a>可能です。なお、XMLICのビルド/実行には、Java SE 6 以上が必要です。</p>
+<script src="http://sourceforge.jp/projects/xmlic/releases/compact.js" type="text/javascript" charset="utf-8"></script>
+
+<h2 id="usage">基本的な使い方</h2>
+<p>jQuery の Traversal/Manipulation API をそのままの仕様で移植していますので同じように操作が可能です。大きく違う点は、<code>Document</code> の取り回しです。
+jQuery が単一の <code>window.document</code> に対して　XMLIC は複数のドキュメントを扱う必要があります。このような処理のために<code>XML</code> クラスが用意されています（jQuery の <code>$</code> 関数に当たるものだと考えるとわかりやすいでしょう）。</p>
+<ul>
+<li>読み込みには、 <code>XML</code> クラスの <code>load()</code> スタティックメソッドを使います。</li>
+<li>読み込んだ  <code>XML</code> インスタンスに対し、<code>find()</code> メソッドで <code>Nodes</code> インスタンスを取得し操作します（<code>Nodes</code> インスタンスは <code>jQuery</code> オブジェクトに当たるものだと考えるとよいでしょう）。</li>
+<li><code>Nodes</code> インスタンスから <code>XML</code> インスタンスを取得したい場合は、 <code>getOwner()</code> メソッドで取得出来ます。</li>
+<li>書き込みは、 <code>XML</code> インスタンスの <code>writeTo()</code> メソッドを使います。</li>
+</ul>
+<p>なお、XPath は jQuery セレクタより機能が豊富ですが違いも大きいので注意が必要です。例えば <code>find("div")</code> と記述した場合、
+jQuery では子孫ノードすべてが対象になりますが、XPath で同じ動作を実現するには <code>find("//div")</code> と記述する必要があります。</p>
+
+<h2 id="license">ライセンス</h2>
+<p>XMLIC は、<a href="http://www.apache.org/licenses/LICENSE-2.0">Apache License, Version 2.0</a>下で配布します。</p>
+<p><b>自分のライブラリへの組み込んでいただいたり、その際にパッケージ名の変更や処理の変更など行っていただいても何ら構いません。</b>ライセンスの範囲内でご自由にお使いください。</p>
+
+<h2 id="report">バグ・要望の報告先</h2>
+<p>バグや要望などは<a href="http://sourceforge.jp/projects/xmlic">XMLIC プロジェクトサイト</a>の<a href="http://sourceforge.jp/projects/xmlic/ticket/">チケット</a>に報告ください。</p>
+
+<h2 id="releasenote">リリースノート</h2>
+
+<h3>2013/7/16 version 0.8.0</h3>
+<ul>
+<li>XMLIC 最初のリリースとなります。仕様の元が jQuery API ですので大きな変更は予定していませんが、1.0 までは不具合、要望など積極的に取り入れたいと思いますので、ご要望あれば是非。</li>
+</ul>
+
+</div>
+
+<div class="footer">
+Copyright (C) 2013 Hidekatsu Izuno All right reserved.
+</div>
+</body>
+</html>
