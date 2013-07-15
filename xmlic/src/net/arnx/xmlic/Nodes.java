@@ -1,5 +1,7 @@
 package net.arnx.xmlic;
 
+import java.io.IOException;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -8,12 +10,10 @@ import java.util.TreeSet;
 
 import javax.xml.xpath.XPathExpression;
 
-import org.w3c.dom.DOMConfiguration;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.w3c.dom.ls.LSSerializer;
 
 public class Nodes extends ArrayList<Node> {
 	private static final long serialVersionUID = 1L;
@@ -1272,18 +1272,19 @@ public class Nodes extends ArrayList<Node> {
 	public String xml() {
 		if (isEmpty()) return "";
 		
-		LSSerializer serializer = XML.createLSSerializer(getOwner().doc);
-		DOMConfiguration conf = serializer.getDomConfig();
-		conf.setParameter("format-pretty-print", false);
-		conf.setParameter("xml-declaration", false);
-		NodeList nodes = this.get(0).getChildNodes();
+		NodeList nodes = get(0).getChildNodes();
 		if (nodes.getLength() == 0) return "";
 		
-		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < nodes.getLength(); i++) {
-			sb.append(serializer.writeToString(nodes.item(i)));
+		XMLSerializer serializer = new XMLSerializer();
+		StringWriter writer = new StringWriter();
+		try {
+			for (int i = 0; i < nodes.getLength(); i++) {
+				serializer.writeTo(writer, nodes.item(i));
+			}
+		} catch (IOException e) {
+			throw new IllegalStateException(e);
 		}
-		return sb.toString();
+		return writer.toString();
 	}
 	
 	public Nodes xml(String xml) {
@@ -1318,15 +1319,16 @@ public class Nodes extends ArrayList<Node> {
 	public String toString() {
 		if (isEmpty()) return "";
 		
-		LSSerializer serializer = XML.createLSSerializer(getOwner().doc);
-		DOMConfiguration conf = serializer.getDomConfig();
-		conf.setParameter("format-pretty-print", false);
-		conf.setParameter("xml-declaration", false);
-		StringBuilder sb = new StringBuilder();
-		for (Node node : this) {
-			sb.append(serializer.writeToString(node));
+		XMLSerializer serializer = new XMLSerializer();
+		StringWriter writer = new StringWriter();
+		try {
+			for (Node self : this) {
+				serializer.writeTo(writer, self);
+			}
+		} catch (IOException e) {
+			throw new IllegalStateException(e);
 		}
-		return sb.toString();
+		return writer.toString();
 	}
 	
 	boolean isExternalNode(Node node) {

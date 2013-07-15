@@ -8,6 +8,7 @@ import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Serializable;
 import java.io.StringReader;
+import java.io.StringWriter;
 import java.io.Writer;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -36,14 +37,10 @@ import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
 import org.w3c.dom.Attr;
-import org.w3c.dom.DOMConfiguration;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.w3c.dom.ls.DOMImplementationLS;
-import org.w3c.dom.ls.LSOutput;
-import org.w3c.dom.ls.LSSerializer;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
@@ -78,12 +75,37 @@ public class XML implements Serializable {
 		try {
 			DocumentBuilder db = getDocumentBuilder();
 			db.setEntityResolver(new ResourceResolver());
-
-			NamespaceContextImpl nci = new NamespaceContextImpl();
-			XML xml = new XML(db.parse(is), nci);
 			
-			XPathExpression expr = xml.compileXPath("//namespace::*");
-			NodeList list = xml.evaluateAsNodeList(expr, xml.doc);
+			return new XML(db.parse(is));
+		} catch (SAXException e) {
+			throw new IllegalArgumentException(e);
+		}
+	}
+	
+	final Document doc;
+	final ResourceResolver resolver;
+	final NamespaceContext context;
+	
+	public XML() {
+		this(Collections.<String, String>emptyMap());
+	}
+	
+	public XML(Map<String, String> namespaces) {
+		this(getDocumentBuilder().newDocument(), namespaces);
+	}
+	
+	public XML(Document doc) {
+		this(doc, null);
+	}
+	
+	public XML(Document doc, Map<String, String> namespaces) {
+		this.doc = doc;
+		this.resolver = new ResourceResolver();
+		
+		if (namespaces == null) {
+			NamespaceContextImpl context = new NamespaceContextImpl();
+			XPathExpression expr = compileXPath("//namespace::*");
+			NodeList list = evaluateAsNodeList(expr, doc);
 			for (int i = 0; i < list.getLength(); i++) {
 				Node node = list.item(i);
 				String prefix = node.getLocalName();
@@ -91,40 +113,18 @@ public class XML implements Serializable {
 					prefix = XMLConstants.DEFAULT_NS_PREFIX;
 				}
 				
-				nci.addNamespace(prefix, node.getNodeValue());
+				context.addNamespace(prefix, node.getNodeValue());
 			}
-			
-			return  xml;
-		} catch (SAXException e) {
-			throw new IllegalArgumentException(e);
+			this.context = context;
+		} else {
+			this.context = new NamespaceContextImpl(namespaces);
 		}
 	}
 	
-	final Document doc;
-	final NamespaceContext context;
-	final ResourceResolver resolver;
-	
-	public XML() {
-		this(Collections.<String, String>emptyMap());
-	}
-	
-	public XML(Map<String, String> namespaces) {
-		this(createDocumentNS(), namespaces);
-	}
-	
-	public XML(Document doc, Map<String, String> namespaces) {
-		this(doc, new NamespaceContextImpl(namespaces));
-	}
-	
-	XML(Document doc, NamespaceContext context) {
+	XML(Document doc, ResourceResolver resolver, NamespaceContext context) {
 		this.doc = doc;
+		this.resolver = resolver;
 		this.context = context;
-		this.resolver = new ResourceResolver();
-	}
-	
-	static Document createDocumentNS() {
-		DocumentBuilder db = getDocumentBuilder();
-		return db.newDocument();
 	}
 	
 	public Nodes document() {
@@ -224,7 +224,7 @@ public class XML implements Serializable {
 	}
 	
 	public XML clone() {
-		return new XML((Document)doc.cloneNode(true), context);
+		return new XML((Document)doc.cloneNode(true), resolver, context);
 	}
 	
 	public Transformer stylesheet() throws TransformerConfigurationException {
@@ -237,41 +237,40 @@ public class XML implements Serializable {
 		t.setURIResolver(new ResourceResolver());
 		DOMResult result = new DOMResult();
 		t.transform(new DOMSource(doc), result);
-		return new XML((Document)result.getNode(), context);
+		return new XML((Document)result.getNode(), resolver, context);
 	}
 	
-	public void writeTo(File file, boolean declaration, String encoding, boolean prettyPrint) throws IOException {
-		writeTo(new FileOutputStream(file), declaration, encoding, prettyPrint);
+	public void writeTo(File file) throws IOException {
+		writeTo(new FileOutputStream(file));
 	}
 	
-	public void writeTo(OutputStream out, boolean declaration, String encoding, boolean prettyPrint) throws IOException {
-		LSOutput output = createLSOutput(doc);
-		output.setByteStream(out);
-		if (encoding != null) output.setEncoding(encoding);
-		writeTo(output, declaration, encoding, prettyPrint);
+	public void writeTo(OutputStream out) throws IOException {
+		XMLSerializer serializer = new XMLSerializer();
+		serializer.setEncoding("UTF-8");
+	
+		try {
+			serializer.writeTo(out, doc);
+		} finally {
+			out.close();
+		}
 	}
 	
-	public void writeTo(Writer writer, boolean declaration, String encoding, boolean prettyPrint) throws IOException {
-		LSOutput output = createLSOutput(doc);
-		output.setCharacterStream(writer);
-		if (encoding != null) output.setEncoding(encoding);
-		writeTo(output, declaration, encoding, prettyPrint);
-	}
-	
-	void writeTo(LSOutput output, boolean declaration, String encoding, boolean prettyPrint) throws IOException {
-		LSSerializer serializer = createLSSerializer(doc);
-		DOMConfiguration conf = serializer.getDomConfig();
-		conf.setParameter("format-pretty-print", prettyPrint);
-		conf.setParameter("xml-declaration", declaration);
-		if (encoding != null) output.setEncoding(encoding);
+	public void writeTo(Writer writer) throws IOException {
+		XMLSerializer serializer = new XMLSerializer();
 		
-		serializer.write(doc, output);
+		try {
+			serializer.writeTo(writer, doc);
+		} finally {
+			writer.close();
+		}
 	}
 	
 	static DocumentBuilder getDocumentBuilder() {
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		dbf.setCoalescing(true);
 		dbf.setNamespaceAware(true);
+		dbf.setExpandEntityReferences(true);
+		dbf.setXIncludeAware(true);
 		try {
 			return dbf.newDocumentBuilder();
 		} catch (ParserConfigurationException e) {
@@ -281,7 +280,7 @@ public class XML implements Serializable {
 	
 	XPathExpression compileXPath(String xpath) {
 		XPath xpc = XPathFactory.newInstance().newXPath();
-		xpc.setNamespaceContext(context);
+		if (context != null) xpc.setNamespaceContext(context);
 		try {
 			return xpc.compile(xpath);
 		} catch (XPathExpressionException e) {
@@ -307,13 +306,20 @@ public class XML implements Serializable {
 	
 	@Override
 	public String toString() {
-		LSSerializer serializer = createLSSerializer(doc);
-		DOMConfiguration conf = serializer.getDomConfig();
-		conf.setParameter("format-pretty-print", false);
-		conf.setParameter("xml-declaration", false);
-		StringBuilder sb = new StringBuilder();
-		sb.append(serializer.writeToString(doc));
-		return sb.toString();
+		XMLSerializer serializer = new XMLSerializer();
+		StringWriter writer = new StringWriter();
+		try {
+			serializer.writeTo(writer, doc);
+		} catch (IOException e) {
+			throw new IllegalStateException(e);
+		} finally {
+			try {
+				writer.close();
+			} catch (IOException e) {
+				throw new IllegalStateException(e);
+			}
+		}
+		return writer.toString();
 	}
 	
 	static String escape(String xpath) {
@@ -322,17 +328,5 @@ public class XML implements Serializable {
 		} else {
 			return "'" + xpath + "'";
 		}
-	}
-	
-	static DOMImplementationLS getDOMImplementationLS(Document doc) {
-		return (DOMImplementationLS)doc.getImplementation().getFeature("+LS", "3.0");
-	}
-	
-	static LSSerializer createLSSerializer(Document doc) {
-		return getDOMImplementationLS(doc).createLSSerializer();
-	}
-	
-	static LSOutput createLSOutput(Document doc) {
-		return getDOMImplementationLS(doc).createLSOutput();
 	}
 }
