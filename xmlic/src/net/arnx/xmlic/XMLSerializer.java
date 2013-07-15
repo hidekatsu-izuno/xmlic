@@ -1,11 +1,7 @@
 package net.arnx.xmlic;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.io.Writer;
 
 import org.w3c.dom.DOMConfiguration;
@@ -53,34 +49,27 @@ public class XMLSerializer {
 		return linesep;
 	}
 	
-	public void writeTo(File file, Node node) throws IOException {
-		writeTo(new FileOutputStream(file), node);
-	}
-	
 	public void writeTo(OutputStream out, Node node) throws IOException {
-		String encoding = (this.encoding != null) ? this.encoding : "UTF-8";
-		Writer writer = new BufferedWriter(new OutputStreamWriter(out, encoding));
-		try {
-			writeTo(writer, node);
-		} finally {
-			writer.flush();
-		}
+		LSOutput output = createLSOutput(node);
+		output.setByteStream(out);
+		writeTo(output, node);
 	}
 	
 	public void writeTo(Writer writer, Node node) throws IOException {
-		Document doc = (node instanceof Document) ? (Document)node : node.getOwnerDocument();
-		
-		LSSerializer serializer = createLSSerializer(doc);
+		LSOutput output = createLSOutput(node);
+		output.setCharacterStream(writer);
+		writeTo(output, node);
+	}
+	
+	void writeTo(LSOutput output, Node node) throws IOException {
+		LSSerializer serializer = createLSSerializer(node);
 		if (linesep != null) serializer.setNewLine(linesep);
 		
 		DOMConfiguration conf = serializer.getDomConfig();
 		conf.setParameter("format-pretty-print", prittyPrint);
 		conf.setParameter("xml-declaration", xmlDeclaration);
 		
-		LSOutput output = createLSOutput(doc);
-		output.setCharacterStream(writer);
 		if (encoding != null) output.setEncoding(encoding);
-		
 		serializer.write(node, output);
 	}
 	
@@ -88,11 +77,13 @@ public class XMLSerializer {
 		return (DOMImplementationLS)doc.getImplementation().getFeature("+LS", "3.0");
 	}
 	
-	static LSSerializer createLSSerializer(Document doc) {
+	static LSSerializer createLSSerializer(Node node) {
+		Document doc = (node instanceof Document) ? (Document)node : node.getOwnerDocument();
 		return getDOMImplementationLS(doc).createLSSerializer();
 	}
 	
-	static LSOutput createLSOutput(Document doc) {
+	static LSOutput createLSOutput(Node node) {
+		Document doc = (node instanceof Document) ? (Document)node : node.getOwnerDocument();
 		return getDOMImplementationLS(doc).createLSOutput();
 	}
 }

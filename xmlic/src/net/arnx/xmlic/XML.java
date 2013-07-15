@@ -48,38 +48,32 @@ public class XML implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	public static XML load(File file) throws IOException {
-		return load(file.toURI());
+		XMLParser parser = new XMLParser();
+		return new XML(parser.parse(file.toURI()));
 	}
 	
 	public static XML load(URI uri) throws IOException {
-		return load(new InputSource(uri.normalize().toASCIIString()));
+		XMLParser parser = new XMLParser();
+		return new XML(parser.parse(uri));
 	}
 	
 	public static XML load(URL url) throws IOException {
 		try {
-			return load(new InputSource(url.toURI().normalize().toASCIIString()));
+			XMLParser parser = new XMLParser();
+			return new XML(parser.parse(url.toURI()));
 		} catch (URISyntaxException e) {
 			throw new IllegalArgumentException(e);
 		}
 	}
 	
 	public static XML load(InputStream in) throws IOException {
-		return load(new InputSource(in));
+		XMLParser parser = new XMLParser();
+		return new XML(parser.parse(in));
 	}
 	
 	public static XML load(Reader reader) throws IOException {
-		return load(new InputSource(reader));
-	}
-	
-	static XML load(InputSource is) throws IOException {
-		try {
-			DocumentBuilder db = getDocumentBuilder();
-			db.setEntityResolver(new ResourceResolver());
-			
-			return new XML(db.parse(is));
-		} catch (SAXException e) {
-			throw new IllegalArgumentException(e);
-		}
+		XMLParser parser = new XMLParser();
+		return new XML(parser.parse(reader));
 	}
 	
 	final Document doc;
