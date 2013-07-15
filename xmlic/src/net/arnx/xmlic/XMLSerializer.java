@@ -13,7 +13,7 @@ import org.w3c.dom.ls.LSSerializer;
 
 public class XMLSerializer {
 	private boolean prittyPrint = false;
-	private boolean xmlDeclaration = false;
+	private boolean xmlDeclaration = true;
 	private String encoding;
 	private String linesep;
 	
@@ -49,19 +49,19 @@ public class XMLSerializer {
 		return linesep;
 	}
 	
-	public void writeTo(OutputStream out, Node node) throws IOException {
+	public void serialize(Node node, OutputStream out) throws IOException {
 		LSOutput output = createLSOutput(node);
 		output.setByteStream(out);
-		writeTo(output, node);
+		serialize(node, output);
 	}
 	
-	public void writeTo(Writer writer, Node node) throws IOException {
+	public void serialize(Node node, Writer writer) throws IOException {
 		LSOutput output = createLSOutput(node);
 		output.setCharacterStream(writer);
-		writeTo(output, node);
+		serialize(node, output);
 	}
 	
-	void writeTo(LSOutput output, Node node) throws IOException {
+	void serialize(Node node, LSOutput output) throws IOException {
 		LSSerializer serializer = createLSSerializer(node);
 		if (linesep != null) serializer.setNewLine(linesep);
 		

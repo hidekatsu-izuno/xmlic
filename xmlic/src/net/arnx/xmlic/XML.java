@@ -36,9 +36,7 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
-import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
@@ -121,7 +119,7 @@ public class XML implements Serializable {
 		this.context = context;
 	}
 	
-	public Nodes document() {
+	public Nodes doc() {
 		Nodes nodes = new Nodes(this, null, 1);
 		nodes.add(doc);
 		return nodes;
@@ -129,13 +127,13 @@ public class XML implements Serializable {
 	
 	public Nodes convert(Node node) {
 		if (node == null) {
-			return new Nodes(document(), 0);
+			return new Nodes(doc(), 0);
 		}
 		
 		if (node.getOwnerDocument() != doc) {
 			node = doc.importNode(node, true);
 		}
-		return new Nodes(document(), node);
+		return new Nodes(doc(), node);
 	}
 	
 	public Nodes convert(Node... list) {
@@ -144,10 +142,10 @@ public class XML implements Serializable {
 	
 	public Nodes convert(Collection<Node> list) {
 		if (list == null || list.isEmpty()) {
-			return new Nodes(document(), 0);
+			return new Nodes(doc(), 0);
 		}
 		
-		Nodes nodes = new Nodes(document(), list.size());
+		Nodes nodes = new Nodes(doc(), list.size());
 		nodes.addAll(list);
 		Nodes.unique(nodes);
 		return nodes;
@@ -155,10 +153,10 @@ public class XML implements Serializable {
 	
 	public Nodes convert(NodeList list) {
 		if (list == null || list.getLength() == 0) {
-			return new Nodes(document(), 0);
+			return new Nodes(doc(), 0);
 		}
 		
-		Nodes nodes = new Nodes(document(), list.getLength());
+		Nodes nodes = new Nodes(doc(), list.getLength());
 		for (int i = 0; i < list.getLength(); i++) {
 			nodes.add(list.item(i));
 		}
@@ -168,7 +166,7 @@ public class XML implements Serializable {
 	
 	public Nodes parse(String text) {
 		if (text == null || text.isEmpty()) {
-			return new Nodes(document(), 0);
+			return new Nodes(doc(), 0);
 		}
 		
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
@@ -181,7 +179,7 @@ public class XML implements Serializable {
 			Document ndoc = db.parse(new InputSource(new StringReader("<x>" + text + "</x>")));
 			NodeList list = doc.importNode(ndoc.getDocumentElement(), true).getChildNodes();
 			
-			Nodes nodes = new Nodes(document(), list.getLength());
+			Nodes nodes = new Nodes(doc(), list.getLength());
 			for (int i = 0; i < list.getLength(); i++) {
 				nodes.add(list.item(i));
 			}
@@ -196,25 +194,11 @@ public class XML implements Serializable {
 	}
 	
 	public Nodes find(String xpath) {
-		return document().find(xpath);
+		return doc().find(xpath);
 	}
 	
 	public Nodes remove(String xpath) {
-		return document().remove(xpath);
-	}
-	
-	public Nodes removeNamespace(String namespaceURI) {
-		if (namespaceURI == null) namespaceURI = ""; 
-		Nodes root = document();
-		root.find("//*[namespace-uri()=" + escape(namespaceURI) + "]").namespaceURI(null);
-		XPathExpression expr = compileXPath("//namespace::*[self::node()=" + escape(namespaceURI) + "]");
-		NodeList list = evaluateAsNodeList(expr, doc);
-		for (int i = 0; i < list.getLength(); i++) {
-			Attr attr = (Attr)list.item(i);
-			Element elem = attr.getOwnerElement();
-			if (elem != null) elem.removeAttributeNode(attr);
-		}
-		return root;
+		return doc().remove(xpath);
 	}
 	
 	public XML clone() {
@@ -243,7 +227,7 @@ public class XML implements Serializable {
 		serializer.setEncoding("UTF-8");
 	
 		try {
-			serializer.writeTo(out, doc);
+			serializer.serialize(doc, out);
 		} finally {
 			out.close();
 		}
@@ -253,7 +237,7 @@ public class XML implements Serializable {
 		XMLSerializer serializer = new XMLSerializer();
 		
 		try {
-			serializer.writeTo(writer, doc);
+			serializer.serialize(doc, writer);
 		} finally {
 			writer.close();
 		}
@@ -301,9 +285,10 @@ public class XML implements Serializable {
 	@Override
 	public String toString() {
 		XMLSerializer serializer = new XMLSerializer();
+		serializer.setXMLDeclarationVisible(false);
 		StringWriter writer = new StringWriter();
 		try {
-			serializer.writeTo(writer, doc);
+			serializer.serialize(doc, writer);
 		} catch (IOException e) {
 			throw new IllegalStateException(e);
 		} finally {
@@ -314,13 +299,5 @@ public class XML implements Serializable {
 			}
 		}
 		return writer.toString();
-	}
-	
-	static String escape(String xpath) {
-		if (xpath.contains("'")) {
-			return "concat('" + xpath.replace("'", "',\"'\",") + "')";
-		} else {
-			return "'" + xpath + "'";
-		}
 	}
 }

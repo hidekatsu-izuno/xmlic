@@ -1,5 +1,5 @@
 package net.arnx.xmlic;
 
-public interface Filter<T> {
+public interface Acceptor<T> {
 	public boolean accept(T t);
 }

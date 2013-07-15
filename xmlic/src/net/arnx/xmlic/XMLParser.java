@@ -16,7 +16,7 @@ import org.xml.sax.SAXException;
 public class XMLParser {
 	boolean coalescing = true;
 	boolean expandEntityReferences = true;
-	boolean xincludeEnabled = false;
+	boolean xincludeEnabled = true;
 	
 	public void setCoalescing(boolean flag) {
 		this.coalescing = flag;

@@ -4,7 +4,7 @@ import static org.junit.Assert.*;
 
 import java.io.IOException;
 
-import net.arnx.xmlic.Filter;
+import net.arnx.xmlic.Acceptor;
 import net.arnx.xmlic.XML;
 
 import org.junit.Test;
@@ -108,8 +108,8 @@ public class NodesTest {
 	@Test
 	public void testEnd() throws IOException {
 		XML xml = XML.load(getClass().getResource("test.xml"));
-		assertEquals("", xml.document().end().toString());		
-		assertEquals("", xml.document().end().end().toString());		
+		assertEquals("", xml.doc().end().toString());		
+		assertEquals("", xml.doc().end().end().toString());		
 		assertEquals("<ul class=\"s11\">\n\t\t<li>t1</li>\n\t\t<li>t2</li>\n\t\t<li>t3</li>\n\t</ul><ul class=\"s21\">\n\t\t<li>t7</li>\n\t\t<li>t8</li>\n\t\t<li>t9</li>\n\t</ul>", xml.find("//ul[position()=1]").children().end().toString());
 	}
 	
@@ -129,7 +129,7 @@ public class NodesTest {
 	public void testFilter() throws IOException {
 		XML xml = XML.load(getClass().getResource("test.xml"));
 		assertEquals("<li>t4</li>", xml.find("//li[position()=1]").filter("text()='t4'").toString());
-		assertEquals("<li>t4</li>", xml.find("//li[position()=1]").filter(new Filter<Node>() {
+		assertEquals("<li>t4</li>", xml.find("//li[position()=1]").filter(new Acceptor<Node>() {
 			@Override
 			public boolean accept(Node t) {
 				return "t4".equals(t.getTextContent());
@@ -229,15 +229,15 @@ public class NodesTest {
 	@Test
 	public void testNamespaceURI() throws IOException {
 		XML xml = XML.load(getClass().getResource("test.xml"));
-		assertNull(xml.find("//li[position()=1]").namespaceURI());
+		assertNull(xml.find("//li[position()=1]").namespace());
 	}
 	
 	@Test
 	public void testNamespaceURINS() throws IOException {
 		XML xml = XML.load(getClass().getResource("test_ns.xml"));
-		assertEquals("http://www.w3.org/1999/xhtml", xml.find("//html:li[position()=1]").namespaceURI());
-		assertEquals("<body xmlns:html=\"http://www.w3.org/1999/xhtml\" xmlns:svg=\"http://www.w3.org/2000/svg\">\ntop\n<div class=\"s1\">\n\t<ul class=\"s11\">\n\t\t<li>t1</li>\n\t\t<li>t2</li>\n\t\t<li>t3</li>\n\t</ul>\n\t<ul class=\"s12\">\n\t\t<li>t4</li>\n\t\t<li>t5</li>\n\t\t<li>t6</li>\n\t</ul>\n</div>\nmiddle\n<div class=\"s2\">\n\tprefix\n\t<ul class=\"s21\">\n\t\t<li>t7</li>\n\t\t<li>t8</li>\n\t\t<li>t9</li>\n\t</ul>\n\tsuffix\n</div>\nbottom\n</body>", xml.find("//*").namespaceURI(null).end().toString());
-		assertEquals("<svg:body xmlns:html=\"http://www.w3.org/1999/xhtml\" xmlns:svg=\"http://www.w3.org/2000/svg\">\ntop\n<svg:div class=\"s1\">\n\t<svg:ul class=\"s11\">\n\t\t<svg:li>t1</svg:li>\n\t\t<svg:li>t2</svg:li>\n\t\t<svg:li>t3</svg:li>\n\t</svg:ul>\n\t<svg:ul class=\"s12\">\n\t\t<svg:li>t4</svg:li>\n\t\t<svg:li>t5</svg:li>\n\t\t<svg:li>t6</svg:li>\n\t</svg:ul>\n</svg:div>\nmiddle\n<svg:div class=\"s2\">\n\tprefix\n\t<svg:ul class=\"s21\">\n\t\t<svg:li>t7</svg:li>\n\t\t<svg:li>t8</svg:li>\n\t\t<svg:li>t9</svg:li>\n\t</svg:ul>\n\tsuffix\n</svg:div>\nbottom\n</svg:body>", xml.find("//*").namespaceURI("http://www.w3.org/2000/svg").end().toString());
+		assertEquals("http://www.w3.org/1999/xhtml", xml.find("//html:li[position()=1]").namespace());
+		assertEquals("<body xmlns:html=\"http://www.w3.org/1999/xhtml\" xmlns:svg=\"http://www.w3.org/2000/svg\">\ntop\n<div class=\"s1\">\n\t<ul class=\"s11\">\n\t\t<li>t1</li>\n\t\t<li>t2</li>\n\t\t<li>t3</li>\n\t</ul>\n\t<ul class=\"s12\">\n\t\t<li>t4</li>\n\t\t<li>t5</li>\n\t\t<li>t6</li>\n\t</ul>\n</div>\nmiddle\n<div class=\"s2\">\n\tprefix\n\t<ul class=\"s21\">\n\t\t<li>t7</li>\n\t\t<li>t8</li>\n\t\t<li>t9</li>\n\t</ul>\n\tsuffix\n</div>\nbottom\n</body>", xml.find("//*").namespace(null).end().toString());
+		assertEquals("<svg:body xmlns:html=\"http://www.w3.org/1999/xhtml\" xmlns:svg=\"http://www.w3.org/2000/svg\">\ntop\n<svg:div class=\"s1\">\n\t<svg:ul class=\"s11\">\n\t\t<svg:li>t1</svg:li>\n\t\t<svg:li>t2</svg:li>\n\t\t<svg:li>t3</svg:li>\n\t</svg:ul>\n\t<svg:ul class=\"s12\">\n\t\t<svg:li>t4</svg:li>\n\t\t<svg:li>t5</svg:li>\n\t\t<svg:li>t6</svg:li>\n\t</svg:ul>\n</svg:div>\nmiddle\n<svg:div class=\"s2\">\n\tprefix\n\t<svg:ul class=\"s21\">\n\t\t<svg:li>t7</svg:li>\n\t\t<svg:li>t8</svg:li>\n\t\t<svg:li>t9</svg:li>\n\t</svg:ul>\n\tsuffix\n</svg:div>\nbottom\n</svg:body>", xml.find("//*").namespace("http://www.w3.org/2000/svg").end().toString());
 	}
 	
 	@Test
@@ -347,18 +347,27 @@ public class NodesTest {
 	}
 	
 	@Test
+	public void testRemoveNamespace() throws IOException {
+		XML xml = XML.load(getClass().getResource("test_ns.xml"));
+		assertEquals("<html:body xmlns:html=\"http://www.w3.org/1999/xhtml\">\ntop\n<html:div class=\"s1\">\n\t<html:ul class=\"s11\">\n\t\t<html:li>t1</html:li>\n\t\t<html:li>t2</html:li>\n\t\t<html:li>t3</html:li>\n\t</html:ul>\n\t<html:ul class=\"s12\">\n\t\t<html:li>t4</html:li>\n\t\t<html:li>t5</html:li>\n\t\t<html:li>t6</html:li>\n\t</html:ul>\n</html:div>\nmiddle\n<html:div class=\"s2\">\n\tprefix\n\t<html:ul class=\"s21\">\n\t\t<html:li>t7</html:li>\n\t\t<html:li>t8</html:li>\n\t\t<html:li>t9</html:li>\n\t</html:ul>\n\tsuffix\n</html:div>\nbottom\n</html:body>", xml.doc().removeNamespace("http://www.w3.org/2000/svg").toString());
+		assertEquals("<body>\ntop\n<div class=\"s1\">\n\t<ul class=\"s11\">\n\t\t<li>t1</li>\n\t\t<li>t2</li>\n\t\t<li>t3</li>\n\t</ul>\n\t<ul class=\"s12\">\n\t\t<li>t4</li>\n\t\t<li>t5</li>\n\t\t<li>t6</li>\n\t</ul>\n</div>\nmiddle\n<div class=\"s2\">\n\tprefix\n\t<ul class=\"s21\">\n\t\t<li>t7</li>\n\t\t<li>t8</li>\n\t\t<li>t9</li>\n\t</ul>\n\tsuffix\n</div>\nbottom\n</body>", xml.doc().removeNamespace("http://www.w3.org/1999/xhtml").toString());
+		xml = XML.load(getClass().getResource("test_ns.xml"));
+		assertEquals("<body>\ntop\n<div class=\"s1\">\n\t<ul class=\"s11\">\n\t\t<li>t1</li>\n\t\t<li>t2</li>\n\t\t<li>t3</li>\n\t</ul>\n\t<ul class=\"s12\">\n\t\t<li>t4</li>\n\t\t<li>t5</li>\n\t\t<li>t6</li>\n\t</ul>\n</div>\nmiddle\n<div class=\"s2\">\n\tprefix\n\t<ul class=\"s21\">\n\t\t<li>t7</li>\n\t\t<li>t8</li>\n\t\t<li>t9</li>\n\t</ul>\n\tsuffix\n</div>\nbottom\n</body>", xml.doc().removeNamespace().toString());
+	}
+	
+	@Test
 	public void testRename() throws IOException {
 		XML xml = XML.load(getClass().getResource("test.xml"));
-		assertEquals("<div>t1</div><div>t4</div><div>t7</div>", xml.find("//li[position()=1]").rename("div").toString());
+		assertEquals("<div>t1</div><div>t4</div><div>t7</div>", xml.find("//li[position()=1]").name("div").toString());
 		assertEquals("<body>\ntop\n<div class=\"s1\">\n\t<ul class=\"s11\">\n\t\t<div>t1</div>\n\t\t<li>t2</li>\n\t\t<li>t3</li>\n\t</ul>\n\t<ul class=\"s12\">\n\t\t<div>t4</div>\n\t\t<li>t5</li>\n\t\t<li>t6</li>\n\t</ul>\n</div>\nmiddle\n<div class=\"s2\">\n\tprefix\n\t<ul class=\"s21\">\n\t\t<div>t7</div>\n\t\t<li>t8</li>\n\t\t<li>t9</li>\n\t</ul>\n\tsuffix\n</div>\nbottom\n</body>", xml.toString());
 	}
 	
 	@Test
 	public void testRenameNS() throws IOException {
 		XML xml = XML.load(getClass().getResource("test_ns.xml"));
-		assertEquals("<div>t1</div><div>t4</div><div>t7</div>", xml.find("//html:li[position()=1]").rename("div").toString());
+		assertEquals("<div>t1</div><div>t4</div><div>t7</div>", xml.find("//html:li[position()=1]").name("div").toString());
 		assertEquals("<html:body xmlns:html=\"http://www.w3.org/1999/xhtml\" xmlns:svg=\"http://www.w3.org/2000/svg\">\ntop\n<html:div class=\"s1\">\n\t<html:ul class=\"s11\">\n\t\t<div>t1</div>\n\t\t<html:li>t2</html:li>\n\t\t<html:li>t3</html:li>\n\t</html:ul>\n\t<html:ul class=\"s12\">\n\t\t<div>t4</div>\n\t\t<html:li>t5</html:li>\n\t\t<html:li>t6</html:li>\n\t</html:ul>\n</html:div>\nmiddle\n<html:div class=\"s2\">\n\tprefix\n\t<html:ul class=\"s21\">\n\t\t<div>t7</div>\n\t\t<html:li>t8</html:li>\n\t\t<html:li>t9</html:li>\n\t</html:ul>\n\tsuffix\n</html:div>\nbottom\n</html:body>", xml.toString());
-		assertEquals("<svg:rect xmlns:svg=\"http://www.w3.org/2000/svg\">t1</svg:rect><svg:rect xmlns:svg=\"http://www.w3.org/2000/svg\">t4</svg:rect><svg:rect xmlns:svg=\"http://www.w3.org/2000/svg\">t7</svg:rect>", xml.find("//div[position()=1]").rename("svg:rect").toString());
+		assertEquals("<svg:rect xmlns:svg=\"http://www.w3.org/2000/svg\">t1</svg:rect><svg:rect xmlns:svg=\"http://www.w3.org/2000/svg\">t4</svg:rect><svg:rect xmlns:svg=\"http://www.w3.org/2000/svg\">t7</svg:rect>", xml.find("//div[position()=1]").name("svg:rect").toString());
 	}
 	
 	@Test
@@ -387,7 +396,7 @@ public class NodesTest {
 	@Test
 	public void testText() throws IOException {
 		XML xml = XML.load(getClass().getResource("test.xml"));
-		assertEquals("\ntop\n\n\t\n\t\tt1\n\t\tt2\n\t\tt3\n\t\n\t\n\t\tt4\n\t\tt5\n\t\tt6\n\t\n\nmiddle\n\n\tprefix\n\t\n\t\tt7\n\t\tt8\n\t\tt9\n\t\n\tsuffix\n\nbottom\n", xml.document().text());		
+		assertEquals("\ntop\n\n\t\n\t\tt1\n\t\tt2\n\t\tt3\n\t\n\t\n\t\tt4\n\t\tt5\n\t\tt6\n\t\n\nmiddle\n\n\tprefix\n\t\n\t\tt7\n\t\tt8\n\t\tt9\n\t\n\tsuffix\n\nbottom\n", xml.doc().text());		
 		assertEquals("t1t2t3t4t5t6t7t8t9", xml.find("//li").text());		
 		assertEquals("<li>text</li><li>text</li><li>text</li><li>text</li><li>text</li><li>text</li><li>text</li><li>text</li><li>text</li>", xml.find("//li").text("text").toString());		
 	}
@@ -430,14 +439,14 @@ public class NodesTest {
 	
 	@Test
 	public void testEscape() {
-		assertEquals("abc[]", Nodes.escape("abc[]"));
-		assertEquals("abc[]", Nodes.escape("abc]"));
-		assertEquals("abc[]aaa[]", Nodes.escape("abc]aaa["));
-		assertEquals("abc[]a[]a[]a[[[]]]", Nodes.escape("abc]a[]a]a[[["));
+		assertEquals("abc[]", Nodes.escapeFilter("abc[]"));
+		assertEquals("abc[]", Nodes.escapeFilter("abc]"));
+		assertEquals("abc[]aaa[]", Nodes.escapeFilter("abc]aaa["));
+		assertEquals("abc[]a[]a[]a[[[]]]", Nodes.escapeFilter("abc]a[]a]a[[["));
 		
-		assertEquals("abc'['[]", Nodes.escape("abc'[']"));
-		assertEquals("ab\"c]\"de", Nodes.escape("ab\"c]\"de"));
-		assertEquals("a\"bc]a'\"aa'['", Nodes.escape("a\"bc]a'\"aa'["));
-		assertEquals("ab'c]\"a['[]a[]a\"['['[\"", Nodes.escape("ab'c]\"a[']a]a\"['['["));
+		assertEquals("abc'['[]", Nodes.escapeFilter("abc'[']"));
+		assertEquals("ab\"c]\"de", Nodes.escapeFilter("ab\"c]\"de"));
+		assertEquals("a\"bc]a'\"aa'['", Nodes.escapeFilter("a\"bc]a'\"aa'["));
+		assertEquals("ab'c]\"a['[]a[]a\"['['[\"", Nodes.escapeFilter("ab'c]\"a[']a]a\"['['["));
 	}
 }
