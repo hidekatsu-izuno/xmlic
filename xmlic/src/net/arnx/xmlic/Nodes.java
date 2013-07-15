@@ -7,7 +7,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Map;
-import java.util.TreeSet;
 
 import javax.xml.XMLConstants;
 import javax.xml.xpath.XPathExpression;
@@ -325,20 +324,6 @@ public class Nodes extends ArrayList<Node> {
 			if (get(i) == node) return i;
 		}
 		return -1;
-	}
-	
-	public Nodes each(Visitor<Nodes> visitor) {
-		if (visitor == null) return this;
-		
-		int i = 0;
-		for (Node self : this) {
-			if (!visitor.visit(i, getOwner().convert(self))) {
-				return this;
-			}
-			i++;
-		}
-		
-		return this;
 	}
 	
 	public Nodes has(String filter) {
@@ -1449,7 +1434,7 @@ public class Nodes extends ArrayList<Node> {
 	static void unique(final Nodes nodes) {
 		if (nodes.size() < 2) return;
 		
-		TreeSet<Node> uniqueSet = new TreeSet<Node>(new Comparator<Node>() {
+		Collections.sort(nodes, new Comparator<Node>() {
 			@Override
 			public int compare(Node a, Node b) {
 				if (a == b) return 0;
@@ -1472,9 +1457,21 @@ public class Nodes extends ArrayList<Node> {
 				return 0;
 			}
 		});
-		uniqueSet.addAll(nodes);
-		nodes.clear();
-		nodes.addAll(uniqueSet);
+		
+		System.out.println(nodes);
+		
+		int dis = 0;
+		for (int i = 0; i < nodes.size(); i++) {
+			Node current = nodes.get(i);
+			if (i - dis - 1 >= 0 && current == nodes.get(i - dis - 1)) {
+				dis++;
+			} else if (dis > 0) {
+				nodes.set(i - dis, current);
+			}
+		}
+		for (int i = 0; i < dis; i++) {
+			nodes.remove(nodes.size() - 1);
+		}
 	}
 	
 	static boolean contains(Node a, Node b) {
