@@ -31,6 +31,13 @@ li {
 	list-style-type: none;
 }
 
+table {
+	border-collapse: collapse;
+	width: 100%;
+	box-sizing: boder-box;
+	table-layout: fixed;
+}
+
 .nav {
 	position: fixed;
 	*position: absolute;
@@ -95,5 +102,8 @@ ul { list-style-image: url(../img/marker.jpg); }
 .menu li a { text-decoration: none; }
 
 .main ul { padding-left: 30px;  }
-.source { border: 1px solid silver; font: 9pt monospace; padding: 16px; background-color: #E0FFFF; }
+.source { border: 1px solid silver; font-size: 0.9em; font-family: monospace; padding: 10px; background-color: #E0FFFF; }
 .comment { color: #0066FF; }
+.table { border: 1px solid gray; margin-top: 15px; font-size: 0.9em; }
+.table th { border: 1px solid gray; background-color: #AFEEEE; }
+.table td { border: 1px solid gray; background-color: white; }

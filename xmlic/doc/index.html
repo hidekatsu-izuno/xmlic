@@ -35,7 +35,7 @@
 
 <h2 id="introduction" style="margin-top: 0px;">XMLIC（ズムリック）とは</h2>
 <p>jQuery ライクな DOM 操作を実現する Java 用 XML APIです。JDOM や XOM などと異なり、あくまで W3C 標準の DOM に対し検索、操作を行なうため、XSLT など他ライブラリとの高い相互運用性を実現出来ます。<br />
-API の使い方は jQuery に似ていますが、XMLIC は XML の操作に特化しるため、次のような違いがあります。</p>
+API の使い方は jQuery に似ていますが、XMLIC は XML の操作に特化しているため、次のような違いがあります。</p>
 <ul>
 <li>CSS セレクタの代わりに XPath を使用します。</li>
 <li>複数ドキュメントを扱うことができます。入出力機能も用意されています。</li>
@@ -66,6 +66,31 @@ jQuery が単一の <code>window.document</code> に対して　XMLIC は複数�
 </ul>
 <p>なお、XPath は jQuery セレクタより機能が豊富ですが違いも大きいので注意が必要です。例えば <code>find("div")</code> と記述した場合、
 jQuery では子孫ノードすべてが対象になりますが、XPath で同じ動作を実現するには <code>find("//div")</code> と記述する必要があります。</p>
+
+<h2 id="xpath">XPath と CSS セレクタとの比較</h2>
+<table class="table">
+<colgroup>
+<col style="width: 150px" />
+<col style="width: 200px" />
+<col style="width: 200px" />
+<col />
+</colgroup>
+<thead>
+<tr><th>対象</th><th>XPath</th><th>CSS セレクタ</th><th>備考</th></tr>
+</thead>
+<tbody>
+<tr><td>すべての要素</td><td><code>//*</code></td><td><code>*</code></td><td></td></tr>
+<tr><td>要素が一致</td><td><code>//element</code></td><td><code>element</code></td><td></td></tr>
+<tr><td>子要素</td><td><code>//parent/child</code></td><td><code>parent &gt; child</code></td><td></td></tr>
+<tr><td>子孫要素</td><td><code>//ancestor//descendant</code></td><td><code>ancestor descendant</code></td><td></td></tr>
+<tr><td>属性がある</td><td><code>//*[@name]</code></td><td><code>[name]</code></td><td></td></tr>
+<tr><td>属性が一致</td><td><code>//*[@name='value']</code></td><td><code>[name='value']</code></td><td></td></tr>
+<tr><td>n番目の子要素</td><td><code>//*[n]</code></td><td><code>:nth-child(n)</code></td><td></td></tr>
+<tr><td>最初の子要素</td><td><code>//*[first()]</code></td><td><code>:first-child</code></td><td></td></tr>
+<tr><td>最後の子要素</td><td><code>//*[last()]</code></td><td><code>:last-child</code></td><td></td></tr>
+</tbody>
+</table>
+<p>jQueryでは <code>#ID</code> の形でID指定を多用しますが、XMLではスキーマにID型が指定されない限り利用できないため、通常の属性同様 <code>//*[@id='ID']</code> と記述します。</p>
 
 <h2 id="license">ライセンス</h2>
 <p>XMLIC は、<a href="http://www.apache.org/licenses/LICENSE-2.0">Apache License, Version 2.0</a>下で配布します。</p>
