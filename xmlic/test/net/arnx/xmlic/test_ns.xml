@@ -16,7 +16,7 @@ top
 middle
 <html:div class="s2">
 	prefix
-	<html:ul class="s21">
+	<html:ul svg:class="s21">
 		<html:li>t7</html:li>
 		<html:li>t8</html:li>
 		<html:li>t9</html:li>

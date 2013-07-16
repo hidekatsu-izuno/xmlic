@@ -14,9 +14,18 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 public class XMLParser {
+	boolean ignoreComments = false;
 	boolean coalescing = true;
 	boolean expandEntityReferences = true;
 	boolean xincludeEnabled = true;
+	
+	public void setIgnoreComments(boolean flag) {
+		this.ignoreComments = flag;
+	}
+	
+	public boolean isIgnoreComments() {
+		return ignoreComments;
+	}
 	
 	public void setCoalescing(boolean flag) {
 		this.coalescing = flag;
@@ -56,6 +65,7 @@ public class XMLParser {
 	
 	Document parse(InputSource is) throws IOException {
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+		dbf.setIgnoringComments(ignoreComments);
 		dbf.setCoalescing(coalescing);
 		dbf.setNamespaceAware(true);
 		dbf.setExpandEntityReferences(expandEntityReferences);

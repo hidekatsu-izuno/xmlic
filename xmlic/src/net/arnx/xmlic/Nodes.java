@@ -63,8 +63,17 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	public String namespace() {
-		if (isEmpty() || !(get(0) instanceof Element)) return null;
-		return ((Element)get(0)).getNamespaceURI();
+		if (isEmpty()) return null;
+		
+		Node self = get(0);
+		if (self == null) return null;
+		
+		switch (self.getNodeType()) {
+		case Node.ELEMENT_NODE:
+		case Node.ATTRIBUTE_NODE:
+			return self.getNamespaceURI();
+		}
+		return null;
 	}
 	
 	public Nodes namespace(String uri) {
@@ -72,19 +81,22 @@ public class Nodes extends ArrayList<Node> {
 		
 		for (Node self : this) {
 			if (self == null) continue;
-			if (self.getNodeType() != Node.ELEMENT_NODE) continue;
 			
-			String name = self.getLocalName();
-			if (!self.isDefaultNamespace(uri)) {
-				String prefix = self.lookupPrefix(uri);
-				if (prefix == null) {
-					prefix = getOwner().context.getPrefix(uri);
+			switch (self.getNodeType()) {
+			case Node.ELEMENT_NODE:
+			case Node.ATTRIBUTE_NODE:
+				String name = self.getLocalName();
+				if (!self.isDefaultNamespace(uri)) {
+					String prefix = self.lookupPrefix(uri);
+					if (prefix == null) {
+						prefix = getOwner().context.getPrefix(uri);
+					}
+					if (prefix != null && !XMLConstants.DEFAULT_NS_PREFIX.equals(prefix)) {
+						name = prefix + ":" + name;
+					}
 				}
-				if (prefix != null && !XMLConstants.DEFAULT_NS_PREFIX.equals(prefix)) {
-					name = prefix + ":" + name;
-				}
+				getOwner().doc.renameNode(self, uri, name);
 			}
-			getOwner().doc.renameNode(self, uri, name);
 		}
 		
 		return this;
@@ -100,31 +112,66 @@ public class Nodes extends ArrayList<Node> {
 		
 		for (Node self : this) {
 			if (self == null) continue;
-			if (self.getNodeType() != Node.ELEMENT_NODE) continue;
 			
-			String suri = self.getNamespaceURI();
-			if (suri == null) suri = XMLConstants.DEFAULT_NS_PREFIX;
-			if (!suri.equals(uri)) continue;
+			switch (self.getNodeType()) {
+			case Node.ELEMENT_NODE:
+			case Node.ATTRIBUTE_NODE:
+				String suri = self.getNamespaceURI();
+				if (suri == null) suri = XMLConstants.DEFAULT_NS_PREFIX;
+				if (!suri.equals(uri)) continue;
 			
-			getOwner().doc.renameNode(self, "", self.getLocalName());
+				getOwner().doc.renameNode(self, "", self.getLocalName());
+			}
 		}
 		
 		return this;
 	}
 	
 	public String prefix() {
-		if (isEmpty() || !(get(0) instanceof Element)) return null;
-		return ((Element)get(0)).getPrefix();
+		if (isEmpty()) return null;
+		
+		Node self = get(0);
+		if (self == null) return null;
+		
+		switch(self.getNodeType()) {
+		case Node.ELEMENT_NODE:
+		case Node.ATTRIBUTE_NODE:
+			return self.getPrefix();
+		}
+		return null;
 	}
 	
 	public String localName() {
-		if (isEmpty() || !(get(0) instanceof Element)) return null;
-		return ((Element)get(0)).getLocalName();
+		if (isEmpty()) return null;
+		
+		Node self = get(0);
+		if (self == null) return null;
+		
+		switch(self.getNodeType()) {
+		case Node.ELEMENT_NODE:
+		case Node.ATTRIBUTE_NODE:
+			return self.getLocalName();
+		}
+		return null;
 	}
 	
 	public String name() {
-		if (isEmpty() || !(get(0) instanceof Element)) return null;
-		return ((Element)get(0)).getTagName();
+		if (isEmpty()) return null;
+		
+		Node self = get(0);
+		if (self == null) return null;
+		
+		switch(self.getNodeType()) {
+		case Node.ELEMENT_NODE:
+		case Node.ATTRIBUTE_NODE:
+		case Node.DOCUMENT_TYPE_NODE:
+		case Node.ENTITY_NODE:
+		case Node.ENTITY_REFERENCE_NODE:
+		case Node.NOTATION_NODE:
+		case Node.PROCESSING_INSTRUCTION_NODE:
+			return self.getNodeName();
+		}
+		return null;
 	}
 	
 	public Nodes name(String name) {
@@ -145,7 +192,14 @@ public class Nodes extends ArrayList<Node> {
 		if (localName.isEmpty()) return null;
 		
 		for (Node self : this) {
-			getOwner().doc.renameNode(self, uri, name);
+			if (self == null) continue;
+			
+			switch (self.getNodeType()) {
+			case Node.ELEMENT_NODE:
+			case Node.ATTRIBUTE_NODE:
+				getOwner().doc.renameNode(self, uri, name);
+				break;
+			}
 		}
 		
 		return this;
@@ -277,6 +331,40 @@ public class Nodes extends ArrayList<Node> {
 			((Element)self).removeAttributeNS(uri, localName);
 		}
 		return this;
+	}
+	
+	public Nodes val(String value) {
+		if (isEmpty() || get(0) == null) return null;
+		
+		for (Node self : this) {
+			if (self == null) continue;
+			
+			switch (self.getNodeType()) {
+			case Node.ATTRIBUTE_NODE:
+			case Node.CDATA_SECTION_NODE:
+			case Node.COMMENT_NODE:
+			case Node.PROCESSING_INSTRUCTION_NODE:
+			case Node.TEXT_NODE:
+				self.setNodeValue(value);
+				break;
+			}
+		}
+		return this;
+	}
+	
+	public String val() {
+		if (isEmpty() || get(0) == null) return null;
+		
+		Node self = get(0);
+		switch (self.getNodeType()) {
+		case Node.ATTRIBUTE_NODE:
+		case Node.CDATA_SECTION_NODE:
+		case Node.COMMENT_NODE:
+		case Node.PROCESSING_INSTRUCTION_NODE:
+		case Node.TEXT_NODE:
+			return self.getNodeValue();
+		}
+		return null;
 	}
 	
 	public Nodes eq(int index) {
@@ -464,13 +552,30 @@ public class Nodes extends ArrayList<Node> {
 		return back;
 	}
 	
-	public Nodes find(String xpath) {
+	public Nodes select(String xpath) {
 		if (xpath == null || xpath.isEmpty() || isEmpty()) {
 			return new Nodes(this, 0);
 		}
 		
 		XPathExpression expr = getOwner().compileXPath(xpath);
 		
+		Nodes results = new Nodes(this, size());
+		for (Node self : this) {
+			NodeList list = getOwner().evaluateAsNodeList(expr, self);
+			for (int i = 0; i < list.getLength(); i++) {
+				results.add(list.item(i));
+			}
+		}
+		unique(results);
+		return results;
+	}
+	
+	public Nodes find(String xpath) {
+		if (xpath == null || xpath.isEmpty() || isEmpty()) {
+			return new Nodes(this, 0);
+		}
+		
+		XPathExpression expr = getOwner().compileXPath(xpath);
 		Nodes results = new Nodes(this, size());
 		for (Node self : this) {
 			NodeList list = getOwner().evaluateAsNodeList(expr, self);
@@ -490,7 +595,6 @@ public class Nodes extends ArrayList<Node> {
 		}
 		
 		XPathExpression expr = getOwner().compileXPath("self::node()[" + escapeFilter(filter) + "]");
-		
 		Nodes results = new Nodes(this, size());
 		for (Node self : this) {
 			if (getOwner().evaluteAsBoolean(expr, self)) {
@@ -1052,8 +1156,6 @@ public class Nodes extends ArrayList<Node> {
 			
 			for (Node node : nodes) {
 				if (node == null) continue;
-				if (node.getNodeType() != Node.ELEMENT_NODE) continue;
-				
 				if (node.getParentNode() != null) {
 					node = node.cloneNode(true);
 				}

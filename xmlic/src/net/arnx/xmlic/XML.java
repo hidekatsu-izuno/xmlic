@@ -165,13 +165,8 @@ public class XML implements Serializable {
 			return new Nodes(doc(), 0);
 		}
 		
-		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-		dbf.setCoalescing(true);
-		dbf.setNamespaceAware(true);
-		
 		try {
-			DocumentBuilder db = dbf.newDocumentBuilder();
-			db.setEntityResolver(new ResourceResolver());
+			DocumentBuilder db = getDocumentBuilder();
 			Document ndoc = db.parse(new InputSource(new StringReader("<x>" + text + "</x>")));
 			NodeList list = doc.importNode(ndoc.getDocumentElement(), true).getChildNodes();
 			
@@ -180,13 +175,15 @@ public class XML implements Serializable {
 				nodes.add(list.item(i));
 			}
 			return nodes;
-		} catch (ParserConfigurationException e) {
-			throw new IllegalStateException(e);
 		} catch (IOException e) {
 			throw new IllegalStateException(e);
 		} catch (SAXException e) {
 			throw new IllegalArgumentException(e);
 		}
+	}
+	
+	public Nodes select(String xpath) {
+		return doc().select(xpath);
 	}
 	
 	public Nodes find(String xpath) {
@@ -251,7 +248,9 @@ public class XML implements Serializable {
 		dbf.setExpandEntityReferences(true);
 		dbf.setXIncludeAware(true);
 		try {
-			return dbf.newDocumentBuilder();
+			DocumentBuilder db = dbf.newDocumentBuilder();
+			db.setEntityResolver(new ResourceResolver());
+			return db;
 		} catch (ParserConfigurationException e) {
 			throw new IllegalArgumentException(e);
 		}

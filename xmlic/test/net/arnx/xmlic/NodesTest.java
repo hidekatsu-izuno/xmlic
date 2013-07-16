@@ -63,7 +63,7 @@ public class NodesTest {
 	public void testAttrNS() throws IOException {
 		XML xml = XML.load(getClass().getResource("test_ns.xml"));
 		assertEquals("s11", xml.find("//html:ul[position()=1]").attr("class"));
-		assertEquals("<html:ul xmlns:html=\"http://www.w3.org/1999/xhtml\" class=\"s11\" xmlns:svg=\"http://www.w3.org/2000/svg\" svg:id=\"x12\">\n\t\t<html:li>t1</html:li>\n\t\t<html:li>t2</html:li>\n\t\t<html:li>t3</html:li>\n\t</html:ul><html:ul xmlns:html=\"http://www.w3.org/1999/xhtml\" class=\"s21\" xmlns:svg=\"http://www.w3.org/2000/svg\" svg:id=\"x12\">\n\t\t<html:li>t7</html:li>\n\t\t<html:li>t8</html:li>\n\t\t<html:li>t9</html:li>\n\t</html:ul>", xml.find("//html:ul[position()=1]").attr("svg:id", "x12").toString());
+		assertEquals("<html:ul xmlns:html=\"http://www.w3.org/1999/xhtml\" class=\"s11\" xmlns:svg=\"http://www.w3.org/2000/svg\" svg:id=\"x12\">\n\t\t<html:li>t1</html:li>\n\t\t<html:li>t2</html:li>\n\t\t<html:li>t3</html:li>\n\t</html:ul><html:ul xmlns:html=\"http://www.w3.org/1999/xhtml\" xmlns:svg=\"http://www.w3.org/2000/svg\" svg:class=\"s21\" svg:id=\"x12\">\n\t\t<html:li>t7</html:li>\n\t\t<html:li>t8</html:li>\n\t\t<html:li>t9</html:li>\n\t</html:ul>", xml.find("//html:ul[position()=1]").attr("svg:id", "x12").toString());
 		assertEquals("x12", xml.find("//html:ul[position()=1]").attr("svg:id"));
 	}
 	
@@ -236,8 +236,8 @@ public class NodesTest {
 	public void testNamespaceNS() throws IOException {
 		XML xml = XML.load(getClass().getResource("test_ns.xml"));
 		assertEquals("http://www.w3.org/1999/xhtml", xml.find("//html:li[position()=1]").namespace());
-		assertEquals("<body xmlns:html=\"http://www.w3.org/1999/xhtml\" xmlns:svg=\"http://www.w3.org/2000/svg\">\ntop\n<div class=\"s1\">\n\t<ul class=\"s11\">\n\t\t<li>t1</li>\n\t\t<li>t2</li>\n\t\t<li>t3</li>\n\t</ul>\n\t<ul class=\"s12\">\n\t\t<li>t4</li>\n\t\t<li>t5</li>\n\t\t<li>t6</li>\n\t</ul>\n</div>\nmiddle\n<div class=\"s2\">\n\tprefix\n\t<ul class=\"s21\">\n\t\t<li>t7</li>\n\t\t<li>t8</li>\n\t\t<li>t9</li>\n\t</ul>\n\tsuffix\n</div>\nbottom\n</body>", xml.find("//*").namespace(null).end().toString());
-		assertEquals("<svg:body xmlns:html=\"http://www.w3.org/1999/xhtml\" xmlns:svg=\"http://www.w3.org/2000/svg\">\ntop\n<svg:div class=\"s1\">\n\t<svg:ul class=\"s11\">\n\t\t<svg:li>t1</svg:li>\n\t\t<svg:li>t2</svg:li>\n\t\t<svg:li>t3</svg:li>\n\t</svg:ul>\n\t<svg:ul class=\"s12\">\n\t\t<svg:li>t4</svg:li>\n\t\t<svg:li>t5</svg:li>\n\t\t<svg:li>t6</svg:li>\n\t</svg:ul>\n</svg:div>\nmiddle\n<svg:div class=\"s2\">\n\tprefix\n\t<svg:ul class=\"s21\">\n\t\t<svg:li>t7</svg:li>\n\t\t<svg:li>t8</svg:li>\n\t\t<svg:li>t9</svg:li>\n\t</svg:ul>\n\tsuffix\n</svg:div>\nbottom\n</svg:body>", xml.find("//*").namespace("http://www.w3.org/2000/svg").end().toString());
+		assertEquals("<body xmlns:html=\"http://www.w3.org/1999/xhtml\" xmlns:svg=\"http://www.w3.org/2000/svg\">\ntop\n<div class=\"s1\">\n\t<ul class=\"s11\">\n\t\t<li>t1</li>\n\t\t<li>t2</li>\n\t\t<li>t3</li>\n\t</ul>\n\t<ul class=\"s12\">\n\t\t<li>t4</li>\n\t\t<li>t5</li>\n\t\t<li>t6</li>\n\t</ul>\n</div>\nmiddle\n<div class=\"s2\">\n\tprefix\n\t<ul svg:class=\"s21\">\n\t\t<li>t7</li>\n\t\t<li>t8</li>\n\t\t<li>t9</li>\n\t</ul>\n\tsuffix\n</div>\nbottom\n</body>", xml.find("//*").namespace(null).end().toString());
+		assertEquals("<svg:body xmlns:html=\"http://www.w3.org/1999/xhtml\" xmlns:svg=\"http://www.w3.org/2000/svg\">\ntop\n<svg:div class=\"s1\">\n\t<svg:ul class=\"s11\">\n\t\t<svg:li>t1</svg:li>\n\t\t<svg:li>t2</svg:li>\n\t\t<svg:li>t3</svg:li>\n\t</svg:ul>\n\t<svg:ul class=\"s12\">\n\t\t<svg:li>t4</svg:li>\n\t\t<svg:li>t5</svg:li>\n\t\t<svg:li>t6</svg:li>\n\t</svg:ul>\n</svg:div>\nmiddle\n<svg:div class=\"s2\">\n\tprefix\n\t<svg:ul svg:class=\"s21\">\n\t\t<svg:li>t7</svg:li>\n\t\t<svg:li>t8</svg:li>\n\t\t<svg:li>t9</svg:li>\n\t</svg:ul>\n\tsuffix\n</svg:div>\nbottom\n</svg:body>", xml.find("//*").namespace("http://www.w3.org/2000/svg").end().toString());
 	}
 	
 	@Test
@@ -349,8 +349,8 @@ public class NodesTest {
 	@Test
 	public void testRemoveNamespace() throws IOException {
 		XML xml = XML.load(getClass().getResource("test_ns.xml"));
-		assertEquals("<html:body xmlns:html=\"http://www.w3.org/1999/xhtml\" xmlns:svg=\"http://www.w3.org/2000/svg\">\ntop\n<html:div class=\"s1\">\n\t<html:ul class=\"s11\">\n\t\t<html:li>t1</html:li>\n\t\t<html:li>t2</html:li>\n\t\t<html:li>t3</html:li>\n\t</html:ul>\n\t<html:ul class=\"s12\">\n\t\t<html:li>t4</html:li>\n\t\t<html:li>t5</html:li>\n\t\t<html:li>t6</html:li>\n\t</html:ul>\n</html:div>\nmiddle\n<html:div class=\"s2\">\n\tprefix\n\t<html:ul class=\"s21\">\n\t\t<html:li>t7</html:li>\n\t\t<html:li>t8</html:li>\n\t\t<html:li>t9</html:li>\n\t</html:ul>\n\tsuffix\n</html:div>\nbottom\n</html:body>", xml.find("//*").removeNamespace("http://www.w3.org/2000/svg").end().toString());
-		assertEquals("<body xmlns:html=\"http://www.w3.org/1999/xhtml\" xmlns:svg=\"http://www.w3.org/2000/svg\">\ntop\n<div class=\"s1\">\n\t<ul class=\"s11\">\n\t\t<li>t1</li>\n\t\t<li>t2</li>\n\t\t<li>t3</li>\n\t</ul>\n\t<ul class=\"s12\">\n\t\t<li>t4</li>\n\t\t<li>t5</li>\n\t\t<li>t6</li>\n\t</ul>\n</div>\nmiddle\n<div class=\"s2\">\n\tprefix\n\t<ul class=\"s21\">\n\t\t<li>t7</li>\n\t\t<li>t8</li>\n\t\t<li>t9</li>\n\t</ul>\n\tsuffix\n</div>\nbottom\n</body>", xml.find("//*").removeNamespace("http://www.w3.org/1999/xhtml").end().toString());
+		assertEquals("<html:body xmlns:html=\"http://www.w3.org/1999/xhtml\" xmlns:svg=\"http://www.w3.org/2000/svg\">\ntop\n<html:div class=\"s1\">\n\t<html:ul class=\"s11\">\n\t\t<html:li>t1</html:li>\n\t\t<html:li>t2</html:li>\n\t\t<html:li>t3</html:li>\n\t</html:ul>\n\t<html:ul class=\"s12\">\n\t\t<html:li>t4</html:li>\n\t\t<html:li>t5</html:li>\n\t\t<html:li>t6</html:li>\n\t</html:ul>\n</html:div>\nmiddle\n<html:div class=\"s2\">\n\tprefix\n\t<html:ul svg:class=\"s21\">\n\t\t<html:li>t7</html:li>\n\t\t<html:li>t8</html:li>\n\t\t<html:li>t9</html:li>\n\t</html:ul>\n\tsuffix\n</html:div>\nbottom\n</html:body>", xml.find("//*").removeNamespace("http://www.w3.org/2000/svg").end().toString());
+		assertEquals("<body xmlns:html=\"http://www.w3.org/1999/xhtml\" xmlns:svg=\"http://www.w3.org/2000/svg\">\ntop\n<div class=\"s1\">\n\t<ul class=\"s11\">\n\t\t<li>t1</li>\n\t\t<li>t2</li>\n\t\t<li>t3</li>\n\t</ul>\n\t<ul class=\"s12\">\n\t\t<li>t4</li>\n\t\t<li>t5</li>\n\t\t<li>t6</li>\n\t</ul>\n</div>\nmiddle\n<div class=\"s2\">\n\tprefix\n\t<ul svg:class=\"s21\">\n\t\t<li>t7</li>\n\t\t<li>t8</li>\n\t\t<li>t9</li>\n\t</ul>\n\tsuffix\n</div>\nbottom\n</body>", xml.find("//*").removeNamespace("http://www.w3.org/1999/xhtml").end().toString());
 	}
 	
 	@Test
@@ -364,7 +364,7 @@ public class NodesTest {
 	public void testRenameNS() throws IOException {
 		XML xml = XML.load(getClass().getResource("test_ns.xml"));
 		assertEquals("<div>t1</div><div>t4</div><div>t7</div>", xml.find("//html:li[position()=1]").name("div").toString());
-		assertEquals("<html:body xmlns:html=\"http://www.w3.org/1999/xhtml\" xmlns:svg=\"http://www.w3.org/2000/svg\">\ntop\n<html:div class=\"s1\">\n\t<html:ul class=\"s11\">\n\t\t<div>t1</div>\n\t\t<html:li>t2</html:li>\n\t\t<html:li>t3</html:li>\n\t</html:ul>\n\t<html:ul class=\"s12\">\n\t\t<div>t4</div>\n\t\t<html:li>t5</html:li>\n\t\t<html:li>t6</html:li>\n\t</html:ul>\n</html:div>\nmiddle\n<html:div class=\"s2\">\n\tprefix\n\t<html:ul class=\"s21\">\n\t\t<div>t7</div>\n\t\t<html:li>t8</html:li>\n\t\t<html:li>t9</html:li>\n\t</html:ul>\n\tsuffix\n</html:div>\nbottom\n</html:body>", xml.toString());
+		assertEquals("<html:body xmlns:html=\"http://www.w3.org/1999/xhtml\" xmlns:svg=\"http://www.w3.org/2000/svg\">\ntop\n<html:div class=\"s1\">\n\t<html:ul class=\"s11\">\n\t\t<div>t1</div>\n\t\t<html:li>t2</html:li>\n\t\t<html:li>t3</html:li>\n\t</html:ul>\n\t<html:ul class=\"s12\">\n\t\t<div>t4</div>\n\t\t<html:li>t5</html:li>\n\t\t<html:li>t6</html:li>\n\t</html:ul>\n</html:div>\nmiddle\n<html:div class=\"s2\">\n\tprefix\n\t<html:ul svg:class=\"s21\">\n\t\t<div>t7</div>\n\t\t<html:li>t8</html:li>\n\t\t<html:li>t9</html:li>\n\t</html:ul>\n\tsuffix\n</html:div>\nbottom\n</html:body>", xml.toString());
 		assertEquals("<svg:rect xmlns:svg=\"http://www.w3.org/2000/svg\">t1</svg:rect><svg:rect xmlns:svg=\"http://www.w3.org/2000/svg\">t4</svg:rect><svg:rect xmlns:svg=\"http://www.w3.org/2000/svg\">t7</svg:rect>", xml.find("//div[position()=1]").name("svg:rect").toString());
 	}
 	
@@ -404,6 +404,13 @@ public class NodesTest {
 		XML xml = XML.load(getClass().getResource("test.xml"));
 		assertEquals("<ul class=\"s11\"/><ul class=\"s12\"/><ul class=\"s21\"/>", xml.find("//ul").unwrap().toString());
 		assertEquals("<body>\ntop\n<div class=\"s1\">\n\t\n\t\t<li>t1</li>\n\t\t<li>t2</li>\n\t\t<li>t3</li>\n\t\n\t\n\t\t<li>t4</li>\n\t\t<li>t5</li>\n\t\t<li>t6</li>\n\t\n</div>\nmiddle\n<div class=\"s2\">\n\tprefix\n\t\n\t\t<li>t7</li>\n\t\t<li>t8</li>\n\t\t<li>t9</li>\n\t\n\tsuffix\n</div>\nbottom\n</body>", xml.toString());
+	}
+	
+	@Test
+	public void testVal() throws IOException {
+		XML xml = XML.load(getClass().getResource("test.xml"));
+		assertEquals("s1", xml.select("//@*").val());
+		assertEquals("<body>\ntop\n<div class=\"v1\">\n\t<ul class=\"v1\">\n\t\t<li>t1</li>\n\t\t<li>t2</li>\n\t\t<li>t3</li>\n\t</ul>\n\t<ul class=\"v1\">\n\t\t<li>t4</li>\n\t\t<li>t5</li>\n\t\t<li>t6</li>\n\t</ul>\n</div>\nmiddle\n<div class=\"v1\">\n\tprefix\n\t<ul class=\"v1\">\n\t\t<li>t7</li>\n\t\t<li>t8</li>\n\t\t<li>t9</li>\n\t</ul>\n\tsuffix\n</div>\nbottom\n</body>", xml.select("//@*").val("v1").getOwner().toString());
 	}
 	
 	@Test
