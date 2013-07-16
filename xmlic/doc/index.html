@@ -16,6 +16,7 @@
 	<li><a href="#introduction">XMLICとは</a></li>
 	<li><a href="#download">ダウンロード</a></li>
 	<li><a href="#usage">基本的な使い方</a></li>
+	<li><a href="#load">XML文書の読み込み</a></li>
 	<li><a href="#traversal">DOMの選択</a>
 		<ul>
 			<li><a href="#find">要素の検索</a></li>
@@ -24,6 +25,7 @@
 		</ul>
 	</li>
 	<li><a href="#manipulation">DOMの操作</a></li>
+	<li><a href="#writeto">XML文書の出力</a></li>
 	<li>API リファレンス
 		<ul>
 			<li><a href="http://xmlic.sourceforge.jp/api/index.html">javadoc</a></li>
@@ -69,15 +71,15 @@ jQuery が単一の <code>window.document</code> に対して　XMLIC は複数�
 <ul>
 <li>読み込みには、 <code>XML</code> クラスの <code>load()</code> スタティックメソッドを使います。</li>
 <li>読み込んだ  <code>XML</code> インスタンスに対し、<code>find()</code> メソッドで <code>Nodes</code> インスタンスを取得し操作します（<code>Nodes</code> インスタンスは <code>jQuery</code> オブジェクトに当たるものだと考えるとよいでしょう）。</li>
-<li><code>Nodes</code> インスタンスから <code>XML</code> インスタンスを取得したい場合は、 <code>getOwner()</code> メソッドで取得出来ます。</li>
+<li><code>Nodes</code> インスタンスからは <code>getOwner()</code> メソッドを通じて <code>XML</code> インスタンスにいつでもアクセスできます。</li>
 <li>書き込みは、 <code>XML</code> インスタンスの <code>writeTo()</code> メソッドを使います。</li>
 </ul>
 <p>なお、XPath は jQuery セレクタより機能が豊富ですが違いも大きいので注意が必要です。例えば <code>find("div")</code> と記述した場合、
 jQuery では子孫ノードすべてが対象になりますが、XPath で同じ動作を実現するには <code>find("//div")</code> と記述する必要があります。</p>
 
-<h2 id="load">XML 文書の読み込み</h2>
+<h2 id="load">XML 文書の読み込み <span class="sub">- Load</span></h2>
 
-<h2 id="traversal">DOM の選択 (Traversal)</h2>
+<h2 id="traversal">DOM の選択 <span class="sub">- Traversal</span></h2>
 
 <h3 id="find">要素の検索</h3>
 <p>要素の検索には </p>
@@ -108,7 +110,10 @@ jQuery では子孫ノードすべてが対象になりますが、XPath で同�
 </table>
 <p>jQueryでは <code>#ID</code> の形でID指定を多用しますが、XMLではスキーマにID型が指定されない限り利用できないため、通常の属性同様 <code>//*[@id='ID']</code> と記述します。</p>
 
-<h2 id="#manipulation">DOM の操作 (Manipulation)</h2>
+<h2 id="#manipulation">DOM の操作  <span class="sub">- Manipulation</span></h2>
+
+<h2 id="writeto">XML 文書の出力 <span class="sub">- Write</span></h2>
+
 
 <h2 id="license">ライセンス</h2>
 <p>XMLIC は、<a href="http://www.apache.org/licenses/LICENSE-2.0">Apache License, Version 2.0</a>下で配布します。</p>

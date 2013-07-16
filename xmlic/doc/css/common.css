@@ -93,6 +93,7 @@ h3 {
 .logo a img { border: 0; }
 h1 .title { display: none; }
 h1 .sub { top: 18px; left: 160px; }
+h2 .sub { font-size: 0.9em; font-style: italic; font-weight: normal; }
 .bar { color: white; background: gray; text-align: right; padding: 0px 5px; }
 
 ul { list-style-image: url(../img/marker.jpg); }
