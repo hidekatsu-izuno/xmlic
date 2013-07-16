@@ -1450,12 +1450,12 @@ public class Nodes extends ArrayList<Node> {
 		NodeList nodes = get(0).getChildNodes();
 		if (nodes.getLength() == 0) return "";
 		
-		XMLSerializer serializer = new XMLSerializer();
+		XMLWriter serializer = new XMLWriter();
 		serializer.setXMLDeclarationVisible(false);
 		StringWriter writer = new StringWriter();
 		try {
 			for (int i = 0; i < nodes.getLength(); i++) {
-				serializer.serialize(nodes.item(i), writer);
+				serializer.writeTo(writer, nodes.item(i));
 			}
 		} catch (IOException e) {
 			throw new IllegalStateException(e);
@@ -1495,12 +1495,12 @@ public class Nodes extends ArrayList<Node> {
 	public String toString() {
 		if (isEmpty()) return "";
 		
-		XMLSerializer serializer = new XMLSerializer();
+		XMLWriter serializer = new XMLWriter();
 		serializer.setXMLDeclarationVisible(false);
 		StringWriter writer = new StringWriter();
 		try {
 			for (Node self : this) {
-				serializer.serialize(self, writer);
+				serializer.writeTo(writer, self);
 			}
 		} catch (IOException e) {
 			throw new IllegalStateException(e);

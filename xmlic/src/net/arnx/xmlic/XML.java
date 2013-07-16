@@ -46,32 +46,32 @@ public class XML implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	public static XML load(File file) throws IOException {
-		XMLParser parser = new XMLParser();
-		return new XML(parser.parse(file.toURI()));
+		XMLLoader parser = new XMLLoader();
+		return new XML(parser.load(file.toURI()));
 	}
 	
 	public static XML load(URI uri) throws IOException {
-		XMLParser parser = new XMLParser();
-		return new XML(parser.parse(uri));
+		XMLLoader parser = new XMLLoader();
+		return new XML(parser.load(uri));
 	}
 	
 	public static XML load(URL url) throws IOException {
 		try {
-			XMLParser parser = new XMLParser();
-			return new XML(parser.parse(url.toURI()));
+			XMLLoader parser = new XMLLoader();
+			return new XML(parser.load(url.toURI()));
 		} catch (URISyntaxException e) {
 			throw new IllegalArgumentException(e);
 		}
 	}
 	
 	public static XML load(InputStream in) throws IOException {
-		XMLParser parser = new XMLParser();
-		return new XML(parser.parse(in));
+		XMLLoader parser = new XMLLoader();
+		return new XML(parser.load(in));
 	}
 	
 	public static XML load(Reader reader) throws IOException {
-		XMLParser parser = new XMLParser();
-		return new XML(parser.parse(reader));
+		XMLLoader parser = new XMLLoader();
+		return new XML(parser.load(reader));
 	}
 	
 	final Document doc;
@@ -221,21 +221,21 @@ public class XML implements Serializable {
 	}
 	
 	public void writeTo(OutputStream out) throws IOException {
-		XMLSerializer serializer = new XMLSerializer();
+		XMLWriter serializer = new XMLWriter();
 		serializer.setEncoding("UTF-8");
 	
 		try {
-			serializer.serialize(doc, out);
+			serializer.writeTo(out, doc);
 		} finally {
 			out.close();
 		}
 	}
 	
 	public void writeTo(Writer writer) throws IOException {
-		XMLSerializer serializer = new XMLSerializer();
+		XMLWriter serializer = new XMLWriter();
 		
 		try {
-			serializer.serialize(doc, writer);
+			serializer.writeTo(writer, doc);
 		} finally {
 			writer.close();
 		}
@@ -284,11 +284,11 @@ public class XML implements Serializable {
 	
 	@Override
 	public String toString() {
-		XMLSerializer serializer = new XMLSerializer();
+		XMLWriter serializer = new XMLWriter();
 		serializer.setXMLDeclarationVisible(false);
 		StringWriter writer = new StringWriter();
 		try {
-			serializer.serialize(doc, writer);
+			serializer.writeTo(writer, doc);
 		} catch (IOException e) {
 			throw new IllegalStateException(e);
 		} finally {

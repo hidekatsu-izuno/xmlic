@@ -11,7 +11,7 @@ import org.w3c.dom.ls.DOMImplementationLS;
 import org.w3c.dom.ls.LSOutput;
 import org.w3c.dom.ls.LSSerializer;
 
-public class XMLSerializer {
+public class XMLWriter {
 	private boolean prittyPrint = false;
 	private boolean xmlDeclaration = true;
 	private String encoding;
@@ -49,19 +49,19 @@ public class XMLSerializer {
 		return linesep;
 	}
 	
-	public void serialize(Node node, OutputStream out) throws IOException {
+	public void writeTo(OutputStream out, Node node) throws IOException {
 		LSOutput output = createLSOutput(node);
 		output.setByteStream(out);
-		serialize(node, output);
+		writeTo(output, node);
 	}
 	
-	public void serialize(Node node, Writer writer) throws IOException {
+	public void writeTo(Writer writer, Node node) throws IOException {
 		LSOutput output = createLSOutput(node);
 		output.setCharacterStream(writer);
-		serialize(node, output);
+		writeTo(output, node);
 	}
 	
-	void serialize(Node node, LSOutput output) throws IOException {
+	void writeTo(LSOutput output, Node node) throws IOException {
 		LSSerializer serializer = createLSSerializer(node);
 		if (linesep != null) serializer.setNewLine(linesep);
 		

@@ -13,7 +13,7 @@ import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-public class XMLParser {
+public class XMLLoader {
 	boolean ignoreComments = false;
 	boolean coalescing = true;
 	boolean expandEntityReferences = true;
@@ -51,19 +51,19 @@ public class XMLParser {
 		return xincludeEnabled;
 	}
 	
-	public Document parse(URI uri) throws IOException {
-		return parse(new InputSource(uri.normalize().toASCIIString()));
+	public Document load(URI uri) throws IOException {
+		return load(new InputSource(uri.normalize().toASCIIString()));
 	}
 	
-	public Document parse(InputStream in) throws IOException {
-		return parse(new InputSource(in));
+	public Document load(InputStream in) throws IOException {
+		return load(new InputSource(in));
 	}
 	
-	public Document parse(Reader reader) throws IOException {
-		return parse(new InputSource(reader));
+	public Document load(Reader reader) throws IOException {
+		return load(new InputSource(reader));
 	}
 	
-	Document parse(InputSource is) throws IOException {
+	Document load(InputSource is) throws IOException {
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		dbf.setIgnoringComments(ignoreComments);
 		dbf.setCoalescing(coalescing);
