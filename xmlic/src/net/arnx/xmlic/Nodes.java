@@ -1580,14 +1580,6 @@ public class Nodes extends ArrayList<Node> {
 				&& (a.compareDocumentPosition(bup) & Node.DOCUMENT_POSITION_CONTAINED_BY) != 0));
 	}
 	
-	static String escapeText(String text) {
-		if (text.contains("'")) {
-			return "concat('" + text.replace("'", "',\"'\",") + "')";
-		} else {
-			return "'" + text + "'";
-		}
-	}
-	
 	static String escapeFilter(String filter) {
 		StringBuilder sb = new StringBuilder(filter.length());
 		int state = 0; // 0 ' 1 " 2
