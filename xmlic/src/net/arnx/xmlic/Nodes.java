@@ -89,7 +89,7 @@ public class Nodes extends ArrayList<Node> {
 				if (!self.isDefaultNamespace(uri)) {
 					String prefix = self.lookupPrefix(uri);
 					if (prefix == null) {
-						prefix = getOwner().context.getPrefix(uri);
+						prefix = getOwner().nsContext.getPrefix(uri);
 					}
 					if (prefix != null && !XMLConstants.DEFAULT_NS_PREFIX.equals(prefix)) {
 						name = prefix + ":" + name;
@@ -184,7 +184,7 @@ public class Nodes extends ArrayList<Node> {
 		int index = name.indexOf(':');
 		if (index > 0 && index < name.length()-1) {
 			localName = name.substring(index + 1);
-			uri = getOwner().context.getNamespaceURI(name.substring(0, index));
+			uri = getOwner().nsContext.getNamespaceURI(name.substring(0, index));
 			if (uri == null) localName = name;
 		} else {
 			localName = name;
@@ -215,7 +215,7 @@ public class Nodes extends ArrayList<Node> {
 		int index = name.indexOf(':');
 		if (index > 0 && index < name.length()-1) {
 			localName = name.substring(index + 1);
-			uri = getOwner().context.getNamespaceURI(name.substring(0, index));
+			uri = getOwner().nsContext.getNamespaceURI(name.substring(0, index));
 			if (uri == null) localName = name;
 		} else {
 			localName = name;
@@ -240,7 +240,7 @@ public class Nodes extends ArrayList<Node> {
 		int index = name.indexOf(':');
 		if (index > 0 && index < name.length()-1) {
 			localName = name.substring(index + 1);
-			uri = getOwner().context.getNamespaceURI(name.substring(0, index));
+			uri = getOwner().nsContext.getNamespaceURI(name.substring(0, index));
 			if (uri == null) localName = name;
 		} else {
 			localName = name;
@@ -276,7 +276,7 @@ public class Nodes extends ArrayList<Node> {
 		int index = name.indexOf(':');
 		if (index > 0 && index < name.length()-1) {
 			localName = name.substring(index + 1);
-			uri = getOwner().context.getNamespaceURI(name.substring(0, index));
+			uri = getOwner().nsContext.getNamespaceURI(name.substring(0, index));
 			if (uri == null) localName = name;
 		} else {
 			localName = name;
@@ -319,7 +319,7 @@ public class Nodes extends ArrayList<Node> {
 		int index = name.indexOf(':');
 		if (index > 0 && index < name.length()-1) {
 			localName = name.substring(index + 1);
-			uri = getOwner().context.getNamespaceURI(name.substring(0, index));
+			uri = getOwner().nsContext.getNamespaceURI(name.substring(0, index));
 			if (uri == null) localName = name;
 		} else {
 			localName = name;
@@ -381,7 +381,7 @@ public class Nodes extends ArrayList<Node> {
 		
 		XPathExpression expr = getOwner().compileXPath("self::node()[" + escapeFilter(filter) + "]");
 		for (Node node : this) {
-			if (getOwner().evaluteAsBoolean(expr, node)) {
+			if (getOwner().evaluate(expr, node, boolean.class)) {
 				return true;
 			}
 		}
@@ -393,7 +393,7 @@ public class Nodes extends ArrayList<Node> {
 		
 		XPathExpression expr = getOwner().compileXPath("self::node()[" + escapeFilter(filter) + "]");
 		for (int i = 0; i < size(); i++) {
-			if (getOwner().evaluteAsBoolean(expr, get(i))) {
+			if (getOwner().evaluate(expr, get(i), boolean.class)) {
 				return i;
 			}
 		}
@@ -422,7 +422,7 @@ public class Nodes extends ArrayList<Node> {
 		XPathExpression expr = getOwner().compileXPath("child::node()[" + escapeFilter(filter) + "]");
 		Nodes nodes = new Nodes(this, size());
 		for (Node self : this) {
-			if (getOwner().evaluteAsBoolean(expr, self)) {
+			if (getOwner().evaluate(expr, self, boolean.class)) {
 				nodes.add(self);
 			}
 		}
@@ -504,7 +504,7 @@ public class Nodes extends ArrayList<Node> {
 		Nodes results = new Nodes(this, size() * 2);
 		results.addAll(this);
 		for (Node self : this) {
-			NodeList list = getOwner().evaluateAsNodeList(expr, self);
+			NodeList list = getOwner().evaluate(expr, self, NodeList.class);
 			for (int i = 0; i < list.getLength(); i++) {
 				Node node = list.item(i);
 				if (node.getNodeType() != Node.ELEMENT_NODE) continue;
@@ -537,7 +537,7 @@ public class Nodes extends ArrayList<Node> {
 		Nodes results = new Nodes(this, size() * 2);
 		results.addAll(this);
 		for (Node node : back) {
-			if (getOwner().evaluteAsBoolean(expr, node)) {
+			if (getOwner().evaluate(expr, node, boolean.class)) {
 				results.add(node);
 			}
 		}
@@ -552,6 +552,18 @@ public class Nodes extends ArrayList<Node> {
 		return back;
 	}
 	
+	public <T> T evaluate(String xpath, Class<T> cls) {
+		if (xpath == null || xpath.isEmpty() || isEmpty()) {
+			return null;
+		}
+		
+		Node self = get(0);
+		if (self == null) return null;
+		
+		XPathExpression expr = getOwner().compileXPath(xpath);
+		return getOwner().evaluate(expr, self, cls);
+	}
+	
 	public Nodes select(String xpath) {
 		if (xpath == null || xpath.isEmpty() || isEmpty()) {
 			return new Nodes(this, 0);
@@ -561,7 +573,7 @@ public class Nodes extends ArrayList<Node> {
 		
 		Nodes results = new Nodes(this, size());
 		for (Node self : this) {
-			NodeList list = getOwner().evaluateAsNodeList(expr, self);
+			NodeList list = getOwner().evaluate(expr, self, NodeList.class);
 			for (int i = 0; i < list.getLength(); i++) {
 				results.add(list.item(i));
 			}
@@ -578,7 +590,7 @@ public class Nodes extends ArrayList<Node> {
 		XPathExpression expr = getOwner().compileXPath(xpath);
 		Nodes results = new Nodes(this, size());
 		for (Node self : this) {
-			NodeList list = getOwner().evaluateAsNodeList(expr, self);
+			NodeList list = getOwner().evaluate(expr, self, NodeList.class);
 			for (int i = 0; i < list.getLength(); i++) {
 				Node node = list.item(i);
 				if (node.getNodeType() != Node.ELEMENT_NODE) continue;
@@ -597,7 +609,7 @@ public class Nodes extends ArrayList<Node> {
 		XPathExpression expr = getOwner().compileXPath("self::node()[" + escapeFilter(filter) + "]");
 		Nodes results = new Nodes(this, size());
 		for (Node self : this) {
-			if (getOwner().evaluteAsBoolean(expr, self)) {
+			if (getOwner().evaluate(expr, self, boolean.class)) {
 				results.add(self);
 			}
 		}
@@ -628,7 +640,7 @@ public class Nodes extends ArrayList<Node> {
 		XPathExpression expr = getOwner().compileXPath("self::node()[" + escapeFilter(filter) + "]");
 		Nodes results = new Nodes(this, size());
 		for (Node self : this) {
-			if (!getOwner().evaluteAsBoolean(expr, self)) {
+			if (!getOwner().evaluate(expr, self, boolean.class)) {
 				results.add(self);
 			}
 		}
@@ -689,7 +701,7 @@ public class Nodes extends ArrayList<Node> {
 			while ((parent = parent.getParentNode()) != null) {
 				if (parent.getNodeType() != Node.ELEMENT_NODE) break;
 				
-				if (getOwner().evaluteAsBoolean(expr, parent)) {
+				if (getOwner().evaluate(expr, parent, boolean.class)) {
 					results.add(parent);
 					if (mode == SelectMode.UNTIL) break;
 				} else if (mode == SelectMode.UNTIL) {
@@ -719,7 +731,7 @@ public class Nodes extends ArrayList<Node> {
 			do {
 				if (current.getNodeType() != Node.ELEMENT_NODE) break;
 				
-				if (getOwner().evaluteAsBoolean(expr, current)) {
+				if (getOwner().evaluate(expr, current, boolean.class)) {
 					results.add(current);
 					break;
 				}
@@ -762,7 +774,7 @@ public class Nodes extends ArrayList<Node> {
 				if (child == null) continue;
 				if (child.getNodeType() != Node.ELEMENT_NODE) continue;
 				
-				if (getOwner().evaluteAsBoolean(expr, child)) {
+				if (getOwner().evaluate(expr, child, boolean.class)) {
 					results.add(child);
 				}
 			}
@@ -801,7 +813,7 @@ public class Nodes extends ArrayList<Node> {
 				Node child = children.item(i);
 				if (child == null) continue;
 				
-				if (getOwner().evaluteAsBoolean(expr, child)) {
+				if (getOwner().evaluate(expr, child, boolean.class)) {
 					results.add(child);
 				}
 			}
@@ -870,7 +882,7 @@ public class Nodes extends ArrayList<Node> {
 			while ((prev = prev.getPreviousSibling()) != null) {
 				if (prev.getNodeType() != Node.ELEMENT_NODE) continue;
 				
-				if (getOwner().evaluteAsBoolean(expr, prev)) {
+				if (getOwner().evaluate(expr, prev, boolean.class)) {
 					results.add(prev);
 					if (mode == SelectMode.UNTIL) break;
 				} else if (mode == SelectMode.UNTIL) {
@@ -939,7 +951,7 @@ public class Nodes extends ArrayList<Node> {
 			while ((next = next.getNextSibling()) != null) {
 				if (next.getNodeType() != Node.ELEMENT_NODE) continue;
 				
-				if (getOwner().evaluteAsBoolean(expr, next)) {
+				if (getOwner().evaluate(expr, next, boolean.class)) {
 					results.add(next);
 					if (mode == SelectMode.UNTIL) break;
 				} else if (mode == SelectMode.UNTIL) {
@@ -991,7 +1003,7 @@ public class Nodes extends ArrayList<Node> {
 			while ((prev = prev.getPreviousSibling()) != null) {
 				if (prev.getNodeType() != Node.ELEMENT_NODE) continue;
 				
-				if (getOwner().evaluteAsBoolean(expr, prev)) {
+				if (getOwner().evaluate(expr, prev, boolean.class)) {
 					results.add(prev);
 				}
 			}
@@ -1000,7 +1012,7 @@ public class Nodes extends ArrayList<Node> {
 			while ((next = next.getNextSibling()) != null) {
 				if (next.getNodeType() != Node.ELEMENT_NODE) continue;
 
-				if (getOwner().evaluteAsBoolean(expr, next)) {
+				if (getOwner().evaluate(expr, next, boolean.class)) {
 					results.add(next);
 				}
 			}
@@ -1426,7 +1438,7 @@ public class Nodes extends ArrayList<Node> {
 			if (self == null) continue;
 			if (self.getNodeType() != Node.ELEMENT_NODE) continue;
 			
-			NodeList nodes = getOwner().evaluateAsNodeList(expr, self);
+			NodeList nodes = getOwner().evaluate(expr, self, NodeList.class);
 			for (int i = 0; i < nodes.getLength(); i++) {
 				Node node = nodes.item(i);
 				Node parent = node.getParentNode();

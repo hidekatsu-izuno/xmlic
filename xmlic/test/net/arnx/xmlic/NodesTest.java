@@ -47,7 +47,7 @@ public class NodesTest {
 	
 	@Test
 	public void testAppendTo() throws IOException {
-		XML xml = XML.load(getClass().getResource("test.xml"));
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   		XML xml = XML.load(getClass().getResource("test.xml"));
 		assertEquals("<li>t1</li><li>t4</li><li>t7</li>", xml.find("//li[position()=1]").appendTo("/body").toString());
 		assertEquals("<body>\ntop\n<div class=\"s1\">\n\t<ul class=\"s11\">\n\t\t<li>t1</li>\n\t\t<li>t2</li>\n\t\t<li>t3</li>\n\t</ul>\n\t<ul class=\"s12\">\n\t\t<li>t4</li>\n\t\t<li>t5</li>\n\t\t<li>t6</li>\n\t</ul>\n</div>\nmiddle\n<div class=\"s2\">\n\tprefix\n\t<ul class=\"s21\">\n\t\t<li>t7</li>\n\t\t<li>t8</li>\n\t\t<li>t9</li>\n\t</ul>\n\tsuffix\n</div>\nbottom\n<li>t1</li><li>t4</li><li>t7</li></body>", xml.toString());		
 	}

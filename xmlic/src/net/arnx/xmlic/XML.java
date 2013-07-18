@@ -75,8 +75,8 @@ public class XML implements Serializable {
 	}
 	
 	final Document doc;
-	final ResourceResolver resolver;
-	final NamespaceContext context;
+	final ResourceResolver resResolver;
+	final NamespaceContext nsContext;
 	
 	public XML() {
 		this(Collections.<String, String>emptyMap());
@@ -92,12 +92,12 @@ public class XML implements Serializable {
 	
 	public XML(Document doc, Map<String, String> namespaces) {
 		this.doc = doc;
-		this.resolver = new ResourceResolver();
+		this.resResolver = new ResourceResolver();
 		
 		if (namespaces == null) {
 			NamespaceContextImpl context = new NamespaceContextImpl();
 			XPathExpression expr = compileXPath("//namespace::*");
-			NodeList list = evaluateAsNodeList(expr, doc);
+			NodeList list = evaluate(expr, doc, NodeList.class);
 			for (int i = 0; i < list.getLength(); i++) {
 				Node node = list.item(i);
 				String prefix = node.getLocalName();
@@ -107,16 +107,16 @@ public class XML implements Serializable {
 				
 				context.addNamespace(prefix, node.getNodeValue());
 			}
-			this.context = context;
+			this.nsContext = context;
 		} else {
-			this.context = new NamespaceContextImpl(namespaces);
+			this.nsContext = new NamespaceContextImpl(namespaces);
 		}
 	}
 	
 	XML(Document doc, ResourceResolver resolver, NamespaceContext context) {
 		this.doc = doc;
-		this.resolver = resolver;
-		this.context = context;
+		this.resResolver = resolver;
+		this.nsContext = context;
 	}
 	
 	public Nodes doc() {
@@ -200,7 +200,7 @@ public class XML implements Serializable {
 	}
 	
 	public XML clone() {
-		return new XML((Document)doc.cloneNode(true), resolver, context);
+		return new XML((Document)doc.cloneNode(true), resResolver, nsContext);
 	}
 	
 	public Transformer stylesheet() throws TransformerConfigurationException {
@@ -213,7 +213,7 @@ public class XML implements Serializable {
 		t.setURIResolver(new ResourceResolver());
 		DOMResult result = new DOMResult();
 		t.transform(new DOMSource(doc), result);
-		return new XML((Document)result.getNode(), resolver, context);
+		return new XML((Document)result.getNode(), resResolver, nsContext);
 	}
 	
 	public void writeTo(File file) throws IOException {
@@ -258,7 +258,7 @@ public class XML implements Serializable {
 	
 	XPathExpression compileXPath(String xpath) {
 		XPath xpc = XPathFactory.newInstance().newXPath();
-		if (context != null) xpc.setNamespaceContext(context);
+		if (nsContext != null) xpc.setNamespaceContext(nsContext);
 		try {
 			return xpc.compile(xpath);
 		} catch (XPathExpressionException e) {
@@ -266,17 +266,22 @@ public class XML implements Serializable {
 		}
 	}
 	
-	boolean evaluteAsBoolean(XPathExpression expr, Node node) {
+	@SuppressWarnings("unchecked")
+	<T> T evaluate(XPathExpression expr, Node node, Class<T> cls) {
 		try {
-			return (Boolean)expr.evaluate(node, XPathConstants.BOOLEAN);
-		} catch (XPathExpressionException e) {
-			throw new IllegalArgumentException(e.getMessage(), e);
-		}
-	}
-	
-	NodeList evaluateAsNodeList(XPathExpression expr, Node node) {
-		try {
-			return (NodeList)expr.evaluate(node, XPathConstants.NODESET);
+			if (cls.equals(NodeList.class)) {
+				return (T)expr.evaluate(node, XPathConstants.NODESET);
+			} else if (cls.equals(Node.class)) {
+				return (T)expr.evaluate(node, XPathConstants.NODE);
+			} else if (cls.equals(String.class)) {
+				return (T)expr.evaluate(node, XPathConstants.STRING);
+			} else if (cls.equals(boolean.class) || cls.equals(Boolean.class)) {
+				return (T)expr.evaluate(node, XPathConstants.BOOLEAN);
+			} else if (cls.equals(double.class) || cls.equals(Double.class)) {
+				return (T)expr.evaluate(node, XPathConstants.NUMBER);
+			} else {
+				throw new UnsupportedOperationException("Unsupported Convert class: " + cls);
+			}
 		} catch (XPathExpressionException e) {
 			throw new IllegalArgumentException(e.getMessage(), e);
 		}
