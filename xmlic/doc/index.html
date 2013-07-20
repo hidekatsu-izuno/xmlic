@@ -363,7 +363,7 @@ writer.setEncoding("EUC-JP");
 writer.setLineSeparator("\r\n");
 writer.setPrettyPrinting(true);
 
-writer.writeTo(new FileOutputStream("test.xml"), xml.doc().get(0));
+writer.writeTo(new FileOutputStream("test.xml"), xml.getDocument());
 </pre>
 
 <h2 id="license">ライセンス</h2>
