@@ -274,12 +274,16 @@ xml.find("//div").contents();
 xml.find("//div").contents("first()");
 </pre>
 
-<h3 id="filter">取得結果の操作<span class="sub"> - filter, eq　/ first / last　/ slice</span></h3>
+<h3 id="filter">取得結果の操作<span class="sub"> - filter / not, eq　/ first / last　/ slice</span></h3>
 <p>取得結果をフィルタリングしたい場合は、<code>filter</code> メソッドを使います。<code>filter</code>メソッドには、XPath 
-式によるフィルタと、内部クラスを用いた２種類が用意されています。</p>
+式によるフィルタと、内部クラスを用いた２種類が用意されています。<code>not</code> メソッドは、<code>filter</code> 
+とは逆に条件にマッチしないものだけを残します。</p>
 <pre class="source">
 <span class="comment">// <code>div</code> 要素を検索した結果に対し属性でフィルタリングします。</span>
 xml.find("//div").filter("@name='test'");
+
+<span class="comment">// <code>div</code> 要素を検索した結果に対し条件にマッチしないものだけ残します。</span>
+xml.find("//div").not("@name='test'");
 
 <span class="comment">// <code>div</code> 要素を検索した結果に対しメソッドを使って属性ででフィルタリングします。</span>
 xml.find("//div").filter(new Visitor() {
