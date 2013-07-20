@@ -45,7 +45,8 @@ class NamespaceContextImpl implements NamespaceContext, Serializable {
 		if (prefix == null) {
 			throw new IllegalArgumentException("prefix is null.");
 		} else if (XMLConstants.DEFAULT_NS_PREFIX.equals(prefix)) {
-			return XMLConstants.NULL_NS_URI;
+			List<String> list = map.get(prefix);
+			return (list != null && !list.isEmpty()) ? list.get(0) : XMLConstants.NULL_NS_URI;
 		} else if (XMLConstants.XML_NS_PREFIX.equals(prefix)) {
 			return XMLConstants.XML_NS_URI;
 		} else if (XMLConstants.XMLNS_ATTRIBUTE.equals(prefix)) {

@@ -330,7 +330,47 @@ xml.find("//div")
 
 <h2 id="#manipulation">DOM の操作<span class="sub"> - Manipulation</span></h2>
 
-<h3 id="name">名前の操作</h3>
+<h3 id="name">名前の操作<span class="sub"> - name, namespace, prefix, localName</span></h3>
+<p>XML と HTML の大きな違いとして名前空間のサポートがあります。仕様としては自然なものですが XML の利用において最大の難物とも言えます。
+まず、XML における名前の概念を整理すると次のようになります。なお、属性については、プレフィックスを付けない場合、名前空間はデフォルト名前空間
+ではなく、要素の名前空間に属します。</p>
+
+<table class="table">
+<colgroup>
+<col style="width: 200px" />
+<col style="width: 300px" />
+</colgroup>
+<thead>
+<tr><th>概念</th><th>説明</th><th>例</th></tr>
+</thead>
+<tbody>
+<tr><td>名前空間(Namespace URI)</td><td>タグセットの仕様を表す URI</td><td>http://www.w3.org/1999/xhtml</td></tr>
+<tr><td>プレフィックス(Prefix)</td><td>文書中での名前空間に対する短縮名</td><td>任意（hなど）</td></tr>
+<tr><td>ローカル名(Local Name)</td><td>タグの要素や属性の名前</td><td>div、span など</td></tr>
+<tr><td>修飾された名前（QName）</td><td>プレフィックスで修飾されたローカル名</td><td>h:div、h:span など</td></tr>
+</tbody>
+</table>
+
+<p>名前空間導入以前の XML における名前やいわゆるTagNameは、デフォルト名前空間で修飾された名前として扱われます。</p>
+<p>XMLIC では、名前空間、プレフィックス、ローカル名、就職された名前それぞれに対し <code>namespace</code>、<code>prefix</code>、<code>localName</code>、
+<code>name</code>メソッドでアクセスします（複数のノードが含まれる場合は、先頭ノードの情報が返されます）。</p>
+<pre class="source">
+Nodes nodes = xml.parse("&lt;h:div xmlns:h=\"http://www.w3.org/1999/xhtml\"&gt;テスト&lt;/h:div&gt;");
+nodes.namespace(); <span class="comment">// http://www.w3.org/1999/xhtml</span>
+nodes.prefix(); <span class="comment">// h</span>
+nodes.localName(); <span class="comment">// div</span>
+nodes.name(); <span class="comment">// h:div</span>
+</pre>
+<p>変更する場合も、引数に値を設定するだけです。</p>
+<pre class="source">
+Nodes nodes = xml.parse("&lt;h:div xmlns:h=\"http://www.w3.org/1999/xhtml\"&gt;テスト&lt;/h:div&gt;");
+<span class="comment">// プレフィックスは、文書中直近に指定されているものになります。存在しない場合は <code>load</code> 時に指定したもの。見つからなければ自動選択となります。</span>
+nodes.namespace("http://www.w3.org/2000/svg");　<span class="comment">// デフォルトに戻す場合は、<code>null</code> を設定します。</span>
+nodes.prefix("svg"); <span class="comment">// プレフィックスのみを変更します（名前空間は変わりません）</span>
+nodes.localName("span"); <span class="comment">// ローカル名のみを変更します（名前空間は変わりません）</span>
+nodes.name("svg:span"); <span class="comment">// svg　に紐づく名前空間と span というローカル名に変更されます。</span>
+</pre>
+
 <h3 id="attr">属性の操作</h3>
 <h3 id="text">テキスト／値の操作</h3>
 <h3 id="is">要素の評価</h3>

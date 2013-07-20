@@ -72,8 +72,18 @@ public class Nodes extends ArrayList<Node> {
 		
 		switch (self.getNodeType()) {
 		case Node.ELEMENT_NODE:
-		case Node.ATTRIBUTE_NODE:
 			return self.getNamespaceURI();
+		case Node.ATTRIBUTE_NODE:
+			if (self.getNamespaceURI() == null) {
+				Element elem = ((Attr)self).getOwnerElement();
+				if (elem != null) {
+					return elem.getNamespaceURI();
+				} else {
+					return null;
+				}
+			} else {
+				return self.getNamespaceURI();
+			}
 		}
 		return null;
 	}
@@ -83,11 +93,12 @@ public class Nodes extends ArrayList<Node> {
 		
 		for (Node self : this) {
 			if (self == null) continue;
-			
+
+			String name = self.getLocalName();
+
 			switch (self.getNodeType()) {
 			case Node.ELEMENT_NODE:
 			case Node.ATTRIBUTE_NODE:
-				String name = self.getLocalName();
 				if (!self.isDefaultNamespace(uri)) {
 					String prefix = self.lookupPrefix(uri);
 					if (prefix == null) {
@@ -98,6 +109,7 @@ public class Nodes extends ArrayList<Node> {
 					}
 				}
 				getOwner().doc.renameNode(self, uri, name);
+				break;
 			}
 		}
 		
@@ -143,6 +155,27 @@ public class Nodes extends ArrayList<Node> {
 		return null;
 	}
 	
+	public Nodes prefix(String prefix) {
+		for (Node self : this) {
+			if (self == null) continue;
+			
+			switch (self.getNodeType()) {
+			case Node.ELEMENT_NODE:
+			case Node.ATTRIBUTE_NODE:
+				String namespace = self.getNamespaceURI();
+				String name = self.getLocalName();
+				if (prefix != null && !prefix.isEmpty()) {
+					if (namespace == null) namespace = XMLConstants.NULL_NS_URI;
+					name = prefix + ":" + name;
+				}
+				getOwner().doc.renameNode(self, namespace, name);
+				break;
+			}
+		}
+		
+		return this;
+	}
+	
 	public String localName() {
 		if (isEmpty()) return null;
 		
@@ -155,6 +188,25 @@ public class Nodes extends ArrayList<Node> {
 			return self.getLocalName();
 		}
 		return null;
+	}
+	
+	public Nodes localName(String localName) {
+		for (Node self : this) {
+			if (self == null) continue;
+			
+			switch (self.getNodeType()) {
+			case Node.ELEMENT_NODE:
+			case Node.ATTRIBUTE_NODE:
+				String name = localName;
+				if (self.getPrefix() != null && !self.getPrefix().isEmpty()) {
+					name = self.getPrefix() + ":" + name;
+				}
+				getOwner().doc.renameNode(self, self.getNamespaceURI(), name);
+				break;
+			}
+		}
+		
+		return this;
 	}
 	
 	public String name() {
