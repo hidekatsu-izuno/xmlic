@@ -153,10 +153,10 @@ public class NodesTest {
 	@Test
 	public void testGet() throws IOException {
 		XML xml = XML.load(getClass().getResource("test.xml"));
-		assertEquals("<li>t1</li>", xml.get(xml.find("//li[position()=1]").get(0)).toString());
-		assertEquals("<li>t1</li>", xml.get(xml.find("//li[position()=1]").get(-3)).toString());
-		assertEquals("<li>t7</li>", xml.get(xml.find("//li[position()=1]").get(2)).toString());
-		assertEquals("<li>t7</li>", xml.get(xml.find("//li[position()=1]").get(-1)).toString());
+		assertEquals("<li>t1</li>", xml.translate(xml.find("//li[position()=1]").get(0)).toString());
+		assertEquals("<li>t1</li>", xml.translate(xml.find("//li[position()=1]").get(-3)).toString());
+		assertEquals("<li>t7</li>", xml.translate(xml.find("//li[position()=1]").get(2)).toString());
+		assertEquals("<li>t7</li>", xml.translate(xml.find("//li[position()=1]").get(-1)).toString());
 		assertNull(xml.find("//li[position()=1]").get(3));
 		assertNull(xml.find("//li[position()=1]").get(-4));
 	}

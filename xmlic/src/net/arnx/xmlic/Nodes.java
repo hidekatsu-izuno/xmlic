@@ -35,13 +35,9 @@ public class Nodes extends ArrayList<Node> {
 		this.back = back;
 	}
 	
-	Nodes(XML owner, Node node) {
+	Nodes(XML owner, Nodes back, Node node) {
 		this(owner, null, 1);
 		add(node);
-	}
-	
-	Nodes(Nodes back, int size) {
-		this(back.getOwner(), back, size);
 	}
 	
 	Nodes(Nodes back, Node node) {
@@ -378,7 +374,7 @@ public class Nodes extends ArrayList<Node> {
 		if (self != null) {
 			return new Nodes(this, self);
 		} else {
-			return new Nodes(this, 0);
+			return new Nodes(getOwner(), this, 0);
 		}
 	}
 	
@@ -427,7 +423,7 @@ public class Nodes extends ArrayList<Node> {
 		
 		int i = 0;
 		for (Node self : this) {
-			if (!func.visit(i, new Nodes(getOwner(), self))) {
+			if (!func.visit(i, getOwner().translate(self))) {
 				return this;
 			}
 			i++;
@@ -437,11 +433,11 @@ public class Nodes extends ArrayList<Node> {
 	
 	public Nodes has(String filter) {
 		if (filter == null || filter.isEmpty() || isEmpty()) {
-			return new Nodes(this, 0);
+			return new Nodes(getOwner(), this, 0);
 		}
 		
 		XPathExpression expr = getOwner().compileXPath("child::node()[" + escapeFilter(filter) + "]");
-		Nodes nodes = new Nodes(this, size());
+		Nodes nodes = new Nodes(getOwner(), this, size());
 		for (Node self : this) {
 			if (getOwner().evaluate(expr, self, boolean.class)) {
 				nodes.add(self);
@@ -508,7 +504,7 @@ public class Nodes extends ArrayList<Node> {
 			return new Nodes(this, this);
 		}
 		
-		Nodes results = new Nodes(this, size() + nodes.size());
+		Nodes results = new Nodes(getOwner(), this, size() + nodes.size());
 		results.addAll(this);
 		results.addAll(nodes);
 		unique(results);
@@ -522,7 +518,7 @@ public class Nodes extends ArrayList<Node> {
 		
 		XPathExpression expr = getOwner().compileXPath(xpath);
 		
-		Nodes results = new Nodes(this, size() * 2);
+		Nodes results = new Nodes(getOwner(), this, size() * 2);
 		results.addAll(this);
 		for (Node self : this) {
 			NodeList list = getOwner().evaluate(expr, self, NodeList.class);
@@ -541,7 +537,7 @@ public class Nodes extends ArrayList<Node> {
 			return new Nodes(this, this);
 		}
 		
-		Nodes results = new Nodes(this, size() + back.size());
+		Nodes results = new Nodes(getOwner(), this, size() + back.size());
 		results.addAll(this);
 		results.addAll(back);
 		unique(results);
@@ -555,7 +551,7 @@ public class Nodes extends ArrayList<Node> {
 		
 		XPathExpression expr = getOwner().compileXPath("self::node()[" + escapeFilter(filter) + "]");
 		
-		Nodes results = new Nodes(this, size() * 2);
+		Nodes results = new Nodes(getOwner(), this, size() * 2);
 		results.addAll(this);
 		for (Node node : back) {
 			if (getOwner().evaluate(expr, node, boolean.class)) {
@@ -587,12 +583,12 @@ public class Nodes extends ArrayList<Node> {
 	
 	public Nodes select(String xpath) {
 		if (xpath == null || xpath.isEmpty() || isEmpty()) {
-			return new Nodes(this, 0);
+			return new Nodes(getOwner(), this, 0);
 		}
 		
 		XPathExpression expr = getOwner().compileXPath(xpath);
 		
-		Nodes results = new Nodes(this, size());
+		Nodes results = new Nodes(getOwner(), this, size());
 		for (Node self : this) {
 			NodeList list = getOwner().evaluate(expr, self, NodeList.class);
 			for (int i = 0; i < list.getLength(); i++) {
@@ -605,11 +601,11 @@ public class Nodes extends ArrayList<Node> {
 	
 	public Nodes find(String xpath) {
 		if (xpath == null || xpath.isEmpty() || isEmpty()) {
-			return new Nodes(this, 0);
+			return new Nodes(getOwner(), this, 0);
 		}
 		
 		XPathExpression expr = getOwner().compileXPath(xpath);
-		Nodes results = new Nodes(this, size());
+		Nodes results = new Nodes(getOwner(), this, size());
 		for (Node self : this) {
 			NodeList list = getOwner().evaluate(expr, self, NodeList.class);
 			for (int i = 0; i < list.getLength(); i++) {
@@ -624,11 +620,11 @@ public class Nodes extends ArrayList<Node> {
 	
 	public Nodes filter(String filter) {
 		if (filter == null || filter.isEmpty() || isEmpty()) {
-			return new Nodes(this, 0);
+			return new Nodes(getOwner(), this, 0);
 		}
 		
 		XPathExpression expr = getOwner().compileXPath("self::node()[" + escapeFilter(filter) + "]");
-		Nodes results = new Nodes(this, size());
+		Nodes results = new Nodes(getOwner(), this, size());
 		for (Node self : this) {
 			if (getOwner().evaluate(expr, self, boolean.class)) {
 				results.add(self);
@@ -640,13 +636,13 @@ public class Nodes extends ArrayList<Node> {
 	
 	public Nodes filter(Visitor func) {
 		if (func == null || isEmpty()) {
-			return new Nodes(this, 0);
+			return new Nodes(getOwner(), this, 0);
 		}
 		
-		Nodes results = new Nodes(this, size());
+		Nodes results = new Nodes(getOwner(), this, size());
 		int i = 0;
 		for (Node self : this) {
-			if (func.visit(i, new Nodes(getOwner(), self))) {
+			if (func.visit(i, getOwner().translate(self))) {
 				results.add(self);
 			}
 			i++;
@@ -659,11 +655,11 @@ public class Nodes extends ArrayList<Node> {
 		if (filter == null || filter.isEmpty()) {
 			return new Nodes(this, this);
 		} else if (isEmpty()) {
-			return new Nodes(this, 0);
+			return new Nodes(getOwner(), this, 0);
 		}
 		
 		XPathExpression expr = getOwner().compileXPath("self::node()[" + escapeFilter(filter) + "]");
-		Nodes results = new Nodes(this, size());
+		Nodes results = new Nodes(getOwner(), this, size());
 		for (Node self : this) {
 			if (!getOwner().evaluate(expr, self, boolean.class)) {
 				results.add(self);
@@ -694,7 +690,7 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	Nodes parentsInternal(SelectMode mode) {
-		Nodes results = new Nodes(this, size() * 2);
+		Nodes results = new Nodes(getOwner(), this, size() * 2);
 		for (Node self : this) {
 			if (self == null) continue;
 			
@@ -714,11 +710,11 @@ public class Nodes extends ArrayList<Node> {
 	
 	Nodes parentsInternal(String filter, SelectMode mode) {
 		if (filter == null || filter.isEmpty() || isEmpty()) {
-			return new Nodes(this, 0);
+			return new Nodes(getOwner(), this, 0);
 		}
 		
 		XPathExpression expr = getOwner().compileXPath("self::node()[" + escapeFilter(filter) + "]");
-		Nodes results = new Nodes(this, size() * 2);
+		Nodes results = new Nodes(getOwner(), this, size() * 2);
 		for (Node self : this) {
 			if (self == null) continue;
 			
@@ -744,11 +740,11 @@ public class Nodes extends ArrayList<Node> {
 	
 	public Nodes closest(String filter) {
 		if (filter == null || filter.isEmpty() || isEmpty()) {
-			return new Nodes(this, 0);
+			return new Nodes(getOwner(), this, 0);
 		}
 		
 		XPathExpression expr = getOwner().compileXPath("self::node()[" + escapeFilter(filter) + "]");
-		Nodes results = new Nodes(this, size() * 2);
+		Nodes results = new Nodes(getOwner(), this, size() * 2);
 		for (Node self : this) {
 			if (self == null) continue;
 			
@@ -767,7 +763,7 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	public Nodes children() {
-		Nodes results = new Nodes(this, size() * 2);
+		Nodes results = new Nodes(getOwner(), this, size() * 2);
 		for (Node self : this) {
 			if (!self.hasChildNodes()) continue;
 			
@@ -785,11 +781,11 @@ public class Nodes extends ArrayList<Node> {
 	
 	public Nodes children(String filter) {
 		if (filter == null || filter.isEmpty() || isEmpty()) {
-			return new Nodes(this, 0);
+			return new Nodes(getOwner(), this, 0);
 		}
 		
 		XPathExpression expr = getOwner().compileXPath("self::node()[" + escapeFilter(filter) + "]");
-		Nodes results = new Nodes(this, size() * 2);
+		Nodes results = new Nodes(getOwner(), this, size() * 2);
 		for (Node self : this) {
 			if (!self.hasChildNodes()) continue;
 			
@@ -808,7 +804,7 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	public Nodes contents() {
-		Nodes results = new Nodes(this, size() * 2);
+		Nodes results = new Nodes(getOwner(), this, size() * 2);
 		for (Node self : this) {
 			if (!self.hasChildNodes()) continue;
 			
@@ -825,11 +821,11 @@ public class Nodes extends ArrayList<Node> {
 	
 	public Nodes contents(String filter) {
 		if (filter == null || filter.isEmpty() || isEmpty()) {
-			return new Nodes(this, 0);
+			return new Nodes(getOwner(), this, 0);
 		}
 		
 		XPathExpression expr = getOwner().compileXPath("self::node()[" + escapeFilter(filter) + "]");
-		Nodes results = new Nodes(this, size() * 2);
+		Nodes results = new Nodes(getOwner(), this, size() * 2);
 		for (Node self : this) {
 			if (!self.hasChildNodes()) continue;
 			
@@ -875,7 +871,7 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	Nodes prevInternal(SelectMode mode) {
-		Nodes results = new Nodes(this, size());
+		Nodes results = new Nodes(getOwner(), this, size());
 		for (Node self : this) {
 			if (self == null) continue;
 			
@@ -895,11 +891,11 @@ public class Nodes extends ArrayList<Node> {
 	
 	Nodes prevInternal(String filter, SelectMode mode) {
 		if (filter == null || filter.isEmpty() || isEmpty()) {
-			return new Nodes(this, 0);
+			return new Nodes(getOwner(), this, 0);
 		}
 		
 		XPathExpression expr = getOwner().compileXPath("self::node()[" + escapeFilter(filter) + "]");
-		Nodes results = new Nodes(this, size());
+		Nodes results = new Nodes(getOwner(), this, size());
 		for (Node self : this) {
 			if (self == null) continue;
 			
@@ -944,7 +940,7 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	Nodes nextInternal(SelectMode mode) {
-		Nodes results = new Nodes(this, size() * 2);
+		Nodes results = new Nodes(getOwner(), this, size() * 2);
 		for (Node self : this) {
 			if (self == null) continue;
 			
@@ -964,11 +960,11 @@ public class Nodes extends ArrayList<Node> {
 	
 	Nodes nextInternal(String filter, SelectMode mode) {
 		if (filter == null || filter.isEmpty() || isEmpty()) {
-			return new Nodes(this, 0);
+			return new Nodes(getOwner(), this, 0);
 		}
 		
 		XPathExpression expr = getOwner().compileXPath("self::node()[" + escapeFilter(filter) + "]");
-		Nodes results = new Nodes(this, size() * 2);
+		Nodes results = new Nodes(getOwner(), this, size() * 2);
 		for (Node self : this) {
 			if (self == null) continue;
 			
@@ -992,7 +988,7 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	public Nodes siblings() {
-		Nodes results = new Nodes(this, size());
+		Nodes results = new Nodes(getOwner(), this, size());
 		for (Node self : this) {
 			if (self == null) continue;
 			
@@ -1016,11 +1012,11 @@ public class Nodes extends ArrayList<Node> {
 	
 	public Nodes siblings(String filter) {
 		if (filter == null || filter.isEmpty() || isEmpty()) {
-			return new Nodes(this, 0);
+			return new Nodes(getOwner(), this, 0);
 		}
 		
 		XPathExpression expr = getOwner().compileXPath("self::node()[" + escapeFilter(filter) + "]");
-		Nodes results = new Nodes(this, size());
+		Nodes results = new Nodes(getOwner(), this, size());
 		for (Node self : this) {
 			if (self == null) continue;
 			
@@ -1055,10 +1051,10 @@ public class Nodes extends ArrayList<Node> {
 		if (end < 0) end = size() + end;
 		
 		if (start < 0 || start >= size() || end <= 0 || end > size()) {
-			return new Nodes(this, 0);
+			return new Nodes(getOwner(), this, 0);
 		}
 		
-		Nodes results = new Nodes(this, end-start);
+		Nodes results = new Nodes(getOwner(), this, end-start);
 		int pos = 0;
 		for (Node self : this) {
 			if (self == null) continue;
@@ -1105,9 +1101,9 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	public Nodes prependTo(Nodes nodes) {
-		if (nodes == null) return new Nodes(this, 0);
+		if (nodes == null) return new Nodes(getOwner(), this, 0);
 		
-		Nodes results = new Nodes(this, nodes.size());
+		Nodes results = new Nodes(getOwner(), this, nodes.size());
 		for (Node node : nodes) {
 			if (node == null) continue;
 			if (node.getNodeType() != Node.ELEMENT_NODE) continue;
@@ -1158,9 +1154,9 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	public Nodes appendTo(Nodes nodes) {
-		if (nodes == null) return new Nodes(this, 0);
+		if (nodes == null) return new Nodes(getOwner(), this, 0);
 		
-		Nodes result = new Nodes(this, nodes.size());
+		Nodes result = new Nodes(getOwner(), this, nodes.size());
 		for (Node node : nodes) {
 			if (node == null) continue;
 			if (node.getNodeType() != Node.ELEMENT_NODE) continue;
@@ -1400,9 +1396,9 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	public Nodes replaceAll(Nodes nodes) {
-		if (nodes == null) return new Nodes(back, 0);
+		if (nodes == null) return new Nodes(getOwner(), this, 0);
 		
-		Nodes results = new Nodes(back, size());
+		Nodes results = new Nodes(getOwner(), this, size());
 		for (Node node : nodes) {
 			if (node == null) continue;
 			if (node.getNodeType() != Node.ELEMENT_NODE) continue;

@@ -125,34 +125,34 @@ public class XML implements Serializable {
 		return nodes;
 	}
 	
-	public Nodes get(Node node) {
+	public Nodes translate(Node node) {
 		if (node == null) {
-			return new Nodes(doc(), 0);
+			return new Nodes(this, null, 0);
 		}
-		return new Nodes(doc(), node);
+		return new Nodes(this, null, node);
 	}
 	
-	public Nodes get(Node... list) {
-		return get(Arrays.asList((Node[])list));
+	public Nodes translate(Node... list) {
+		return translate(Arrays.asList((Node[])list));
 	}
 	
-	public Nodes get(Collection<Node> list) {
+	public Nodes translate(Collection<Node> list) {
 		if (list == null || list.isEmpty()) {
-			return new Nodes(doc(), 0);
+			return new Nodes(this, null, 0);
 		}
 		
-		Nodes nodes = new Nodes(doc(), list.size());
+		Nodes nodes = new Nodes(this, null, list.size());
 		nodes.addAll(list);
 		Nodes.unique(nodes);
 		return nodes;
 	}
 	
-	public Nodes get(NodeList list) {
+	public Nodes translate(NodeList list) {
 		if (list == null || list.getLength() == 0) {
-			return new Nodes(doc(), 0);
+			return new Nodes(this, null, 0);
 		}
 		
-		Nodes nodes = new Nodes(doc(), list.getLength());
+		Nodes nodes = new Nodes(this, null, list.getLength());
 		for (int i = 0; i < list.getLength(); i++) {
 			nodes.add(list.item(i));
 		}
@@ -162,7 +162,7 @@ public class XML implements Serializable {
 	
 	public Nodes parse(String text) {
 		if (text == null || text.isEmpty()) {
-			return new Nodes(doc(), 0);
+			return new Nodes(this, null, 0);
 		}
 		
 		try {
@@ -170,7 +170,7 @@ public class XML implements Serializable {
 			Document ndoc = db.parse(new InputSource(new StringReader("<x>" + text + "</x>")));
 			NodeList list = doc.importNode(ndoc.getDocumentElement(), true).getChildNodes();
 			
-			Nodes nodes = new Nodes(doc(), list.getLength());
+			Nodes nodes = new Nodes(this, null, list.getLength());
 			for (int i = 0; i < list.getLength(); i++) {
 				nodes.add(list.item(i));
 			}
@@ -285,7 +285,7 @@ public class XML implements Serializable {
 		try {
 			if (cls.equals(Nodes.class)) {
 				NodeList list = (NodeList)expr.evaluate(node, XPathConstants.NODESET);
-				return (T)((list != null) ? get(list) : null);
+				return (T)((list != null) ? translate(list) : null);
 			} else if (cls.equals(NodeList.class)) {
 				return (T)expr.evaluate(node, XPathConstants.NODESET);
 			} else if (cls.equals(Node.class)) {
