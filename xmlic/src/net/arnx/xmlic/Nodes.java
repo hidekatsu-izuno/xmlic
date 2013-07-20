@@ -425,10 +425,12 @@ public class Nodes extends ArrayList<Node> {
 			return this;
 		}
 		
+		int i = 0;
 		for (Node self : this) {
-			if (!func.visit(new Nodes(getOwner(), self))) {
+			if (!func.visit(i, new Nodes(getOwner(), self))) {
 				return this;
 			}
+			i++;
 		}
 		return this;
 	}
@@ -642,10 +644,12 @@ public class Nodes extends ArrayList<Node> {
 		}
 		
 		Nodes results = new Nodes(this, size());
+		int i = 0;
 		for (Node self : this) {
-			if (func.visit(new Nodes(getOwner(), self))) {
+			if (func.visit(i, new Nodes(getOwner(), self))) {
 				results.add(self);
 			}
+			i++;
 		}
 		unique(results);
 		return results;
