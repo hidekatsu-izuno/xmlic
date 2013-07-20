@@ -35,6 +35,11 @@ public class Nodes extends ArrayList<Node> {
 		this.back = back;
 	}
 	
+	Nodes(XML owner, Node node) {
+		this(owner, null, 1);
+		add(node);
+	}
+	
 	Nodes(Nodes back, int size) {
 		this(back.getOwner(), back, size);
 	}
@@ -415,6 +420,19 @@ public class Nodes extends ArrayList<Node> {
 		return -1;
 	}
 	
+	public Nodes each(Visitor func) {
+		if (func == null || isEmpty()) {
+			return this;
+		}
+		
+		for (Node self : this) {
+			if (!func.visit(new Nodes(getOwner(), self))) {
+				return this;
+			}
+		}
+		return this;
+	}
+	
 	public Nodes has(String filter) {
 		if (filter == null || filter.isEmpty() || isEmpty()) {
 			return new Nodes(this, 0);
@@ -618,14 +636,16 @@ public class Nodes extends ArrayList<Node> {
 		return results;
 	}
 	
-	public Nodes filter(Acceptor<Node> func) {
+	public Nodes filter(Visitor func) {
 		if (func == null || isEmpty()) {
 			return new Nodes(this, 0);
 		}
 		
 		Nodes results = new Nodes(this, size());
 		for (Node self : this) {
-			if (func.accept(self)) results.add(self);
+			if (func.visit(new Nodes(getOwner(), self))) {
+				results.add(self);
+			}
 		}
 		unique(results);
 		return results;

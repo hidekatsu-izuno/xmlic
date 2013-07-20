@@ -4,11 +4,10 @@ import static org.junit.Assert.*;
 
 import java.io.IOException;
 
-import net.arnx.xmlic.Acceptor;
+import net.arnx.xmlic.Visitor;
 import net.arnx.xmlic.XML;
 
 import org.junit.Test;
-import org.w3c.dom.Node;
 
 public class NodesTest {
 	
@@ -129,10 +128,10 @@ public class NodesTest {
 	public void testFilter() throws IOException {
 		XML xml = XML.load(getClass().getResource("test.xml"));
 		assertEquals("<li>t4</li>", xml.find("//li[position()=1]").filter("text()='t4'").toString());
-		assertEquals("<li>t4</li>", xml.find("//li[position()=1]").filter(new Acceptor<Node>() {
+		assertEquals("<li>t4</li>", xml.find("//li[position()=1]").filter(new Visitor() {
 			@Override
-			public boolean accept(Node t) {
-				return "t4".equals(t.getTextContent());
+			public boolean visit(Nodes node) {
+				return "t4".equals(node.text());
 			};
 		}).toString());
 		assertEquals("<ul class=\"s21\">\n\t\t<li>t7</li>\n\t\t<li>t8</li>\n\t\t<li>t9</li>\n\t</ul>", xml.find("//ul[position()=1]").filter("@class='s21'").toString());
@@ -154,10 +153,10 @@ public class NodesTest {
 	@Test
 	public void testGet() throws IOException {
 		XML xml = XML.load(getClass().getResource("test.xml"));
-		assertEquals("<li>t1</li>", xml.convert(xml.find("//li[position()=1]").get(0)).toString());
-		assertEquals("<li>t1</li>", xml.convert(xml.find("//li[position()=1]").get(-3)).toString());
-		assertEquals("<li>t7</li>", xml.convert(xml.find("//li[position()=1]").get(2)).toString());
-		assertEquals("<li>t7</li>", xml.convert(xml.find("//li[position()=1]").get(-1)).toString());
+		assertEquals("<li>t1</li>", xml.get(xml.find("//li[position()=1]").get(0)).toString());
+		assertEquals("<li>t1</li>", xml.get(xml.find("//li[position()=1]").get(-3)).toString());
+		assertEquals("<li>t7</li>", xml.get(xml.find("//li[position()=1]").get(2)).toString());
+		assertEquals("<li>t7</li>", xml.get(xml.find("//li[position()=1]").get(-1)).toString());
 		assertNull(xml.find("//li[position()=1]").get(3));
 		assertNull(xml.find("//li[position()=1]").get(-4));
 	}

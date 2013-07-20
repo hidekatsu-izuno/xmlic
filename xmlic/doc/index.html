@@ -11,7 +11,7 @@
 <body>
 <div class="nav">
 <h1 class="logo"><a href="#"><img src="img/xmlic.jpg" alt="XMLIC" width="115" height="34" /></a></h1>
-<div class="bar">version 0.8.0</div>
+<div class="bar">version 0.8.1</div>
 <ul class="menu">
 	<li><a href="#introduction">XMLICとは</a></li>
 	<li><a href="#download">ダウンロード</a></li>
@@ -64,8 +64,7 @@
 <div class="main">
 
 <h2 id="introduction" style="margin-top: 0px;">XMLIC（ズムリック）とは</h2>
-<p>jQuery ライクな DOM 操作を実現する Java 用 XML APIです。JDOM や XOM などと異なり、あくまで W3C 標準の DOM に対し検索、操作を行なうため、XSLT など他ライブラリとの高い相互運用性を実現出来ます。<br />
-API の使い方は jQuery に似ていますが、XMLIC は XML の操作に特化しているため、次のような違いがあります。</p>
+<p>jQuery ライクな DOM 操作を実現する Java 用 XML APIです。JDOM や XOM などと異なり、あくまで W3C 標準の DOM に対し検索、操作を行なうため、XSLT など他ライブラリとの高い相互運用性を実現出来ます。API は jQuery に似ていますが、XMLIC は XML の操作に特化しているため、次のような違いがあります。</p>
 <ul>
 <li>CSS セレクタの代わりに XPath を使用します。</li>
 <li>複数ドキュメントを扱うことができます。入出力機能も用意されています。</li>
@@ -94,7 +93,7 @@ jQuery が単一の <code>window.document</code> に対して　XMLIC は複数�
 <li><code>Nodes</code> インスタンスからは <code>getOwner()</code> メソッドを通じて <code>XML</code> インスタンスにいつでもアクセスできます。</li>
 <li>書き込みは、 <code>XML</code> インスタンスの <code>writeTo()</code> メソッドを使います。</li>
 </ul>
-<p>なお、XPath は jQuery セレクタより機能が豊富ですが違いも大きいので注意が必要です。例えば <code>find("div")</code> と記述した場合、
+<p>XPath は jQuery セレクタより機能が豊富ですが違いも大きいので注意が必要です。例えば <code>find("div")</code> と記述した場合、
 jQuery では子孫ノードすべてが対象になりますが、XPath で同じ動作を実現するには <code>find("//div")</code> と記述する必要があります。</p>
 
 <h2 id="load">XML 文書の読み込み <span class="sub">- Load</span></h2>
@@ -283,8 +282,8 @@ xml.find("//div").contents("first()");
 xml.find("//div").filter("@name='test'");
 
 <span class="comment">// <code>div</code> 要素を検索した結果に対しメソッドを使って属性ででフィルタリングします。</span>
-xml.find("//div").filter(new Acceptor() {
-	public boolean accept(Node node) {
+xml.find("//div").filter(new Visitor() {
+	public boolean visit(Node node) {
 		return "test".equals(node.getAttributeNS(null, "name"));
 	}
 });

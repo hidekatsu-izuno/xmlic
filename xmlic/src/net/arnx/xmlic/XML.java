@@ -119,28 +119,24 @@ public class XML implements Serializable {
 		this.nsContext = context;
 	}
 	
-	public Document get() {
-		return doc;
-	}
-	
 	public Nodes doc() {
 		Nodes nodes = new Nodes(this, null, 1);
 		nodes.add(doc);
 		return nodes;
 	}
 	
-	public Nodes convert(Node node) {
+	public Nodes get(Node node) {
 		if (node == null) {
 			return new Nodes(doc(), 0);
 		}
 		return new Nodes(doc(), node);
 	}
 	
-	public Nodes convert(Node... list) {
-		return convert(Arrays.asList((Node[])list));
+	public Nodes get(Node... list) {
+		return get(Arrays.asList((Node[])list));
 	}
 	
-	public Nodes convert(Collection<Node> list) {
+	public Nodes get(Collection<Node> list) {
 		if (list == null || list.isEmpty()) {
 			return new Nodes(doc(), 0);
 		}
@@ -151,7 +147,7 @@ public class XML implements Serializable {
 		return nodes;
 	}
 	
-	public Nodes convert(NodeList list) {
+	public Nodes get(NodeList list) {
 		if (list == null || list.getLength() == 0) {
 			return new Nodes(doc(), 0);
 		}
@@ -289,7 +285,7 @@ public class XML implements Serializable {
 		try {
 			if (cls.equals(Nodes.class)) {
 				NodeList list = (NodeList)expr.evaluate(node, XPathConstants.NODESET);
-				return (T)((list != null) ? convert(list) : null);
+				return (T)((list != null) ? get(list) : null);
 			} else if (cls.equals(NodeList.class)) {
 				return (T)expr.evaluate(node, XPathConstants.NODESET);
 			} else if (cls.equals(Node.class)) {
