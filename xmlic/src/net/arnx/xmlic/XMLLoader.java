@@ -15,10 +15,10 @@ import org.xml.sax.SAXException;
 
 public class XMLLoader {
 	boolean validating = false;
-	boolean ignoreComments = false;
+	boolean ignoringComments = false;
 	boolean coalescing = true;
 	boolean expandEntityReferences = true;
-	boolean xincludeEnabled = true;
+	boolean xincludeAware = true;
 	
 	public void setValidationg(boolean flag) {
 		this.validating = flag;
@@ -28,12 +28,12 @@ public class XMLLoader {
 		return validating;
 	}
 	
-	public void setIgnoreComments(boolean flag) {
-		this.ignoreComments = flag;
+	public void setIgnoringComments(boolean flag) {
+		this.ignoringComments = flag;
 	}
 	
-	public boolean isIgnoreComments() {
-		return ignoreComments;
+	public boolean isIgnoringComments() {
+		return ignoringComments;
 	}
 	
 	public void setCoalescing(boolean flag) {
@@ -52,12 +52,12 @@ public class XMLLoader {
 		return expandEntityReferences;
 	}
 	
-	public void setXIncludeEnabled(boolean flag) {
-		this.xincludeEnabled = flag;
+	public void setXIncludeAware(boolean flag) {
+		this.xincludeAware = flag;
 	}
 	
-	public boolean isXIncludeEnabled() {
-		return xincludeEnabled;
+	public boolean isXIncludeAware() {
+		return xincludeAware;
 	}
 	
 	public Document load(URI uri) throws IOException {
@@ -74,12 +74,12 @@ public class XMLLoader {
 	
 	Document load(InputSource is) throws IOException {
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-		dbf.setValidating(validating);
-		dbf.setIgnoringComments(ignoreComments);
-		dbf.setCoalescing(coalescing);
 		dbf.setNamespaceAware(true);
+		dbf.setValidating(validating);
+		dbf.setIgnoringComments(ignoringComments);
+		dbf.setCoalescing(coalescing);
 		dbf.setExpandEntityReferences(expandEntityReferences);
-		dbf.setXIncludeAware(xincludeEnabled);
+		dbf.setXIncludeAware(xincludeAware);
 		
 		DocumentBuilder db;
 		try {

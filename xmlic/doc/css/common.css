@@ -47,6 +47,7 @@ table {
 	height: 100%;
 	border-right: 1px solid silver;
 	background: white;
+	overflow-y: auto;
 }
 
 .header {
@@ -94,6 +95,7 @@ h3 {
 h1 .title { display: none; }
 h1 .sub { top: 18px; left: 160px; }
 h2 .sub { font-size: 0.9em; font-style: italic; font-weight: normal; }
+h3 .sub { font-size: 0.9em; font-style: italic; font-weight: normal; float: right; }
 .bar { color: white; background: gray; text-align: right; padding: 0px 5px; }
 
 ul { list-style-image: url(../img/marker.jpg); }
