@@ -17,14 +17,31 @@
 	<li><a href="#download">ダウンロード</a></li>
 	<li><a href="#usage">基本的な使い方</a></li>
 	<li><a href="#load">XML文書の読み込み</a></li>
-	<li><a href="#traversal">DOMの選択</a>
+	<li><a href="#traversal">DOMの検索</a>
 		<ul>
 			<li><a href="#find">要素の検索</a></li>
 			<li><a href="#select">ノードの検索</a></li>
 			<li><a href="#xpath">XPathとCSSセレクタとの比較</a></li>
+			<li><a href="#children">子要素の取得</a></li>
+			<li><a href="#parent">親要素の取得</a></li>
+			<li><a href="#sibling">兄弟要素の取得</a></li>
+			<li><a href="#contents">子ノードの取得</a></li>
+			<li><a href="#filter">取得結果の操作</a></li>
 		</ul>
 	</li>
-	<li><a href="#manipulation">DOMの操作</a></li>
+	<li><a href="#manipulation">DOMの操作</a>
+		<ul>
+			<li><a href="#element">要素の操作</a></li>
+			<li><a href="#attr">属性の操作</a></li>
+			<li><a href="#normalize">ノードの正規化</a></li>
+		</ul>
+	</li>
+	<li><a href="#evaluation">DOMの評価</a>
+		<ul>
+			<li><a href="#is">要素の評価</a></li>
+			<li><a href="#evaluate">ノードの評価</a></li>
+		</ul>
+	</li>
 	<li><a href="#writeto">XML文書の出力</a></li>
 	<li>API リファレンス
 		<ul>
@@ -79,12 +96,51 @@ jQuery では子孫ノードすべてが対象になりますが、XPath で同�
 
 <h2 id="load">XML 文書の読み込み <span class="sub">- Load</span></h2>
 
-<h2 id="traversal">DOM の選択 <span class="sub">- Traversal</span></h2>
+<p>XML 文書の読み込みには、２パターンが用意されています。通常は <code>XML</code> クラスの <code>load</code> スタティックメソッドを使います。オプションは指定出来ませんが、通常の利用では困ることはないでしょう。</p>
+<pre class="source">
+<span class="comment">// ファイルから <code>XML</code> クラスのインスタンスを取得します。</span>
+XML xml = XML.load(new File("test.xml"));
+
+<span class="comment">// <code>InputStrem</code> から <code>XML</code> クラスのインスタンスを取得します。</span>
+XML xml = XML.load(new FileInputStream("test.xml"));
+
+<span class="comment">// <code>Reader</code> から <code>XML</code> クラスのインスタンスを取得します。</span>
+XML xml = XML.load(new FileReader("test.xml"));
+</pre>
+
+<p>検証を行なう必要があるなど、オプションの指定が必要な場合は、<code>XMLLoader</code> を使います。</p>
+
+<h2 id="traversal">DOM の検索 <span class="sub">- Traversal</span></h2>
 
 <h3 id="find">要素の検索</h3>
-<p>要素の検索には </p>
+<p>要素の検索には  <code>find</code> メソッドを使います。<code>find</code> メソッドは、<code>XML</code> クラス、<code>Nodes</code> クラスの両方で利用できます。引数には、XPath 式を記述します。CSS セレクタとは異なり、<code>//</code> から始めないと子要素のみの検索になることに注意してください。</p>
+<pre class="source">
+<span class="comment">// ドキュメントから div 要素を探し、さらに href 属性をもつ a 子要素を検索します。</span>
+xml.find("//div").find("a[@href]");
+</pre>
+<p>ネームペースに対して検索する場合は、プレフィックスを付与します。
+プレフィックスは、原則としてロード時に指定したものを使用します（未指定の場合は、ドキュメントからネームペースを取得しますが、読み込んだ XML に依存してしまいますので、お勧めできません）。</p>
+<pre class="source">
+<span class="comment">// ネームスペースを指定して XML インスタンスを構築します。</span>
+Map&lt;String, String&gt; namespaces = new HashMap&lt;String, String&gt;();
+namespaces.put("h", "http://www.w3.org/1999/xhtml")
+XML xml = XML.load(new File("test.xml"), namespaces);
+
+<span class="comment">// ドキュメントから xhtml の div 要素を探し、さらに href 属性をもつ xhtml の a 子要素を検索します。</span>
+<span class="comment">// 指定するプレフィックスは、ドキュメント内に実際に付与されたプレフィックスには依存しません。</span>
+xml.find("//h:div").find("h:a[@href]");
+</pre>
+
+<h3 id="select">ノードの検索</h3>
+<p>XPath は、要素以外にもテキストノードや属性ノード、コメントノードなども対象にすることができます。
+XMLIC では、それに対応して jQuery にはない <code>select</code> メソッドを追加しています。引数には、XPath 式を記述します。属性値の設定／取得には <code>val</code> メソッドを使います。</p>
+<pre class="source">
+<span class="comment">// ドキュメントから最初の属性ノードを検索し、その値を取得します。</span>
+xml.select("//attribute::node()[1]").val();
+</pre>
 
 <h3 id="xpath">XPath と CSS セレクタとの比較</h3>
+<p>主要な XPath 式と CSS セレクタの対比表を次に示します。参考にしてください。</p>
 <table class="table">
 <colgroup>
 <col style="width: 150px" />

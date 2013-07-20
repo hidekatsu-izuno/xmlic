@@ -14,10 +14,19 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 public class XMLLoader {
+	boolean validating = false;
 	boolean ignoreComments = false;
 	boolean coalescing = true;
 	boolean expandEntityReferences = true;
 	boolean xincludeEnabled = true;
+	
+	public void setValidationg(boolean flag) {
+		this.validating = flag;
+	}
+	
+	public boolean isValidating() {
+		return validating;
+	}
 	
 	public void setIgnoreComments(boolean flag) {
 		this.ignoreComments = flag;
@@ -65,6 +74,7 @@ public class XMLLoader {
 	
 	Document load(InputSource is) throws IOException {
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+		dbf.setValidating(validating);
 		dbf.setIgnoringComments(ignoreComments);
 		dbf.setCoalescing(coalescing);
 		dbf.setNamespaceAware(true);
