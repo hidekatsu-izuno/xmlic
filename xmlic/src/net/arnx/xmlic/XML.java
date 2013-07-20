@@ -119,6 +119,10 @@ public class XML implements Serializable {
 		this.nsContext = context;
 	}
 	
+	public Document get() {
+		return doc;
+	}
+	
 	public Nodes doc() {
 		Nodes nodes = new Nodes(this, null, 1);
 		nodes.add(doc);
@@ -323,7 +327,7 @@ public class XML implements Serializable {
 	@Override
 	public String toString() {
 		XMLWriter serializer = new XMLWriter();
-		serializer.setXMLDeclarationVisible(false);
+		serializer.setShowXMLDeclaration(false);
 		StringWriter writer = new StringWriter();
 		try {
 			serializer.writeTo(writer, doc);

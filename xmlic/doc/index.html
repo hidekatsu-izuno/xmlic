@@ -340,6 +340,28 @@ xml.find("//div")
 
 <h2 id="write">XML 文書の出力<span class="sub"> - Write</span></h2>
 
+<p>XML 文書の出力も読み込み同様に２パターンが用意されています。通常は <code>XML</code> クラスの <code>writeTo</code> メソッドを使います。オプションは指定出来ませんが、通常の利用には十分でしょう。</p>
+<pre class="source">
+<span class="comment">// ファイルに  DOM の内容を出力します。</span>
+xml.writeTo(new File("test.xml"));
+
+<span class="comment">// <code>OutputStream</code> に  DOM の内容を出力します。クローズは自動的に行われます。</span>
+xml.writeTo(new FileOutputStream("test.xml"));
+
+<span class="comment">// <code>Writer</code> に DOM の内容を出力します。クローズは自動的に行われます。</span>
+xml.writeTo(new OutputStreamWriter(new FileOutputStream("test.xml"), "Windows-31J"));
+</pre>
+
+<p>改行コードの変更などオプションの指定が必要な場合は、<code>XMLWriter</code> を使います。</p>
+<pre class="source">
+<span class="comment">// DOM を <code>XMLWrite</code> に渡しファイルに出力します。</span>
+XMLWriter writer = new XMLWriter();
+writer.setEncoding("EUC-JP");
+writer.setLineSeparator("\r\n");
+writer.setPrettyPrinting(true);
+
+writer.writeTo(new FileOutputStream("test.xml"), xml.get());
+</pre>
 
 <h2 id="license">ライセンス</h2>
 <p>XMLIC は、<a href="http://www.apache.org/licenses/LICENSE-2.0">Apache License, Version 2.0</a>下で配布します。</p>

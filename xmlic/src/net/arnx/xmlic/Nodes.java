@@ -1464,7 +1464,7 @@ public class Nodes extends ArrayList<Node> {
 		if (nodes.getLength() == 0) return "";
 		
 		XMLWriter serializer = new XMLWriter();
-		serializer.setXMLDeclarationVisible(false);
+		serializer.setShowXMLDeclaration(false);
 		StringWriter writer = new StringWriter();
 		try {
 			for (int i = 0; i < nodes.getLength(); i++) {
@@ -1532,7 +1532,7 @@ public class Nodes extends ArrayList<Node> {
 		if (isEmpty()) return "";
 		
 		XMLWriter serializer = new XMLWriter();
-		serializer.setXMLDeclarationVisible(false);
+		serializer.setShowXMLDeclaration(false);
 		StringWriter writer = new StringWriter();
 		try {
 			for (Node self : this) {

@@ -12,25 +12,25 @@ import org.w3c.dom.ls.LSOutput;
 import org.w3c.dom.ls.LSSerializer;
 
 public class XMLWriter {
-	private boolean prittyPrint = false;
-	private boolean xmlDeclaration = true;
+	private boolean prittyPrinting = false;
+	private boolean showXmlDeclaration = true;
 	private String encoding;
 	private String linesep;
 	
-	public void setPrettyPrintEnabled(boolean flag) {
-		this.prittyPrint = flag;
+	public void setPrettyPrinting(boolean flag) {
+		this.prittyPrinting = flag;
 	}
 	
-	public boolean isPrittyPrintEnabled() {
-		return prittyPrint;
+	public boolean isPrittyPrinting() {
+		return prittyPrinting;
 	}
 	
-	public void setXMLDeclarationVisible(boolean flag) {
-		this.xmlDeclaration = flag;
+	public void setShowXMLDeclaration(boolean flag) {
+		this.showXmlDeclaration = flag;
 	}
 	
-	public boolean isXMLDeclarationVisible() {
-		return xmlDeclaration;
+	public boolean isShowXMLDeclaration() {
+		return showXmlDeclaration;
 	}
 	
 	public void setEncoding(String encoding) {
@@ -66,8 +66,8 @@ public class XMLWriter {
 		if (linesep != null) serializer.setNewLine(linesep);
 		
 		DOMConfiguration conf = serializer.getDomConfig();
-		conf.setParameter("format-pretty-print", prittyPrint);
-		conf.setParameter("xml-declaration", xmlDeclaration);
+		conf.setParameter("format-pretty-print", prittyPrinting);
+		conf.setParameter("xml-declaration", showXmlDeclaration);
 		
 		if (encoding != null) output.setEncoding(encoding);
 		serializer.write(node, output);
