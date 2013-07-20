@@ -351,9 +351,10 @@ xml.find("//div")
 </tbody>
 </table>
 
-<p>名前空間導入以前の XML における名前やいわゆるTagNameは、デフォルト名前空間で修飾された名前として扱われます。</p>
-<p>XMLIC では、名前空間、プレフィックス、ローカル名、就職された名前それぞれに対し <code>namespace</code>、<code>prefix</code>、<code>localName</code>、
-<code>name</code>メソッドでアクセスします（複数のノードが含まれる場合は、先頭ノードの情報が返されます）。</p>
+<p>名前空間導入以前の XML における名前やいわゆる タグ名（<code>tagName</code>）は、デフォルト名前空間で修飾された名前として扱われます。</p>
+<p>jQuery には名前の操作機能がありませんが、XMLIC では、名前空間、プレフィックス、ローカル名、就職された名前それぞれに対し 
+<code>namespace</code>、<code>prefix</code>、<code>localName</code>、<code>name</code>
+メソッドでアクセスすることができます（複数のノードが含まれる場合は、先頭ノードの情報が返されます）。</p>
 <pre class="source">
 Nodes nodes = xml.parse("&lt;h:div xmlns:h=\"http://www.w3.org/1999/xhtml\"&gt;テスト&lt;/h:div&gt;");
 nodes.namespace(); <span class="comment">// http://www.w3.org/1999/xhtml</span>
@@ -368,10 +369,25 @@ Nodes nodes = xml.parse("&lt;h:div xmlns:h=\"http://www.w3.org/1999/xhtml\"&gt;�
 nodes.namespace("http://www.w3.org/2000/svg");　<span class="comment">// デフォルトに戻す場合は、<code>null</code> を設定します。</span>
 nodes.prefix("svg"); <span class="comment">// プレフィックスのみを変更します（名前空間は変わりません）</span>
 nodes.localName("span"); <span class="comment">// ローカル名のみを変更します（名前空間は変わりません）</span>
-nodes.name("svg:span"); <span class="comment">// svg　に紐づく名前空間と span というローカル名に変更されます。</span>
+nodes.name("svg:span"); <span class="comment">// svg　に紐づく名前空間と span というローカル名に変更されます（プレフィックスは上述のルールが適用され、）。</span>
+</pre>
+
+<p>名前空間については <code>removeNamespace</code> メソッドを使うことで削除することも可能です。</p>
+<pre class="source">
+Nodes nodes = xml.parse("&lt;h:div xmlns:h=\"http://www.w3.org/1999/xhtml\"&gt;テスト&lt;/h:div&gt;");
+<span class="comment">// ネームスペースを削除します。</span>
+nodes.removeNamespace();
+
+<span class="comment">// 特定のネームスペースだけを削除することもできます。</span>
+nodes.removeNamespace("http://www.w3.org/1999/xhtml");
 </pre>
 
 <h3 id="attr">属性の操作</h3>
+<p>属性の操作は、<code>attr</code> メソッドを通じて行います。このメソッドも、名前同様に名前空間を考慮して操作することが可能です。</p>
+<pre class="source">
+<span class="comment"></span>
+</pre>
+
 <h3 id="text">テキスト／値の操作</h3>
 <h3 id="is">要素の評価</h3>
 <h3 id="append">要素の追加</h3>

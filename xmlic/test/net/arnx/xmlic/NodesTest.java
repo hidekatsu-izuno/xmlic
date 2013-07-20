@@ -63,6 +63,7 @@ public class NodesTest {
 		XML xml = XML.load(getClass().getResource("test_ns.xml"));
 		assertEquals("s11", xml.find("//html:ul[position()=1]").attr("class"));
 		assertEquals("<html:ul xmlns:html=\"http://www.w3.org/1999/xhtml\" class=\"s11\" xmlns:svg=\"http://www.w3.org/2000/svg\" svg:id=\"x12\">\n\t\t<html:li>t1</html:li>\n\t\t<html:li>t2</html:li>\n\t\t<html:li>t3</html:li>\n\t</html:ul><html:ul xmlns:html=\"http://www.w3.org/1999/xhtml\" xmlns:svg=\"http://www.w3.org/2000/svg\" svg:class=\"s21\" svg:id=\"x12\">\n\t\t<html:li>t7</html:li>\n\t\t<html:li>t8</html:li>\n\t\t<html:li>t9</html:li>\n\t</html:ul>", xml.find("//html:ul[position()=1]").attr("svg:id", "x12").toString());
+		assertEquals("<html:ul xmlns:html=\"http://www.w3.org/1999/xhtml\" class=\"s11\" id=\"x12\" xmlns:svg=\"http://www.w3.org/2000/svg\" svg:id=\"x12\">\n\t\t<html:li>t1</html:li>\n\t\t<html:li>t2</html:li>\n\t\t<html:li>t3</html:li>\n\t</html:ul>", xml.find("//html:ul[position()=1]").first().attr("html:id", "x12").toString());
 		assertEquals("x12", xml.find("//html:ul[position()=1]").attr("svg:id"));
 	}
 	
@@ -219,12 +220,17 @@ public class NodesTest {
 	public void testName() throws IOException {
 		XML xml = XML.load(getClass().getResource("test.xml"));
 		assertEquals("li", xml.find("//li[position()=1]").name());
+		assertEquals("<html:li>t1</html:li><html:li>t4</html:li><html:li>t7</html:li>", xml.find("//li[position()=1]").name("html:li").toString());
 	}
 	
 	@Test
 	public void testNameNS() throws IOException {
 		XML xml = XML.load(getClass().getResource("test_ns.xml"));
 		assertEquals("html:li", xml.find("//html:li[position()=1]").name());
+		assertEquals("<html:li xmlns:html=\"http://www.w3.org/1999/xhtml\">t1</html:li>", xml.find("//html:li[position()=1]").name("html:li").first().toString());
+		assertEquals("<li>t1</li>", xml.find("//html:li[position()=1]").name("li").first().toString());
+		assertEquals("<svg:li xmlns:svg=\"http://www.w3.org/2000/svg\">t2</svg:li>", xml.find("//html:li[position()=1]").name("svg:li").first().toString());
+		assertEquals("<test:li>t3</test:li>", xml.find("//html:li[position()=1]").name("test:li").first().toString());
 	}
 	
 	@Test

@@ -116,6 +116,10 @@ public class Nodes extends ArrayList<Node> {
 		return this;
 	}
 	
+	public Nodes removeNamespace() {
+		return namespace(null);
+	}
+	
 	public Nodes removeNamespace(String uri) {
 		if (uri == null) uri = XMLConstants.DEFAULT_NS_PREFIX;
 		if (XMLConstants.XML_NS_URI.equals(uri)) {
@@ -134,7 +138,7 @@ public class Nodes extends ArrayList<Node> {
 				if (suri == null) suri = XMLConstants.DEFAULT_NS_PREFIX;
 				if (!suri.equals(uri)) continue;
 			
-				getOwner().doc.renameNode(self, "", self.getLocalName());
+				getOwner().doc.renameNode(self, XMLConstants.DEFAULT_NS_PREFIX, self.getLocalName());
 			}
 		}
 		
@@ -233,17 +237,19 @@ public class Nodes extends ArrayList<Node> {
 		if (isEmpty()) return this;
 		
 		String uri = null;
-		String localName = null;
+		String prefix = null;
+		String localName;
 		
 		int index = name.indexOf(':');
 		if (index > 0 && index < name.length()-1) {
 			localName = name.substring(index + 1);
-			uri = getOwner().nsContext.getNamespaceURI(name.substring(0, index));
-			if (uri == null) localName = name;
+			prefix = name.substring(0, index);
+			uri = getOwner().nsContext.getNamespaceURI(prefix);
 		} else {
 			localName = name;
 		}
 		if (localName.isEmpty()) return null;
+		if (uri == null) uri = XMLConstants.NULL_NS_URI;
 		
 		for (Node self : this) {
 			if (self == null) continue;
@@ -251,7 +257,13 @@ public class Nodes extends ArrayList<Node> {
 			switch (self.getNodeType()) {
 			case Node.ELEMENT_NODE:
 			case Node.ATTRIBUTE_NODE:
-				getOwner().doc.renameNode(self, uri, name);
+				String luri = uri;
+				String lname = name;
+				String lprefix = self.lookupPrefix(uri);
+				if (lprefix == null && prefix != null && !prefix.isEmpty()) {
+					lname = prefix + ":" + localName;
+				}
+				getOwner().doc.renameNode(self, luri, lname);
 				break;
 			}
 		}
@@ -270,17 +282,12 @@ public class Nodes extends ArrayList<Node> {
 		if (index > 0 && index < name.length()-1) {
 			localName = name.substring(index + 1);
 			uri = getOwner().nsContext.getNamespaceURI(name.substring(0, index));
-			if (uri == null) localName = name;
 		} else {
 			localName = name;
 		}
 		if (localName.isEmpty()) return null;
-
-		if (uri != null) {
-			return ((Element)get(0)).getAttributeNS(uri, localName);
-		} else {
-			return ((Element)get(0)).getAttribute(name);
-		}
+		
+		return ((Element)get(0)).getAttributeNS(uri, localName);
 	}
 	
 	public Nodes attr(String name, String value) {
@@ -289,23 +296,38 @@ public class Nodes extends ArrayList<Node> {
 		if (isEmpty()) return this;
 		
 		String uri = null;
-		String localName = null;
-
+		String prefix = null;
+		String localName;
+		
 		int index = name.indexOf(':');
 		if (index > 0 && index < name.length()-1) {
 			localName = name.substring(index + 1);
-			uri = getOwner().nsContext.getNamespaceURI(name.substring(0, index));
-			if (uri == null) localName = name;
+			prefix = name.substring(0, index);
+			uri = getOwner().nsContext.getNamespaceURI(prefix);
 		} else {
 			localName = name;
 		}
-		if (localName.isEmpty()) return this;
+		if (localName.isEmpty()) return null;
+		if (uri == null) uri = XMLConstants.NULL_NS_URI;
 		
 		for (Node self : this) {
 			if (!(self instanceof Element)) continue;
-			
+
 			Element elem = (Element)self;
-			elem.setAttributeNS(uri, name, value);
+			String euri = elem.getNamespaceURI();
+			if (euri == null) euri = XMLConstants.NULL_NS_URI;
+			
+			String luri = uri;
+			String lname = name;
+			String lprefix = self.lookupPrefix(uri);
+			if (lprefix == null && prefix != null && !prefix.isEmpty()) {
+				lname = prefix + ":" + localName;
+			} else if (uri.equals(euri)) {
+				luri = null;
+				lname = localName;
+			}
+			
+			elem.setAttributeNS(luri, lname, value);
 		}
 		return this;
 	}
@@ -325,17 +347,19 @@ public class Nodes extends ArrayList<Node> {
 		if (func == null) return this;
 		
 		String uri = null;
-		String localName = null;
+		String prefix = null;
+		String localName;
 		
 		int index = name.indexOf(':');
 		if (index > 0 && index < name.length()-1) {
 			localName = name.substring(index + 1);
-			uri = getOwner().nsContext.getNamespaceURI(name.substring(0, index));
-			if (uri == null) localName = name;
+			prefix = name.substring(0, index);
+			uri = getOwner().nsContext.getNamespaceURI(prefix);
 		} else {
 			localName = name;
 		}
 		if (localName.isEmpty()) return null;
+		if (uri == null) uri = XMLConstants.NULL_NS_URI;
 		
 		int i = 0;
 		for (Node self : this) {
@@ -343,18 +367,26 @@ public class Nodes extends ArrayList<Node> {
 			if (!(self instanceof Element))  continue;
 			
 			Element elem = (Element)self;
-			String oval;
-			if (uri != null) {
-				oval = elem.getAttributeNS(uri, localName);
-			} else {
-				oval = elem.getAttribute(name);
-			}
+			String oval = elem.getAttributeNS(uri, localName);
 			
 			String nval = func.translate(i, oval);
 			if (nval == null) {
 				elem.removeAttributeNS(uri, localName);
 			} else if (!nval.equals(oval)) {
-				elem.setAttributeNS(uri, localName, nval);
+				String euri = elem.getNamespaceURI();
+				if (euri == null) euri = XMLConstants.NULL_NS_URI;
+				
+				String luri = uri;
+				String lname = name;
+				String lprefix = self.lookupPrefix(uri);
+				if (lprefix == null && prefix != null && !prefix.isEmpty()) {
+					lname = prefix + ":" + localName;
+				} else if (uri.equals(euri)) {
+					luri = null;
+					lname = localName;
+				}
+				
+				elem.setAttributeNS(luri, lname, nval);
 			}
 			
 			i++;
