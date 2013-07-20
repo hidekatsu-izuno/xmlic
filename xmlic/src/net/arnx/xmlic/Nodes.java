@@ -11,6 +11,7 @@ import java.util.Map;
 import javax.xml.XMLConstants;
 import javax.xml.xpath.XPathExpression;
 
+import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -1499,6 +1500,29 @@ public class Nodes extends ArrayList<Node> {
 	public Nodes text(String text) {
 		for (Node self : this) {
 			self.setTextContent(text);
+		}
+		return this;
+	}
+	
+	public Nodes normalize() {
+		if (isEmpty()) return this;
+		
+		XPathExpression expr = getOwner().compileXPath("//namespace::*");
+		for (Node self : this) {
+			NodeList list = getOwner().evaluate(expr, self, NodeList.class);
+			for (int i = 0; i < list.getLength(); i++) {
+				Attr attr = (Attr)list.item(i);
+				if (XMLConstants.XML_NS_URI.equals(attr.getNodeValue())) continue;
+				if (XMLConstants.XMLNS_ATTRIBUTE_NS_URI.equals(attr.getNodeValue())) continue;
+				
+				Element elem = attr.getOwnerElement();
+				if (elem == null) continue;
+				
+				expr = getOwner().compileXPath("//*[namespace-uri()='" + attr.getNodeValue() + "' or @*[namespace-uri()='" + attr.getNodeValue() + "']]");
+				if (!getOwner().evaluate(expr, elem, boolean.class)) {
+					elem.removeAttributeNode(attr);
+				}
+			}
 		}
 		return this;
 	}

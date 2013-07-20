@@ -10,6 +10,7 @@ import java.io.Serializable;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.math.BigDecimal;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -35,7 +36,6 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -182,6 +182,10 @@ public class XML implements Serializable {
 		}
 	}
 	
+	public <T> T evaluate(String xpath, Class<T> cls) {
+		return doc().evaluate(xpath, cls);
+	}
+	
 	public Nodes select(String xpath) {
 		return doc().select(xpath);
 	}
@@ -194,9 +198,8 @@ public class XML implements Serializable {
 		return doc().remove(xpath);
 	}
 	
-	public XML normalize() {
-		doc.normalize();
-		return this;
+	public Nodes normalize() {
+		return doc().normalize();
 	}
 	
 	public XML clone() {
@@ -262,14 +265,28 @@ public class XML implements Serializable {
 		try {
 			return xpc.compile(xpath);
 		} catch (XPathExpressionException e) {
-			throw new IllegalArgumentException(e.getMessage(), e);
+			String message;
+			Throwable current = e;
+			do {
+				message = current.getMessage();
+				if (message != null && !message.isEmpty()) break;
+			} while ((current = e.getCause()) != null);
+			
+			StringBuilder sb = new StringBuilder();
+			sb.append("XPath:");
+			sb.append(message != null ? message : "Unexpected error.");
+			
+			throw new IllegalArgumentException(sb.toString(), e);
 		}
 	}
 	
 	@SuppressWarnings("unchecked")
 	<T> T evaluate(XPathExpression expr, Node node, Class<T> cls) {
 		try {
-			if (cls.equals(NodeList.class)) {
+			if (cls.equals(Nodes.class)) {
+				NodeList list = (NodeList)expr.evaluate(node, XPathConstants.NODESET);
+				return (T)((list != null) ? convert(list) : null);
+			} else if (cls.equals(NodeList.class)) {
 				return (T)expr.evaluate(node, XPathConstants.NODESET);
 			} else if (cls.equals(Node.class)) {
 				return (T)expr.evaluate(node, XPathConstants.NODE);
@@ -277,8 +294,24 @@ public class XML implements Serializable {
 				return (T)expr.evaluate(node, XPathConstants.STRING);
 			} else if (cls.equals(boolean.class) || cls.equals(Boolean.class)) {
 				return (T)expr.evaluate(node, XPathConstants.BOOLEAN);
+			} else if (cls.equals(Number.class) || cls.equals(BigDecimal.class)) {
+				Double num = (Double)expr.evaluate(node, XPathConstants.NUMBER);
+				return (T)((num != null) ? new BigDecimal((double)num) : null);
 			} else if (cls.equals(double.class) || cls.equals(Double.class)) {
-				return (T)expr.evaluate(node, XPathConstants.NUMBER);
+				Double num = (Double)expr.evaluate(node, XPathConstants.NUMBER);
+				return (T)((num != null) ? num : cls.equals(double.class) ? 0.0 : null);
+			} else if (cls.equals(float.class) || cls.equals(Float.class)) {
+				Double num = (Double)expr.evaluate(node, XPathConstants.NUMBER);
+				return (T)(Float)((num != null) ? ((Double)num).floatValue() : cls.equals(float.class) ? 0.0F : null);
+			} else if (cls.equals(long.class) || cls.equals(Long.class)) {
+				Double num = (Double)expr.evaluate(node, XPathConstants.NUMBER);
+				return (T)(Long)((num != null) ? ((Double)num).longValue() : cls.equals(long.class) ? 0L : null);
+			} else if (cls.equals(int.class) || cls.equals(Integer.class)) {
+				Double num = (Double)expr.evaluate(node, XPathConstants.NUMBER);
+				return (T)(Integer)((num != null) ? ((Double)num).intValue() : cls.equals(int.class) ? 0 : null);
+			} else if (cls.equals(short.class) || cls.equals(Short.class)) {
+				Double num = (Double)expr.evaluate(node, XPathConstants.NUMBER);
+				return (T)(Short)((num != null) ? ((Double)num).shortValue() : cls.equals(short.class) ? (short)0 : null);
 			} else {
 				throw new UnsupportedOperationException("Unsupported Convert class: " + cls);
 			}
