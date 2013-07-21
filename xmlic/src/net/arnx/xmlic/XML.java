@@ -189,11 +189,12 @@ public class XML implements Serializable {
 		try {
 			DocumentBuilder db = getDocumentBuilder();
 			Document ndoc = db.parse(new InputSource(new StringReader(sb.toString())));
-			NodeList list = doc.importNode(ndoc.getDocumentElement(), true).getChildNodes();
 			
+			NodeList list = ndoc.getDocumentElement().getChildNodes();
 			Nodes nodes = new Nodes(this, null, list.getLength());
 			for (int i = 0; i < list.getLength(); i++) {
-				nodes.add(list.item(i));
+				Node node = list.item(i);
+				nodes.add(node);
 			}
 			return nodes;
 		} catch (IOException e) {

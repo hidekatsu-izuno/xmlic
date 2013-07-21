@@ -1203,9 +1203,7 @@ public class Nodes extends ArrayList<Node> {
 			Node ref = self.getFirstChild();
 			for (Node node : nodes) {
 				if (node == null) continue;
-				if (node.getParentNode() != null) {
-					node = node.cloneNode(true);
-				}
+				node = node.cloneNode(true);
 				if (ref != null) {
 					self.insertBefore(node, ref);
 				} else {
@@ -1231,9 +1229,7 @@ public class Nodes extends ArrayList<Node> {
 			Node ref = node.getFirstChild();
 			for (Node self : this) {
 				if (self == null) continue;
-				if (self.getParentNode() != null) {
-					self = self.cloneNode(true);
-				}
+				self = self.cloneNode(true);
 				results.add(self);
 				if (ref != null) {
 					node.insertBefore(self, ref);
@@ -1260,9 +1256,7 @@ public class Nodes extends ArrayList<Node> {
 
 			for (Node node : nodes) {
 				if (node == null) continue;
-				if (node.getParentNode() != null) {
-					node = node.cloneNode(true);
-				}
+				node = node.cloneNode(true);
 				self.appendChild(node);
 			}
 		}
@@ -1283,9 +1277,7 @@ public class Nodes extends ArrayList<Node> {
 
 			for (Node self : this) {
 				if (self == null) continue;
-				if (self.getParentNode() != null) {
-					self = self.cloneNode(true);
-				}
+				self = self.cloneNode(true);
 				result.add(self);
 				node.appendChild(self);
 			}
@@ -1309,9 +1301,7 @@ public class Nodes extends ArrayList<Node> {
 			
 			for (Node node : nodes) {
 				if (node == null) continue;
-				if (node.getParentNode() != null) {
-					node = node.cloneNode(true);
-				}
+				node = node.cloneNode(true);
 				parent.insertBefore(node, self);
 			}
 		}
@@ -1352,9 +1342,7 @@ public class Nodes extends ArrayList<Node> {
 			
 			Node next = self.getNextSibling();
 			for (Node node : nodes) {
-				if (node.getParentNode() != null) {
-					node = node.cloneNode(true);
-				}
+				node = node.cloneNode(true);
 				if (next != null) {
 					parent.insertBefore(node, next);
 				} else {
