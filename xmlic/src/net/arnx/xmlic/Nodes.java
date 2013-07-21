@@ -342,7 +342,7 @@ public class Nodes extends ArrayList<Node> {
 		return this;
 	}
 	
-	public Nodes attr(String name, Translator<String> func) {
+	public Nodes attr(String name, Mapper<String> func) {
 		if (name == null) throw new IllegalArgumentException("name is null");
 		if (func == null) return this;
 		
@@ -369,7 +369,7 @@ public class Nodes extends ArrayList<Node> {
 			Element elem = (Element)self;
 			String oval = elem.getAttributeNS(uri, localName);
 			
-			String nval = func.translate(i, oval);
+			String nval = func.map(i, oval);
 			if (nval == null) {
 				elem.removeAttributeNS(uri, localName);
 			} else if (!nval.equals(oval)) {
@@ -474,7 +474,7 @@ public class Nodes extends ArrayList<Node> {
 		return false;
 	}
 	
-	public boolean is(Visitor func) {
+	public boolean is(Visitor<Nodes> func) {
 		if (func == null || isEmpty()) return false;
 		
 		int i = 0;
@@ -536,7 +536,7 @@ public class Nodes extends ArrayList<Node> {
 		return -1;
 	}
 	
-	public Nodes each(Visitor func) {
+	public Nodes each(Visitor<Nodes> func) {
 		if (func == null || isEmpty()) {
 			return this;
 		}
@@ -754,7 +754,7 @@ public class Nodes extends ArrayList<Node> {
 		return results;
 	}
 	
-	public Nodes filter(Visitor func) {
+	public Nodes filter(Visitor<Nodes> func) {
 		if (func == null || isEmpty()) {
 			return new Nodes(getOwner(), this, 0);
 		}
