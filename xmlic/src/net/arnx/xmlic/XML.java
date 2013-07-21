@@ -17,10 +17,10 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import javax.xml.XMLConstants;
-import javax.xml.namespace.NamespaceContext;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -77,7 +77,7 @@ public class XML implements Serializable {
 	
 	final Document doc;
 	final ResourceResolver resResolver;
-	final NamespaceContext nsContext;
+	final NamespaceContextImpl nsContext;
 	
 	public XML() {
 		this(Collections.<String, String>emptyMap());
@@ -114,7 +114,7 @@ public class XML implements Serializable {
 		}
 	}
 	
-	XML(Document doc, ResourceResolver resolver, NamespaceContext context) {
+	XML(Document doc, ResourceResolver resolver, NamespaceContextImpl context) {
 		this.doc = doc;
 		this.resResolver = resolver;
 		this.nsContext = context;
@@ -170,9 +170,25 @@ public class XML implements Serializable {
 			return new Nodes(this, null, 0);
 		}
 		
+		StringBuilder sb = new StringBuilder();
+		sb.append("<x");
+		for (Map.Entry<String, List<String>> entry : nsContext) {
+			String prefix = entry.getKey();
+			List<String> uris = entry.getValue();
+			
+			if (uris.isEmpty()) continue;
+			if (prefix != null && !prefix.isEmpty()) {
+				sb.append(" xmlns:").append(prefix).append("=\"");
+			} else {
+				sb.append(" xmlns=\"");
+			}
+			sb.append(uris.get(0).replace("\"", "&quot;")).append("\"");
+		}
+		sb.append(">").append(text).append("</x>");
+		
 		try {
 			DocumentBuilder db = getDocumentBuilder();
-			Document ndoc = db.parse(new InputSource(new StringReader("<x>" + text + "</x>")));
+			Document ndoc = db.parse(new InputSource(new StringReader(sb.toString())));
 			NodeList list = doc.importNode(ndoc.getDocumentElement(), true).getChildNodes();
 			
 			Nodes nodes = new Nodes(this, null, list.getLength());
@@ -327,11 +343,11 @@ public class XML implements Serializable {
 	
 	@Override
 	public String toString() {
-		XMLWriter serializer = new XMLWriter();
-		serializer.setShowXMLDeclaration(false);
+		XMLWriter xwriter = new XMLWriter();
+		xwriter.setShowXMLDeclaration(false);
 		StringWriter writer = new StringWriter();
 		try {
-			serializer.writeTo(writer, doc);
+			xwriter.writeTo(writer, doc);
 		} catch (IOException e) {
 			throw new IllegalStateException(e);
 		} finally {

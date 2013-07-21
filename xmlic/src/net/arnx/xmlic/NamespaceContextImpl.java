@@ -9,11 +9,12 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
 
 import javax.xml.XMLConstants;
 import javax.xml.namespace.NamespaceContext;
 
-class NamespaceContextImpl implements NamespaceContext, Serializable {
+class NamespaceContextImpl implements NamespaceContext, Iterable<Map.Entry<String, List<String>>>, Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	private Map<String, List<String>> map = Collections.synchronizedMap(new LinkedHashMap<String, List<String>>());
@@ -97,6 +98,12 @@ class NamespaceContextImpl implements NamespaceContext, Serializable {
 			return Collections.unmodifiableSet(result).iterator();
 		}
 	}
+	
+	@Override
+	public Iterator<Entry<String, List<String>>> iterator() {
+		return Collections.unmodifiableMap(map).entrySet().iterator();
+	}
+	
 	
 	private static List<String> list(String text) {
 		List<String> list = new ArrayList<String>(1);
