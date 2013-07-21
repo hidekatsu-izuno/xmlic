@@ -39,13 +39,14 @@
 			<li><a href="#is">要素の評価</a></li>
 			<li><a href="#append">要素の追加</a></li>
 			<li><a href="#replace">要素の置換</a></li>
+			<li><a href="#wrap">要素のラッピング</a></li>
 			<li><a href="#remove">要素の削除</a></li>
-			<li><a href="#remove">要素の複製</a></li>
+			<li><a href="#clone">要素の複製</a></li>
 			<li><a href="#evaluate">ノードの評価</a></li>
 			<li><a href="#normalize">ノードの正規化</a></li>
 		</ul>
 	</li>
-	<li><a href="#writo">XML文書の出力</a></li>
+	<li><a href="#write">XML文書の出力</a></li>
 	<li>API リファレンス
 		<ul>
 			<li><a href="http://xmlic.sourceforge.jp/api/index.html">javadoc</a></li>
@@ -90,11 +91,12 @@ jQuery が単一の <code>window.document</code> に対して　XMLIC は複数�
 <ul>
 <li>読み込みには、 <code>XML</code> クラスの <code>load()</code> スタティックメソッドを使います。</li>
 <li>読み込んだ  <code>XML</code> インスタンスに対し、<code>find()</code> メソッドで <code>Nodes</code> インスタンスを取得し操作します（<code>Nodes</code> インスタンスは <code>jQuery</code> オブジェクトに当たるものだと考えるとよいでしょう）。</li>
-<li><code>Nodes</code> インスタンスからは <code>getOwner()</code> メソッドを通じて <code>XML</code> インスタンスにいつでもアクセスできます。</li>
+<li><code>XML</code> インスタンス は、<code>Nodes</code> インスタンスの <code>getOwner()</code> メソッドを通じて取得できます。</li>
 <li>書き込みは、 <code>XML</code> インスタンスの <code>writeTo()</code> メソッドを使います。</li>
 </ul>
 <p>XPath は jQuery セレクタより機能が豊富ですが違いも大きいので注意が必要です。例えば <code>find("div")</code> と記述した場合、
 jQuery では子孫ノードすべてが対象になりますが、XPath で同じ動作を実現するには <code>find("//div")</code> と記述する必要があります。</p>
+<p>なお、現状は、HTML 向けの機能（<code>addClass</code>、<code>removeClass</code>、<code>val</code>　や HTML 形式での出力）は実装されておりません（仕様に不整合があるわけではないので、実装することは可能ですが、優先順位の問題から行なっていません）。</p>
 
 <h2 id="load">XML 文書の読み込み <span class="sub">- Load</span></h2>
 
@@ -119,9 +121,22 @@ XML xml = XML.load(new URI("http://..."));
 <span class="comment">// <code>XMLLoader</code> から DOM を構築し、<code>XML</code> クラスでラップします。</span>
 XMLLoader loader = new XMLLoader();
 loader.setValidation(true);
-loader.setIgnoreComment(true);
+loader.setIgnoringComments(true);
 
 XML xml = new XML(loader.load(new FileInputStream(new File("test.xml"))));
+</pre>
+
+<p>外部にあるドキュメントではなく、部分的な XML をインラインで読み込む場合には、<code>parse</code> メソッドを使います。すでに DOM ノード値して構築されている場合は、 <code>translate</code>　メソッドを使って取り込みます。</p>
+<pre class="source">
+<span class="comment">// 部分的な XML をインラインで読み込みます。</span>
+Nodes nodes = xml.parse("&lt;div&gt;部分的なXML&lt;/div&gt;&lt;div&gt;部分的なXML&lt;/div&gt;");
+
+<span class="comment">// 構築済みのノードを <code>Nodes</code> オブジェクトに変換します。</span>
+Node node = ...;
+Nodes nodes = xml.translate(node);
+
+NodeList list = ...;
+Nodes nodes = xml.translate(list);
 </pre>
 
 <h2 id="traversal">DOM の検索<span class="sub"> - Traversal</span></h2>
@@ -319,7 +334,7 @@ xml.find("//div").find("p").addBack();
 xml.find("//div").find("p").addBack("@name='test'");
 </pre>
 
-<h3 id="add">取得結果の復元<span class="sub"> - end</span></h3>
+<h3 id="end">取得結果の復元<span class="sub"> - end</span></h3>
 <p>一つ前の取得結果に戻したい場合は、 <code>end</code> メソッドを使います。このメソッドを使うことでメソッド連結でも入れ子表現が可能になります。</p>
 <pre class="source">
 <span class="comment">// <code>div</code> 要素を検索した結果に <code>p</code> 要素を検索した結果を結合した後、最初の検索結果を取得します。</span>
@@ -328,7 +343,7 @@ xml.find("//div")
 .end();
 </pre>
 
-<h2 id="#manipulation">DOM の操作<span class="sub"> - Manipulation</span></h2>
+<h2 id="manipulation">DOM の操作<span class="sub"> - Manipulation</span></h2>
 
 <h3 id="name">名前の操作<span class="sub"> - name, namespace, prefix, localName</span></h3>
 <p>XML と HTML の大きな違いとして名前空間のサポートがあります。仕様としては自然なものですが XML の利用において最大の難物とも言えます。
@@ -352,7 +367,7 @@ xml.find("//div")
 </table>
 
 <p>名前空間導入以前の XML における名前やいわゆる タグ名（<code>tagName</code>）は、デフォルト名前空間で修飾された名前として扱われます。</p>
-<p>jQuery には名前の操作機能がありませんが、XMLIC では、名前空間、プレフィックス、ローカル名、就職された名前それぞれに対し 
+<p>jQuery には名前の操作機能がありませんが、XMLIC では、名前空間、プレフィックス、ローカル名、修飾された名前それぞれに対し 
 <code>namespace</code>、<code>prefix</code>、<code>localName</code>、<code>name</code>
 メソッドでアクセスすることができます（複数のノードが含まれる場合は、先頭ノードの情報が返されます）。</p>
 <pre class="source">
@@ -369,7 +384,10 @@ Nodes nodes = xml.parse("&lt;h:div xmlns:h=\"http://www.w3.org/1999/xhtml\"&gt;�
 nodes.namespace("http://www.w3.org/2000/svg");　<span class="comment">// デフォルトに戻す場合は、<code>null</code> を設定します。</span>
 nodes.prefix("svg"); <span class="comment">// プレフィックスのみを変更します（名前空間は変わりません）</span>
 nodes.localName("span"); <span class="comment">// ローカル名のみを変更します（名前空間は変わりません）</span>
-nodes.name("svg:span"); <span class="comment">// svg　に紐づく名前空間と span というローカル名に変更されます（プレフィックスは上述のルールが適用され、）。</span>
+
+<span class="comment">// XML 構築時に設定したプレフィクスで指定します。実際のプレフィックスは、文書中直近に指定されているものになります。</span>
+<span class="comment">// 存在しないときのみ、引数で指定したプレフィックスとなります。</span>
+nodes.name("svg:span"); <span class="comment">// svg　に紐づく名前空間と span というローカル名に変更されます。</span>
 </pre>
 
 <p>名前空間については <code>removeNamespace</code> メソッドを使うことで削除することも可能です。</p>
@@ -388,21 +406,141 @@ nodes.removeNamespace("http://www.w3.org/1999/xhtml");
 nodes.attr("name"); <span class="comment">// 属性の値を取得します。</span>
 nodes.attr("name", "1") <span class="comment">// 属性の値を設定します。</span>
 
-<span class="comment">// 名前空間の取り扱いも可能です。</span>
+<span class="comment">// 名前空間の取り扱いも可能です。XML 構築時に設定したプレフィクスで指定します。</span>
 nodes.attr("http:name"); <span class="comment">// 名前空間付きの属性の値を取得します。</span>
 
-<span class="comment">// プレフィックスは、文書中直近に指定されているものになります。存在しないときのみ、引数で指定したプレフィックスとなります。</span>
+<span class="comment">// XML 構築時に設定したプレフィクスで指定します。属性が追加される場合、実際のプレフィックスは、文書中直近に指定されているものになります。</span>
+<span class="comment">// 存在しないときのみ、引数で指定したプレフィックスとなります。</span>
 nodes.attr("http:name", "1") <span class="comment">// 名前空間を使って、属性を設定します。</span>
 </pre>
 
 <h3 id="text">テキスト／値の操作</h3>
-<h3 id="is">要素の評価</h3>
-<h3 id="append">要素の追加</h3>
-<h3 id="replace">要素の置換</h3>
-<h3 id="remove">要素の削除</h3>
-<h3 id="remove">要素の複製</h3>
-<h3 id="evaluate">ノードの評価</h3>
+<p>要素の子要素となっているテキストの操作には、<code>text</code> メソッドを使用します。</p>
+<pre class="source">
+<span class="comment">// 子ノード（以下）に含まれるテキストを結合して返されます。</span>
+nodes.text();
+
+<span class="comment">// 子ノードをテキストで置換します。</span>
+nodes.text("text");
+</pre>
+<p>XPath では、要素以外のノードについても検索が可能なため、属性やコメントなど要素以外のノード値を操作する方法が用意されています。
+具体的には <code>val</code> メソッドを使います。jQuery にも <code>val</code> メソッドがありますが、異なる動作をしますので
+注意してください（将来的には、input など同名の要素に対して同じ動作を実装することも検討しています。現在は要素に対しては何の動作もしません）。</p>
+<pre class="source">
+<span class="comment">// <code>div</code>　要素以下の最初のノードの値を取得します。</span>
+xml.find("//div").contents().val();
+
+<span class="comment">// <code>div</code>　要素以下の各種ノードの値を設定します。</span>
+xml.find("//div").contents().val("text");
+</pre>
+
+<h3 id="is">要素の評価<span class="sub"> - is, index</span></h3>
+<p>要素が条件に一致するか調べたい場合には、<code>is</code> メソッドを使います。条件に一致するインデックス番号を取得したい場合には、<code>index</code>メソッドを使います。</p>
+<pre class="source">
+<span class="comment">// すべての <code>div</code> 要素に属性 <code>name="test"</code>が存在する場合 true になります。</span>
+boolean result = xml.find("//div").is("@name='test'");
+
+<span class="comment">// <code>div</code> で最初に条件が一致したインデックス番号を返します。 見つからない場合は -1 を返します。</span>
+int index = xml.find("//div").index("@name='test'");
+
+<span class="comment">// フィルタの代わりに、<code>Node</code> を指定することもできます。</span>
+Node node = xml.find('div').first().get(0);
+boolean result = xml.find("//div").is(node);
+int index = xml.find("//div").index(node);
+</pre>
+
+<h3 id="append">要素の追加<span class="sub"> - prepend / prependTo, append / appendTo, before / insertBefore, after / insertAfter</span></h3>
+<p>要素を追加したい場合は、<code>prepend</code>系、<code>append系</code>、<code>before</code>系、<code>after</code> 系の各メソッドを使います。
+これらのメソッドは、それぞれ挿入位置が違うだけで、同じような使い方ができます。挿入位置の違いを次に示します。</p>
+<div style="border: 1px solid black; padding: 1px 3px;">
+親要素
+<div style="border: 1px dashed green; background-color: #90ee90; margin: 10px; padding: 1px 3px;">before</div>
+<div style="border: 1px solid blue; margin: 10px; padding: 1px 3px;">
+要素
+<div style="border: 1px dashed green; background-color: #90ee90; margin: 10px; padding: 1px 3px;">prepend</div>
+<div style="border: 1px solid black; margin: 10px; padding: 1px 3px;">子要素…</div>
+<div style="border: 1px dashed green; background-color: #90ee90; margin: 10px; padding: 1px 3px;">append</div>
+</div>
+<div style="border: 1px dashed green; background-color: #90ee90; margin: 10px; padding: 1px 3px;">after</div>
+</div>
+<p><code>prepend</code>、<code>append</code>、<code>before</code>、<code>after</code> と 
+<code>prependTo</code>、<code>appendTo</code>、<code>insertBefore</code>、<code>insertAfter</code> 
+の違いは、前者がオブジェクトの要素群に引数で指定した要素群を加えるのに対し、後者は、引数で指定した要素群にオブジェクトの要素群を加える点にあります（対象が逆になる）。</p>
+<pre class="source">
+<span class="comment">// すべての <code>div</code> 要素に指定した要素を追加します。</span>
+xml.find("//div").prepend("&lt;span&gt;最初の子要素として追加！&lt;/span&gt;");
+xml.find("//div").append("&lt;span&gt;最後の子要素として追加！&lt;/span&gt;");
+xml.find("//div").before("&lt;span&gt;直前の要素として追加！&lt;/span&gt;");
+xml.find("//div").after("&lt;span&gt;直後の要素として追加！&lt;/span&gt;");
+
+<span class="comment">// 同じ結果になりますが記述が逆転します。</span>
+xml.parse("&lt;span&gt;最初の子要素として追加！&lt;/span&gt;").prependTo("//div");
+xml.parse("&lt;span&gt;最後の子要素として追加！&lt;/span&gt;").appendTo("//div");
+xml.parse("&lt;span&gt;直前の要素として追加！&lt;/span&gt;").insertBefore("//div");
+xml.parse("&lt;span&gt;直後の要素として追加！&lt;/span&gt;").insertAfter("//div");
+</pre>
+
+<h3 id="replace">要素の置換<span class="sub"> - replaceWith / replaceAll</span></h3>
+<p>要素の置換には、<code>replaceWith</code> メソッドと <code>replaceAll</code> メソッドを使います。ふたつのメソッドの違いは、要素の追加と同様に置換対象と置換内容の記述位置だけです。</p>
+<pre class="source">
+<span class="comment">// すべての <code>div</code> 要素を指定した要素で置換します。</span>
+xml.find("//div").replaceWith("&lt;span&gt;最初の子要素として追加！&lt;/span&gt;");
+
+<span class="comment">// 同じ結果になりますが記述が逆転します。</span>
+xml.parse("&lt;span&gt;最初の子要素として追加！&lt;/span&gt;").replaceAll("//div");
+</pre>
+
+<h3 id="replace">要素のラッピング<span class="sub"> - wrap / wrapInner / wrapAll / unwrap</span></h3>
+<p>要素のラッピングには、<code>wrap</code> 系メソッドを使います。<code>wrap</code> は要素自身を、<code>wrapInner</code> は要素の内側をラッピングします。
+<code>unwrap</code> は <code>wrap</code> とは反対にラッピングを解除し、子要素で置換します。</p>
+<pre class="source">
+<span class="comment">// すべての <code>div</code> 要素を指定した要素でラップします。</span>
+xml.find("//div").wrap("&lt;div class=".wrap"&gt;&lt;&gt;"); <span class="comment">// &gt;&lt;の間に要素が挿入されます。</span>
+xml.find("//div").unwrap(); <span class="comment">// すべての <code>div</code> 要素のラッピングを解除します。</span>
+
+<span class="comment">// すべての <code>div</code> 要素の内側を指定した要素でラップします。</span>
+xml.find("//div").wrapInner("&lt;div class=".wrap"&gt;&lt;&gt;");
+</pre>
+<p><code>wrapAll</code> は、対象となる要素の最初の位置に対象のすべての要素を包み込むようにラッピングします。</p>
+<pre class="source">
+<span class="comment">// 最初の <code>div</code> 要素の位置にすべての <code>div</code> 要素がラッピングされるように移動されます。</span>
+xml.find("//div").wrapInner("&lt;div class=".wrap"&gt;&lt;&gt;");
+</pre>
+
+<h3 id="remove">要素の削除<span class="sub"> - remove, empty</span></h3>
+<p>要素を削除するメソッドとしては、要素自身を含めて削除する <code>remove</code> メソッドと要素の内側を削除する <code>empty</code> メソッドがあります。</p>
+<pre class="source">
+<span class="comment">// すべての <code>div</code> 要素を削除します。</span>
+xml.find("//div").remove();
+xml.find("//div").remove("//span"); <span class="comment">// マッチした要素だけを削除することも可能です。</span>
+
+<span class="comment">// すべての <code>div</code> 要素を空（＝内側を削除）にします。</span>
+xml.find("//div").empty();
+</pre>
+
+<h3 id="clone">ノードの複製<span class="sub"> - clone</span></h3>
+<p>ノードを複製したい場合は、<code>clone</code> メソッドを使用します。</p>
+<pre class="source">
+Nodes clone = xml.find("//div").clone();
+</pre>
+
+<h3 id="evaluate">ノードの評価<span class="sub"> - evaluate</span></h3>
+<p>XPath では、ノードの選択の他に文字列/数値/真偽値の結果を返す場合があります。XMLIC には、そのような場合にも対応できるように、<code>evaluate</code> 
+という汎用の XPath 評価メソッドを用意しています。引数には、 xpath と戻り値の型を指定します。型には、<code>Nodes</code>、<code>NodeList</code>、
+<code>Node</code>、<code>String</code>、<code>Boolean</code> / <code>boolean</code>、各種数値型（<code>Number</code>のサブクラス）
+を指定することができます。 </p>
+<pre class="source">
+if (nodes.evaluate("self::node()[@name='test']", boolean.class)) {
+  <span class="comment">// マッチした！</span>
+}
+</pre>
+
 <h3 id="normalize">ノードの正規化</h3>
+<p><code>normalize</code> メソッドは、ノードの正規化を行います。具体的には、子要素より下にあるテキストノードを結合してひとつのノードにまとめます。これは、<code>Node</code> クラスの 
+<code>normalize</code> の動作と同じですが、XMLIC ではこの動作に加え、不用な名前空間宣言の除去も行います。</p>
+<pre class="source">
+nodes.normalize();
+</pre>
 
 <h2 id="write">XML 文書の出力<span class="sub"> - Write</span></h2>
 
@@ -429,6 +567,8 @@ writer.setPrettyPrinting(true);
 writer.writeTo(new FileOutputStream("test.xml"), xml.getDocument());
 </pre>
 
+<p>部分的な XML を出力したい場合は、<code>toString</code> でも取得出来ます。</p>
+
 <h2 id="license">ライセンス</h2>
 <p>XMLIC は、<a href="http://www.apache.org/licenses/LICENSE-2.0">Apache License, Version 2.0</a>下で配布します。</p>
 <p><b>自分のライブラリへの組み込んでいただいたり、その際にパッケージ名の変更や処理の変更など行っていただいても何ら構いません。</b>ライセンスの範囲内でご自由にお使いください。</p>
@@ -437,6 +577,13 @@ writer.writeTo(new FileOutputStream("test.xml"), xml.getDocument());
 <p>バグや要望などは<a href="http://sourceforge.jp/projects/xmlic">XMLIC プロジェクトサイト</a>の<a href="http://sourceforge.jp/projects/xmlic/ticket/">チケット</a>に報告ください。</p>
 
 <h2 id="releasenote">リリースノート</h2>
+
+<h3>2013/7/16 version 0.8.1</h3>
+<ul>
+<li>命名や動作が一貫していなかった点をいろいろ修正しました。</li>
+<li>デフォルト名前空間の <code>NamespaceContext</code> での扱いが不適切でしたので修正しました。</li>
+<li>ドキュメントを拡充しました。</li>
+</ul>
 
 <h3>2013/7/16 version 0.8.0</h3>
 <ul>

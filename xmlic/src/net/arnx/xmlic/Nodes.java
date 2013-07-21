@@ -466,8 +466,44 @@ public class Nodes extends ArrayList<Node> {
 		if (filter == null || isEmpty()) return false;
 		
 		XPathExpression expr = getOwner().compileXPath("self::node()[" + escapeFilter(filter) + "]");
-		for (Node node : this) {
-			if (getOwner().evaluate(expr, node, boolean.class)) {
+		for (Node self : this) {
+			if (getOwner().evaluate(expr, self, boolean.class)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public boolean is(Visitor func) {
+		if (func == null || isEmpty()) return false;
+		
+		int i = 0;
+		for (Node self : this) {
+			if (func.visit(i, getOwner().translate(self))) {
+				return true;
+			}
+			i++;
+		}
+		
+		return false;
+	}
+	
+	public boolean is(Nodes nodes) {
+		if (isEmpty() || nodes.isEmpty()) return false;
+		
+		for (Node self : this) {
+			if (nodes.contains(self)) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	public boolean is(Node node) {
+		if (node == null || isEmpty()) return false;
+		for (Node self : this) {
+			if (node.equals(self)) {
 				return true;
 			}
 		}
@@ -1557,7 +1593,9 @@ public class Nodes extends ArrayList<Node> {
 	
 	public Nodes clone() {
 		Nodes clone = new Nodes(getOwner(), back, size());
-		clone.addAll(this);
+		for (Node self : this) {
+			clone.add(self.cloneNode(true));
+		}
 		return clone;
 	}
 	
