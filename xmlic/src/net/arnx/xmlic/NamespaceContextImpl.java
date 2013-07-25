@@ -2,17 +2,19 @@ package net.arnx.xmlic;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import javax.xml.XMLConstants;
-import javax.xml.namespace.NamespaceContext;
+
+import net.arnx.xmlic.internal.org.jaxen.NamespaceContext;
 
 class NamespaceContextImpl implements NamespaceContext, Iterable<Map.Entry<String, List<String>>>, Serializable {
 	private static final long serialVersionUID = 1L;
@@ -22,10 +24,9 @@ class NamespaceContextImpl implements NamespaceContext, Iterable<Map.Entry<Strin
 	public NamespaceContextImpl() {
 	}
 	
-	public NamespaceContextImpl(Map<String, String> map) {
-		for (Map.Entry<String, String> entry : map.entrySet()) {
-			this.map.put(entry.getKey(), list(entry.getValue()));
-		}
+	@Override
+	public Iterator<Entry<String, List<String>>> iterator() {
+		return Collections.unmodifiableMap(map).entrySet().iterator();
 	}
 	
 	public void addNamespace(String prefix, String namespaceURI) {
@@ -42,6 +43,10 @@ class NamespaceContextImpl implements NamespaceContext, Iterable<Map.Entry<Strin
 	}
 	
 	@Override
+	public String translateNamespacePrefixToUri(String prefix) {
+		return getNamespaceURI(prefix);
+	}
+	
 	public String getNamespaceURI(String prefix) {
 		if (prefix == null) {
 			throw new IllegalArgumentException("prefix is null.");
@@ -58,7 +63,6 @@ class NamespaceContextImpl implements NamespaceContext, Iterable<Map.Entry<Strin
 		}
 	}
 	
-	@Override
 	public String getPrefix(String namespaceURI) {
 		if (namespaceURI == null) {
 			throw new IllegalArgumentException("namespaceURI is null.");
@@ -78,16 +82,15 @@ class NamespaceContextImpl implements NamespaceContext, Iterable<Map.Entry<Strin
 		}
 	}
 	
-	@Override
 	public Iterator<?> getPrefixes(String namespaceURI) {
 		if (namespaceURI == null) {
 			throw new IllegalArgumentException("namespaceURI is null.");
 		} else if (XMLConstants.NULL_NS_URI.equals(namespaceURI)) {
-			return list(XMLConstants.DEFAULT_NS_PREFIX).iterator();
+			return Arrays.asList(XMLConstants.DEFAULT_NS_PREFIX).iterator();
 		} else if (XMLConstants.XML_NS_URI.equals(namespaceURI)) {
-			return list(XMLConstants.XML_NS_PREFIX).iterator();
+			return Arrays.asList(XMLConstants.XML_NS_PREFIX).iterator();
 		} else if (XMLConstants.XMLNS_ATTRIBUTE_NS_URI.equals(namespaceURI)) {
-			return list(XMLConstants.XMLNS_ATTRIBUTE).iterator();
+			return Arrays.asList(XMLConstants.XMLNS_ATTRIBUTE).iterator();
 		} else {
 			Set<String> result = new LinkedHashSet<String>();
 			for (Map.Entry<String, List<String>> entry : map.entrySet()) {
@@ -97,17 +100,5 @@ class NamespaceContextImpl implements NamespaceContext, Iterable<Map.Entry<Strin
 			}
 			return Collections.unmodifiableSet(result).iterator();
 		}
-	}
-	
-	@Override
-	public Iterator<Entry<String, List<String>>> iterator() {
-		return Collections.unmodifiableMap(map).entrySet().iterator();
-	}
-	
-	
-	private static List<String> list(String text) {
-		List<String> list = new ArrayList<String>(1);
-		list.add(text);
-		return list;
 	}
 }

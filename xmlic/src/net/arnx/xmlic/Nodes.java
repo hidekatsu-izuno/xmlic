@@ -9,7 +9,6 @@ import java.util.Comparator;
 import java.util.Map;
 
 import javax.xml.XMLConstants;
-import javax.xml.xpath.XPathExpression;
 
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
@@ -465,7 +464,7 @@ public class Nodes extends ArrayList<Node> {
 	public boolean is(String filter) {
 		if (filter == null || isEmpty()) return false;
 		
-		XPathExpression expr = getOwner().compileXPath("self::node()[" + escapeFilter(filter) + "]");
+		Object expr = getOwner().compileXPath("self::node()[" + escapeFilter(filter) + "]");
 		for (Node self : this) {
 			if (getOwner().evaluate(expr, self, boolean.class)) {
 				return true;
@@ -513,7 +512,7 @@ public class Nodes extends ArrayList<Node> {
 	public int index(String filter) {
 		if (filter == null || filter.isEmpty() || isEmpty()) return -1;
 		
-		XPathExpression expr = getOwner().compileXPath("self::node()[" + escapeFilter(filter) + "]");
+		Object expr = getOwner().compileXPath("self::node()[" + escapeFilter(filter) + "]");
 		for (int i = 0; i < size(); i++) {
 			if (getOwner().evaluate(expr, get(i), boolean.class)) {
 				return i;
@@ -556,7 +555,7 @@ public class Nodes extends ArrayList<Node> {
 			return new Nodes(getOwner(), this, 0);
 		}
 		
-		XPathExpression expr = getOwner().compileXPath("child::node()[" + escapeFilter(filter) + "]");
+		Object expr = getOwner().compileXPath("child::node()[" + escapeFilter(filter) + "]");
 		Nodes nodes = new Nodes(getOwner(), this, size());
 		for (Node self : this) {
 			if (getOwner().evaluate(expr, self, boolean.class)) {
@@ -636,7 +635,7 @@ public class Nodes extends ArrayList<Node> {
 			return new Nodes(this, this);
 		}
 		
-		XPathExpression expr = getOwner().compileXPath(xpath);
+		Object expr = getOwner().compileXPath(xpath);
 		
 		Nodes results = new Nodes(getOwner(), this, size() * 2);
 		results.addAll(this);
@@ -669,7 +668,7 @@ public class Nodes extends ArrayList<Node> {
 			return new Nodes(this, this);
 		}
 		
-		XPathExpression expr = getOwner().compileXPath("self::node()[" + escapeFilter(filter) + "]");
+		Object expr = getOwner().compileXPath("self::node()[" + escapeFilter(filter) + "]");
 		
 		Nodes results = new Nodes(getOwner(), this, size() * 2);
 		results.addAll(this);
@@ -697,7 +696,7 @@ public class Nodes extends ArrayList<Node> {
 		Node self = get(0);
 		if (self == null) return null;
 		
-		XPathExpression expr = getOwner().compileXPath(xpath);
+		Object expr = getOwner().compileXPath(xpath);
 		return getOwner().evaluate(expr, self, cls);
 	}
 	
@@ -706,7 +705,7 @@ public class Nodes extends ArrayList<Node> {
 			return new Nodes(getOwner(), this, 0);
 		}
 		
-		XPathExpression expr = getOwner().compileXPath(xpath);
+		Object expr = getOwner().compileXPath(xpath);
 		
 		Nodes results = new Nodes(getOwner(), this, size());
 		for (Node self : this) {
@@ -724,7 +723,7 @@ public class Nodes extends ArrayList<Node> {
 			return new Nodes(getOwner(), this, 0);
 		}
 		
-		XPathExpression expr = getOwner().compileXPath(xpath);
+		Object expr = getOwner().compileXPath(xpath);
 		Nodes results = new Nodes(getOwner(), this, size());
 		for (Node self : this) {
 			NodeList list = getOwner().evaluate(expr, self, NodeList.class);
@@ -743,7 +742,7 @@ public class Nodes extends ArrayList<Node> {
 			return new Nodes(getOwner(), this, 0);
 		}
 		
-		XPathExpression expr = getOwner().compileXPath("self::node()[" + escapeFilter(filter) + "]");
+		Object expr = getOwner().compileXPath("self::node()[" + escapeFilter(filter) + "]");
 		Nodes results = new Nodes(getOwner(), this, size());
 		for (Node self : this) {
 			if (getOwner().evaluate(expr, self, boolean.class)) {
@@ -778,7 +777,7 @@ public class Nodes extends ArrayList<Node> {
 			return new Nodes(getOwner(), this, 0);
 		}
 		
-		XPathExpression expr = getOwner().compileXPath("self::node()[" + escapeFilter(filter) + "]");
+		Object expr = getOwner().compileXPath("self::node()[" + escapeFilter(filter) + "]");
 		Nodes results = new Nodes(getOwner(), this, size());
 		for (Node self : this) {
 			if (!getOwner().evaluate(expr, self, boolean.class)) {
@@ -833,7 +832,7 @@ public class Nodes extends ArrayList<Node> {
 			return new Nodes(getOwner(), this, 0);
 		}
 		
-		XPathExpression expr = getOwner().compileXPath("self::node()[" + escapeFilter(filter) + "]");
+		Object expr = getOwner().compileXPath("self::node()[" + escapeFilter(filter) + "]");
 		Nodes results = new Nodes(getOwner(), this, size() * 2);
 		for (Node self : this) {
 			if (self == null) continue;
@@ -863,7 +862,7 @@ public class Nodes extends ArrayList<Node> {
 			return new Nodes(getOwner(), this, 0);
 		}
 		
-		XPathExpression expr = getOwner().compileXPath("self::node()[" + escapeFilter(filter) + "]");
+		Object expr = getOwner().compileXPath("self::node()[" + escapeFilter(filter) + "]");
 		Nodes results = new Nodes(getOwner(), this, size() * 2);
 		for (Node self : this) {
 			if (self == null) continue;
@@ -904,7 +903,7 @@ public class Nodes extends ArrayList<Node> {
 			return new Nodes(getOwner(), this, 0);
 		}
 		
-		XPathExpression expr = getOwner().compileXPath("self::node()[" + escapeFilter(filter) + "]");
+		Object expr = getOwner().compileXPath("self::node()[" + escapeFilter(filter) + "]");
 		Nodes results = new Nodes(getOwner(), this, size() * 2);
 		for (Node self : this) {
 			if (!self.hasChildNodes()) continue;
@@ -944,7 +943,7 @@ public class Nodes extends ArrayList<Node> {
 			return new Nodes(getOwner(), this, 0);
 		}
 		
-		XPathExpression expr = getOwner().compileXPath("self::node()[" + escapeFilter(filter) + "]");
+		Object expr = getOwner().compileXPath("self::node()[" + escapeFilter(filter) + "]");
 		Nodes results = new Nodes(getOwner(), this, size() * 2);
 		for (Node self : this) {
 			if (!self.hasChildNodes()) continue;
@@ -1014,7 +1013,7 @@ public class Nodes extends ArrayList<Node> {
 			return new Nodes(getOwner(), this, 0);
 		}
 		
-		XPathExpression expr = getOwner().compileXPath("self::node()[" + escapeFilter(filter) + "]");
+		Object expr = getOwner().compileXPath("self::node()[" + escapeFilter(filter) + "]");
 		Nodes results = new Nodes(getOwner(), this, size());
 		for (Node self : this) {
 			if (self == null) continue;
@@ -1083,7 +1082,7 @@ public class Nodes extends ArrayList<Node> {
 			return new Nodes(getOwner(), this, 0);
 		}
 		
-		XPathExpression expr = getOwner().compileXPath("self::node()[" + escapeFilter(filter) + "]");
+		Object expr = getOwner().compileXPath("self::node()[" + escapeFilter(filter) + "]");
 		Nodes results = new Nodes(getOwner(), this, size() * 2);
 		for (Node self : this) {
 			if (self == null) continue;
@@ -1135,7 +1134,7 @@ public class Nodes extends ArrayList<Node> {
 			return new Nodes(getOwner(), this, 0);
 		}
 		
-		XPathExpression expr = getOwner().compileXPath("self::node()[" + escapeFilter(filter) + "]");
+		Object expr = getOwner().compileXPath("self::node()[" + escapeFilter(filter) + "]");
 		Nodes results = new Nodes(getOwner(), this, size());
 		for (Node self : this) {
 			if (self == null) continue;
@@ -1562,7 +1561,7 @@ public class Nodes extends ArrayList<Node> {
 			return this;
 		}
 		
-		XPathExpression expr = getOwner().compileXPath(xpath);
+		Object expr = getOwner().compileXPath(xpath);
 		for (Node self : this) {
 			if (self == null) continue;
 			if (self.getNodeType() != Node.ELEMENT_NODE) continue;
@@ -1637,20 +1636,24 @@ public class Nodes extends ArrayList<Node> {
 	public Nodes normalize() {
 		if (isEmpty()) return this;
 		
-		XPathExpression expr = getOwner().compileXPath("//namespace::*");
+		Object expr = getOwner().compileXPath("//namespace::*");
 		for (Node self : this) {
 			NodeList list = getOwner().evaluate(expr, self, NodeList.class);
 			for (int i = 0; i < list.getLength(); i++) {
-				Attr attr = (Attr)list.item(i);
-				if (XMLConstants.XML_NS_URI.equals(attr.getNodeValue())) continue;
-				if (XMLConstants.XMLNS_ATTRIBUTE_NS_URI.equals(attr.getNodeValue())) continue;
+				Node ns = list.item(i);
+				if (XMLConstants.XML_NS_URI.equals(ns.getNodeValue())) continue;
+				if (XMLConstants.XMLNS_ATTRIBUTE_NS_URI.equals(ns.getNodeValue())) continue;
 				
-				Element elem = attr.getOwnerElement();
-				if (elem == null) continue;
+				Node parent = ns.getParentNode();
+				if (!(parent instanceof Element)) continue;
 				
-				expr = getOwner().compileXPath("//*[namespace-uri()='" + attr.getNodeValue() + "' or @*[namespace-uri()='" + attr.getNodeValue() + "']]");
-				if (!getOwner().evaluate(expr, elem, boolean.class)) {
-					elem.removeAttributeNode(attr);
+				expr = getOwner().compileXPath("//*[namespace-uri()='" + ns.getNodeValue() + "' or @*[namespace-uri()='" + ns.getNodeValue() + "']]");
+				if (!getOwner().evaluate(expr, parent, boolean.class)) {
+					if (ns.getNodeName() != null && !ns.getNodeName().isEmpty()) {
+						((Element)parent).removeAttributeNS(XMLConstants.XMLNS_ATTRIBUTE_NS_URI, ns.getNodeName());
+					} else {
+						((Element)parent).removeAttributeNS(XMLConstants.XMLNS_ATTRIBUTE_NS_URI, XMLConstants.XMLNS_ATTRIBUTE);
+					}
 				}
 			}
 		}

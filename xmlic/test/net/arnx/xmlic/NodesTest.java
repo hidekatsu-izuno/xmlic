@@ -143,6 +143,7 @@ public class NodesTest {
 		XML xml = XML.load(getClass().getResource("test.xml"));
 		assertEquals("<li>t1</li><li>t4</li><li>t7</li>", xml.find("body").find("div").find("//li[position()=1]").toString());
 		assertEquals("<ul class=\"s12\">\n\t\t<li>t4</li>\n\t\t<li>t5</li>\n\t\t<li>t6</li>\n\t</ul>", xml.find("//li[position()=1]").find("(../../ul)[2]").toString());
+		assertEquals("", xml.find("//div").find(".//body").toString());
 	}
 	
 	@Test

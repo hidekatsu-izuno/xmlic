@@ -31,11 +31,10 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.dom.DOMSource;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
-import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
+
+import net.arnx.xmlic.internal.org.jaxen.JaxenException;
+import net.arnx.xmlic.internal.org.jaxen.XPath;
+import net.arnx.xmlic.internal.org.jaxen.dom.DOMXPath;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -95,9 +94,9 @@ public class XML implements Serializable {
 		this.doc = doc;
 		this.resResolver = new ResourceResolver();
 		
+		NamespaceContextImpl nsContext = new NamespaceContextImpl();
 		if (namespaces == null) {
-			NamespaceContextImpl context = new NamespaceContextImpl();
-			XPathExpression expr = compileXPath("//namespace::*");
+			Object expr = compileXPath("//namespace::*");
 			NodeList list = evaluate(expr, doc, NodeList.class);
 			for (int i = 0; i < list.getLength(); i++) {
 				Node node = list.item(i);
@@ -106,18 +105,20 @@ public class XML implements Serializable {
 					prefix = XMLConstants.DEFAULT_NS_PREFIX;
 				}
 				
-				context.addNamespace(prefix, node.getNodeValue());
+				nsContext.addNamespace(prefix, node.getNodeValue());
 			}
-			this.nsContext = context;
 		} else {
-			this.nsContext = new NamespaceContextImpl(namespaces);
+			for (Map.Entry<String, String> entry : namespaces.entrySet()) {
+				nsContext.addNamespace(entry.getKey(), entry.getValue());
+			}
 		}
+		this.nsContext = nsContext;
 	}
 	
-	XML(Document doc, ResourceResolver resolver, NamespaceContextImpl context) {
+	XML(Document doc, ResourceResolver resResolver, NamespaceContextImpl nsContext) {
 		this.doc = doc;
-		this.resResolver = resolver;
-		this.nsContext = context;
+		this.resResolver = resResolver;
+		this.nsContext = nsContext;
 	}
 	
 	public Document getDocument() {
@@ -172,6 +173,7 @@ public class XML implements Serializable {
 		
 		StringBuilder sb = new StringBuilder();
 		sb.append("<x");
+		
 		for (Map.Entry<String, List<String>> entry : nsContext) {
 			String prefix = entry.getKey();
 			List<String> uris = entry.getValue();
@@ -281,64 +283,60 @@ public class XML implements Serializable {
 		}
 	}
 	
-	XPathExpression compileXPath(String xpath) {
-		XPath xpc = XPathFactory.newInstance().newXPath();
-		if (nsContext != null) xpc.setNamespaceContext(nsContext);
+	Object compileXPath(String xpath) {
+		XPath xp;
 		try {
-			return xpc.compile(xpath);
-		} catch (XPathExpressionException e) {
-			String message;
-			Throwable current = e;
-			do {
-				message = current.getMessage();
-				if (message != null && !message.isEmpty()) break;
-			} while ((current = e.getCause()) != null);
-			
-			StringBuilder sb = new StringBuilder();
-			sb.append("XPath:");
-			sb.append(message != null ? message : "Unexpected error.");
-			
-			throw new IllegalArgumentException(sb.toString(), e);
+			xp = new DOMXPath(xpath);
+			if (nsContext != null) xp.setNamespaceContext(nsContext);
+		} catch (JaxenException e) {
+			throw new IllegalArgumentException(e);
 		}
+		return xp;
 	}
 	
 	@SuppressWarnings("unchecked")
-	<T> T evaluate(XPathExpression expr, Node node, Class<T> cls) {
+	<T> T evaluate(Object expr, Node node, Class<T> cls) {
+		XPath xpath = (XPath)expr;
 		try {
 			if (cls.equals(Nodes.class)) {
-				NodeList list = (NodeList)expr.evaluate(node, XPathConstants.NODESET);
+				List<Node> list = (List<Node>)xpath.selectNodes(node);
 				return (T)((list != null) ? translate(list) : null);
+			} else if (cls.equals(List.class)) {
+				return (T)xpath.selectNodes(node);
 			} else if (cls.equals(NodeList.class)) {
-				return (T)expr.evaluate(node, XPathConstants.NODESET);
+				return (T)new ListNodeList(xpath.selectNodes(node));
 			} else if (cls.equals(Node.class)) {
-				return (T)expr.evaluate(node, XPathConstants.NODE);
+				return (T)xpath.selectSingleNode(node);
 			} else if (cls.equals(String.class)) {
-				return (T)expr.evaluate(node, XPathConstants.STRING);
+				return (T)xpath.stringValueOf(node);
 			} else if (cls.equals(boolean.class) || cls.equals(Boolean.class)) {
-				return (T)expr.evaluate(node, XPathConstants.BOOLEAN);
-			} else if (cls.equals(Number.class) || cls.equals(BigDecimal.class)) {
-				Double num = (Double)expr.evaluate(node, XPathConstants.NUMBER);
-				return (T)((num != null) ? new BigDecimal((double)num) : null);
-			} else if (cls.equals(double.class) || cls.equals(Double.class)) {
-				Double num = (Double)expr.evaluate(node, XPathConstants.NUMBER);
-				return (T)((num != null) ? num : cls.equals(double.class) ? 0.0 : null);
+				return (T)Boolean.valueOf(xpath.booleanValueOf(node));
+			} else if (cls.equals(Number.class) || cls.equals(double.class) || cls.equals(Double.class)) {
+				Number num = xpath.numberValueOf(node);
+				return (T)(Double)((num != null) ? num.doubleValue() : cls.equals(double.class) ? 0.0 : null);
 			} else if (cls.equals(float.class) || cls.equals(Float.class)) {
-				Double num = (Double)expr.evaluate(node, XPathConstants.NUMBER);
-				return (T)(Float)((num != null) ? ((Double)num).floatValue() : cls.equals(float.class) ? 0.0F : null);
+				Number num = xpath.numberValueOf(node);
+				return (T)(Float)((num != null) ? num.floatValue() : cls.equals(float.class) ? 0.0F : null);
 			} else if (cls.equals(long.class) || cls.equals(Long.class)) {
-				Double num = (Double)expr.evaluate(node, XPathConstants.NUMBER);
-				return (T)(Long)((num != null) ? ((Double)num).longValue() : cls.equals(long.class) ? 0L : null);
+				Number num = xpath.numberValueOf(node);
+				return (T)(Long)((num != null) ? num.longValue() : cls.equals(long.class) ? 0L : null);
 			} else if (cls.equals(int.class) || cls.equals(Integer.class)) {
-				Double num = (Double)expr.evaluate(node, XPathConstants.NUMBER);
-				return (T)(Integer)((num != null) ? ((Double)num).intValue() : cls.equals(int.class) ? 0 : null);
+				Number num = xpath.numberValueOf(node);
+				return (T)(Integer)((num != null) ? num.intValue() : cls.equals(int.class) ? 0 : null);
 			} else if (cls.equals(short.class) || cls.equals(Short.class)) {
-				Double num = (Double)expr.evaluate(node, XPathConstants.NUMBER);
-				return (T)(Short)((num != null) ? ((Double)num).shortValue() : cls.equals(short.class) ? (short)0 : null);
+				Number num = xpath.numberValueOf(node);
+				return (T)(Short)((num != null) ? num.shortValue() : cls.equals(short.class) ? (short)0 : null);
+			} else if (cls.equals(byte.class) || cls.equals(Byte.class)) {
+				Number num = xpath.numberValueOf(node);
+				return (T)(Byte)((num != null) ? num.byteValue() : cls.equals(byte.class) ? (byte)0 : null);
+			} else if (cls.equals(BigDecimal.class)) {
+				Number num = xpath.numberValueOf(node);
+				return (T)((num != null) ? new BigDecimal(num.doubleValue()) : null);
 			} else {
 				throw new UnsupportedOperationException("Unsupported Convert class: " + cls);
 			}
-		} catch (XPathExpressionException e) {
-			throw new IllegalArgumentException(e.getMessage(), e);
+		} catch (JaxenException e) {
+			throw new IllegalStateException(e);
 		}
 	}
 	
@@ -359,5 +357,24 @@ public class XML implements Serializable {
 			}
 		}
 		return writer.toString();
+	}
+	
+	private static class ListNodeList implements NodeList {
+		private List<Node> items;
+		
+		public ListNodeList(List<Node> items) {
+			this.items = items;
+		}
+		
+		@Override
+		public Node item(int index) {
+			return items.get(index);
+		}
+
+		@Override
+		public int getLength() {
+			return items.size();
+		}
+		
 	}
 }
