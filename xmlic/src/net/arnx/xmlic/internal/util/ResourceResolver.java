@@ -1,10 +1,13 @@
-package net.arnx.xmlic;
+package net.arnx.xmlic.internal.util;
 
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URI;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Source;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.URIResolver;
@@ -14,8 +17,23 @@ import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-class ResourceResolver implements EntityResolver, URIResolver, Serializable {
+public class ResourceResolver implements EntityResolver, URIResolver, Serializable {
 	private static final long serialVersionUID = 1L;
+	
+	public DocumentBuilder getDocumentBuilder() {
+		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+		dbf.setCoalescing(true);
+		dbf.setNamespaceAware(true);
+		dbf.setExpandEntityReferences(true);
+		dbf.setXIncludeAware(true);
+		try {
+			DocumentBuilder db = dbf.newDocumentBuilder();
+			db.setEntityResolver(this);
+			return db;
+		} catch (ParserConfigurationException e) {
+			throw new IllegalArgumentException(e);
+		}
+	}
 
 	@Override
 	public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {

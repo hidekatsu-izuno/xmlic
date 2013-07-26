@@ -1,4 +1,4 @@
-package net.arnx.xmlic;
+package net.arnx.xmlic.internal.util;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -15,13 +15,14 @@ import java.util.Set;
 import javax.xml.XMLConstants;
 
 import net.arnx.xmlic.internal.org.jaxen.NamespaceContext;
+import net.arnx.xmlic.internal.org.jaxen.XPathFunctionContext;
 
-class NamespaceContextImpl implements NamespaceContext, Iterable<Map.Entry<String, List<String>>>, Serializable {
+public class XPathContextImpl extends XPathFunctionContext implements NamespaceContext, Iterable<Map.Entry<String, List<String>>>, Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	private Map<String, List<String>> map = Collections.synchronizedMap(new LinkedHashMap<String, List<String>>());
 	
-	public NamespaceContextImpl() {
+	public XPathContextImpl() {
 	}
 	
 	@Override

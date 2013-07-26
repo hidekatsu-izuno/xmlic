@@ -22,8 +22,6 @@ import java.util.Map;
 
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
@@ -35,6 +33,8 @@ import javax.xml.transform.dom.DOMSource;
 import net.arnx.xmlic.internal.org.jaxen.JaxenException;
 import net.arnx.xmlic.internal.org.jaxen.XPath;
 import net.arnx.xmlic.internal.org.jaxen.dom.DOMXPath;
+import net.arnx.xmlic.internal.util.ResourceResolver;
+import net.arnx.xmlic.internal.util.XPathContextImpl;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -76,14 +76,14 @@ public class XML implements Serializable {
 	
 	final Document doc;
 	final ResourceResolver resResolver;
-	final NamespaceContextImpl nsContext;
+	final XPathContextImpl xpathContext;
 	
 	public XML() {
 		this(Collections.<String, String>emptyMap());
 	}
 	
 	public XML(Map<String, String> namespaces) {
-		this(getDocumentBuilder().newDocument(), namespaces);
+		this(null, namespaces);
 	}
 	
 	public XML(Document doc) {
@@ -91,10 +91,14 @@ public class XML implements Serializable {
 	}
 	
 	public XML(Document doc, Map<String, String> namespaces) {
-		this.doc = doc;
 		this.resResolver = new ResourceResolver();
+		if (doc != null) {
+			this.doc = doc;
+		} else {
+			this.doc = resResolver.getDocumentBuilder().newDocument();
+		}
 		
-		NamespaceContextImpl nsContext = new NamespaceContextImpl();
+		XPathContextImpl nsContext = new XPathContextImpl();
 		if (namespaces == null) {
 			Object expr = compileXPath("//namespace::*");
 			NodeList list = evaluate(expr, doc, NodeList.class);
@@ -112,13 +116,13 @@ public class XML implements Serializable {
 				nsContext.addNamespace(entry.getKey(), entry.getValue());
 			}
 		}
-		this.nsContext = nsContext;
+		this.xpathContext = nsContext;
 	}
 	
-	XML(Document doc, ResourceResolver resResolver, NamespaceContextImpl nsContext) {
+	XML(Document doc, ResourceResolver resResolver, XPathContextImpl xpathContext) {
 		this.doc = doc;
 		this.resResolver = resResolver;
-		this.nsContext = nsContext;
+		this.xpathContext = xpathContext;
 	}
 	
 	public Document getDocument() {
@@ -174,7 +178,7 @@ public class XML implements Serializable {
 		StringBuilder sb = new StringBuilder();
 		sb.append("<x");
 		
-		for (Map.Entry<String, List<String>> entry : nsContext) {
+		for (Map.Entry<String, List<String>> entry : xpathContext) {
 			String prefix = entry.getKey();
 			List<String> uris = entry.getValue();
 			
@@ -189,7 +193,7 @@ public class XML implements Serializable {
 		sb.append(">").append(text).append("</x>");
 		
 		try {
-			DocumentBuilder db = getDocumentBuilder();
+			DocumentBuilder db = resResolver.getDocumentBuilder();
 			Document ndoc = db.parse(new InputSource(new StringReader(sb.toString())));
 			
 			NodeList list = ndoc.getDocumentElement().getChildNodes();
@@ -227,7 +231,7 @@ public class XML implements Serializable {
 	}
 	
 	public XML clone() {
-		return new XML((Document)doc.cloneNode(true), resResolver, nsContext);
+		return new XML((Document)doc.cloneNode(true), resResolver, xpathContext);
 	}
 	
 	public Transformer stylesheet() throws TransformerConfigurationException {
@@ -240,7 +244,7 @@ public class XML implements Serializable {
 		t.setURIResolver(new ResourceResolver());
 		DOMResult result = new DOMResult();
 		t.transform(new DOMSource(doc), result);
-		return new XML((Document)result.getNode(), resResolver, nsContext);
+		return new XML((Document)result.getNode(), resResolver, xpathContext);
 	}
 	
 	public void writeTo(File file) throws IOException {
@@ -268,26 +272,12 @@ public class XML implements Serializable {
 		}
 	}
 	
-	static DocumentBuilder getDocumentBuilder() {
-		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-		dbf.setCoalescing(true);
-		dbf.setNamespaceAware(true);
-		dbf.setExpandEntityReferences(true);
-		dbf.setXIncludeAware(true);
-		try {
-			DocumentBuilder db = dbf.newDocumentBuilder();
-			db.setEntityResolver(new ResourceResolver());
-			return db;
-		} catch (ParserConfigurationException e) {
-			throw new IllegalArgumentException(e);
-		}
-	}
-	
 	Object compileXPath(String xpath) {
 		XPath xp;
 		try {
 			xp = new DOMXPath(xpath);
-			if (nsContext != null) xp.setNamespaceContext(nsContext);
+			xp.setNamespaceContext(xpathContext);
+			xp.setFunctionContext(xpathContext);
 		} catch (JaxenException e) {
 			throw new IllegalArgumentException(e);
 		}

@@ -9,6 +9,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.URISyntaxException;
 
+import javax.xml.soap.Node;
+
 import org.junit.Test;
 
 public class XMLTest {
@@ -27,6 +29,12 @@ public class XMLTest {
 		assertEquals(expected, XML.load(getClass().getResource("test_ns.xml")).toString());
 		assertEquals(expected, XML.load(getClass().getResourceAsStream("test_ns.xml")).toString());
 		assertEquals(expected, XML.load(new InputStreamReader(getClass().getResourceAsStream("test_ns.xml"), "UTF-8")).toString());
+	}
+	
+	@Test
+	public void testExtendedFunction() throws IOException {
+		XML xml = XML.load(getClass().getResource("test_ns.xml"));
+		assertEquals("", xml.evaluate("document('test.xml')", Nodes.class).toString());
 	}
 	
 	@Test
