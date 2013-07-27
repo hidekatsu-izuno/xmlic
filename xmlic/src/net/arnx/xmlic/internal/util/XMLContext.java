@@ -25,7 +25,6 @@ import net.arnx.xmlic.internal.org.jaxen.VariableContext;
 import net.arnx.xmlic.internal.org.jaxen.XPathFunctionContext;
 
 public class XMLContext implements NamespaceContext, VariableContext, FunctionContext, Serializable {
-	public static final String NS_URI = "classpath:" + XMLContext.class.getName();
 	private static final long serialVersionUID = 1L;
 	
 	private Map<String, List<String>> nsMap = Collections.synchronizedMap(new LinkedHashMap<String, List<String>>());

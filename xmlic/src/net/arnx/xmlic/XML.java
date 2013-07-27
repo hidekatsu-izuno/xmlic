@@ -30,8 +30,12 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.dom.DOMSource;
 
+import net.arnx.xmlic.internal.function.CurrentFunction;
 import net.arnx.xmlic.internal.function.DocumentFunction;
+import net.arnx.xmlic.internal.org.jaxen.Function;
+import net.arnx.xmlic.internal.org.jaxen.FunctionContext;
 import net.arnx.xmlic.internal.org.jaxen.JaxenException;
+import net.arnx.xmlic.internal.org.jaxen.UnresolvableException;
 import net.arnx.xmlic.internal.org.jaxen.XPath;
 import net.arnx.xmlic.internal.org.jaxen.dom.DOMXPath;
 import net.arnx.xmlic.internal.util.XMLContext;
@@ -113,7 +117,7 @@ public class XML implements Serializable {
 			this.doc = XMLContext.getDocumentBuilder().newDocument();
 		}
 		
-		xmlContext.addFunction(null, "document", new DocumentFunction(doc.getBaseURI()));
+		xmlContext.addFunction(null, "document", new DocumentFunction(this.doc.getBaseURI()));
 	}
 	
 	XML(Document doc, XMLContext nsContext) {
@@ -266,22 +270,36 @@ public class XML implements Serializable {
 		}
 	}
 	
-	Object compileXPath(String xpath) {
-		XPath xp;
+	Object compileXPath(String text) {
+		XPath xpath;
 		try {
-			xp = new DOMXPath(xpath);
-			xp.setNamespaceContext(xmlContext);
-			xp.setVariableContext(xmlContext);
-			xp.setFunctionContext(xmlContext);
+			xpath = new DOMXPath(text);
+			xpath.setNamespaceContext(xmlContext);
+			xpath.setVariableContext(xmlContext);
+			xpath.setFunctionContext(xmlContext);
 		} catch (JaxenException e) {
 			throw new IllegalArgumentException(e);
 		}
-		return xp;
+		return xpath;
 	}
 	
 	@SuppressWarnings("unchecked")
 	<T> T evaluate(Object expr, Node node, Class<T> cls) {
 		XPath xpath = (XPath)expr;
+		
+		final FunctionContext parent = xpath.getFunctionContext();
+		final CurrentFunction current = new CurrentFunction(node);
+		xpath.setFunctionContext(new FunctionContext() {
+			
+			@Override
+			public Function getFunction(String namespaceURI, String prefix, String localName) throws UnresolvableException {
+				if (namespaceURI == null && "current".equals(localName)) {
+					return current;
+				}
+				return parent.getFunction(namespaceURI, prefix, localName);
+			}
+		});
+		
 		try {
 			if (cls.equals(Nodes.class)) {
 				List<Node> list = (List<Node>)xpath.selectNodes(node);
