@@ -101,7 +101,7 @@ public class Nodes extends ArrayList<Node> {
 				if (!self.isDefaultNamespace(uri)) {
 					String prefix = self.lookupPrefix(uri);
 					if (prefix == null) {
-						prefix = getOwner().xpathContext.getPrefix(uri);
+						prefix = getOwner().xmlContext.getPrefix(uri);
 					}
 					if (prefix != null && !XMLConstants.DEFAULT_NS_PREFIX.equals(prefix)) {
 						name = prefix + ":" + name;
@@ -243,7 +243,7 @@ public class Nodes extends ArrayList<Node> {
 		if (index > 0 && index < name.length()-1) {
 			localName = name.substring(index + 1);
 			prefix = name.substring(0, index);
-			uri = getOwner().xpathContext.getNamespaceURI(prefix);
+			uri = getOwner().xmlContext.getNamespaceURI(prefix);
 		} else {
 			localName = name;
 		}
@@ -280,7 +280,7 @@ public class Nodes extends ArrayList<Node> {
 		int index = name.indexOf(':');
 		if (index > 0 && index < name.length()-1) {
 			localName = name.substring(index + 1);
-			uri = getOwner().xpathContext.getNamespaceURI(name.substring(0, index));
+			uri = getOwner().xmlContext.getNamespaceURI(name.substring(0, index));
 		} else {
 			localName = name;
 		}
@@ -302,7 +302,7 @@ public class Nodes extends ArrayList<Node> {
 		if (index > 0 && index < name.length()-1) {
 			localName = name.substring(index + 1);
 			prefix = name.substring(0, index);
-			uri = getOwner().xpathContext.getNamespaceURI(prefix);
+			uri = getOwner().xmlContext.getNamespaceURI(prefix);
 		} else {
 			localName = name;
 		}
@@ -353,7 +353,7 @@ public class Nodes extends ArrayList<Node> {
 		if (index > 0 && index < name.length()-1) {
 			localName = name.substring(index + 1);
 			prefix = name.substring(0, index);
-			uri = getOwner().xpathContext.getNamespaceURI(prefix);
+			uri = getOwner().xmlContext.getNamespaceURI(prefix);
 		} else {
 			localName = name;
 		}
@@ -404,7 +404,7 @@ public class Nodes extends ArrayList<Node> {
 		int index = name.indexOf(':');
 		if (index > 0 && index < name.length()-1) {
 			localName = name.substring(index + 1);
-			uri = getOwner().xpathContext.getNamespaceURI(name.substring(0, index));
+			uri = getOwner().xmlContext.getNamespaceURI(name.substring(0, index));
 			if (uri == null) localName = name;
 		} else {
 			localName = name;

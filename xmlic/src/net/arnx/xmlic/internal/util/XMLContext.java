@@ -9,57 +9,70 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.xml.XMLConstants;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
+import net.arnx.xmlic.internal.org.jaxen.Function;
+import net.arnx.xmlic.internal.org.jaxen.FunctionContext;
 import net.arnx.xmlic.internal.org.jaxen.NamespaceContext;
+import net.arnx.xmlic.internal.org.jaxen.SimpleVariableContext;
+import net.arnx.xmlic.internal.org.jaxen.UnresolvableException;
+import net.arnx.xmlic.internal.org.jaxen.VariableContext;
 import net.arnx.xmlic.internal.org.jaxen.XPathFunctionContext;
 
-public class XPathContextImpl extends XPathFunctionContext implements NamespaceContext, Iterable<Map.Entry<String, List<String>>>, Serializable {
+public class XMLContext implements NamespaceContext, VariableContext, FunctionContext, Serializable {
+	public static final String NS_URI = "classpath:" + XMLContext.class.getName();
 	private static final long serialVersionUID = 1L;
 	
-	private Map<String, List<String>> map = Collections.synchronizedMap(new LinkedHashMap<String, List<String>>());
+	private Map<String, List<String>> nsMap = Collections.synchronizedMap(new LinkedHashMap<String, List<String>>());
+	private SimpleVariableContext varContext = new SimpleVariableContext();
+	private XPathFunctionContext fnContext = new XPathFunctionContext(false);
 	
-	public XPathContextImpl() {
+	public XMLContext() {
 	}
 	
-	@Override
-	public Iterator<Entry<String, List<String>>> iterator() {
-		return Collections.unmodifiableMap(map).entrySet().iterator();
+	public static DocumentBuilder getDocumentBuilder() {
+		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+		dbf.setCoalescing(true);
+		dbf.setNamespaceAware(true);
+		dbf.setExpandEntityReferences(true);
+		dbf.setXIncludeAware(true);
+		try {
+			return dbf.newDocumentBuilder();
+		} catch (ParserConfigurationException e) {
+			throw new IllegalArgumentException(e);
+		}
 	}
 	
 	public void addNamespace(String prefix, String namespaceURI) {
 		synchronized (this) {
-			List<String> list = map.get(prefix);
+			List<String> list = nsMap.get(prefix);
 			if (list == null) {
 				list = new ArrayList<String>(1);
 				list.add(namespaceURI);
-				map.put(prefix, list);
+				nsMap.put(prefix, list);
 			} else if (!list.contains(namespaceURI)) {
 				list.add(namespaceURI);
 			}
 		}
 	}
 	
-	@Override
-	public String translateNamespacePrefixToUri(String prefix) {
-		return getNamespaceURI(prefix);
-	}
-	
 	public String getNamespaceURI(String prefix) {
 		if (prefix == null) {
 			throw new IllegalArgumentException("prefix is null.");
 		} else if (XMLConstants.DEFAULT_NS_PREFIX.equals(prefix)) {
-			List<String> list = map.get(prefix);
+			List<String> list = nsMap.get(prefix);
 			return (list != null && !list.isEmpty()) ? list.get(0) : XMLConstants.NULL_NS_URI;
 		} else if (XMLConstants.XML_NS_PREFIX.equals(prefix)) {
 			return XMLConstants.XML_NS_URI;
 		} else if (XMLConstants.XMLNS_ATTRIBUTE.equals(prefix)) {
 			return XMLConstants.XMLNS_ATTRIBUTE_NS_URI;
 		} else {
-			List<String> list = map.get(prefix);
+			List<String> list = nsMap.get(prefix);
 			return (list != null && !list.isEmpty()) ? list.get(0) : null;
 		}
 	}
@@ -74,13 +87,17 @@ public class XPathContextImpl extends XPathFunctionContext implements NamespaceC
 		} else if (XMLConstants.XMLNS_ATTRIBUTE_NS_URI.equals(namespaceURI)) {
 			return XMLConstants.XMLNS_ATTRIBUTE;
 		} else {
-			for (Map.Entry<String, List<String>> entry : map.entrySet()) {
+			for (Map.Entry<String, List<String>> entry : nsMap.entrySet()) {
 				if (entry.getValue().contains(namespaceURI)) {
 					return entry.getKey();
 				}
 			}
 			return null;
 		}
+	}
+	
+	public Set<String> getPrefixes() {
+		return Collections.unmodifiableSet(nsMap.keySet());
 	}
 	
 	public Iterator<?> getPrefixes(String namespaceURI) {
@@ -94,12 +111,35 @@ public class XPathContextImpl extends XPathFunctionContext implements NamespaceC
 			return Arrays.asList(XMLConstants.XMLNS_ATTRIBUTE).iterator();
 		} else {
 			Set<String> result = new LinkedHashSet<String>();
-			for (Map.Entry<String, List<String>> entry : map.entrySet()) {
+			for (Map.Entry<String, List<String>> entry : nsMap.entrySet()) {
 				if (entry.getValue().contains(namespaceURI)) {
 					result.add(entry.getKey());
 				}
 			}
 			return Collections.unmodifiableSet(result).iterator();
 		}
+	}
+	
+	@Override
+	public String translateNamespacePrefixToUri(String prefix) {
+		return getNamespaceURI(prefix);
+	}
+	
+	public void addVariable(String namespaceURI, String localName, Object value) {
+		varContext.setVariableValue(namespaceURI, localName, value);
+	}
+	
+	@Override
+	public Object getVariableValue(String namespaceURI, String prefix, String localName) throws UnresolvableException {
+		return varContext.getVariableValue(namespaceURI, prefix, localName);
+	}
+	
+	public void addFunction(String namespaceURI, String localName, Function function) {
+		fnContext.registerFunction(namespaceURI, localName, function);
+	}
+
+	@Override
+	public Function getFunction(String namespaceURI, String prefix, String localName) throws UnresolvableException {
+		return fnContext.getFunction(namespaceURI, prefix, localName);
 	}
 }

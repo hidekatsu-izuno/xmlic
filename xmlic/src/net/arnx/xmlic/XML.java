@@ -30,11 +30,11 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.dom.DOMSource;
 
+import net.arnx.xmlic.internal.function.DocumentFunction;
 import net.arnx.xmlic.internal.org.jaxen.JaxenException;
 import net.arnx.xmlic.internal.org.jaxen.XPath;
 import net.arnx.xmlic.internal.org.jaxen.dom.DOMXPath;
-import net.arnx.xmlic.internal.util.ResourceResolver;
-import net.arnx.xmlic.internal.util.XPathContextImpl;
+import net.arnx.xmlic.internal.util.XMLContext;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -75,11 +75,10 @@ public class XML implements Serializable {
 	}
 	
 	final Document doc;
-	final ResourceResolver resResolver;
-	final XPathContextImpl xpathContext;
+	final XMLContext xmlContext;
 	
 	public XML() {
-		this(Collections.<String, String>emptyMap());
+		this(null, Collections.<String, String>emptyMap());
 	}
 	
 	public XML(Map<String, String> namespaces) {
@@ -87,19 +86,18 @@ public class XML implements Serializable {
 	}
 	
 	public XML(Document doc) {
-		this(doc, null);
+		this(doc, Collections.<String, String>emptyMap());
 	}
 	
 	public XML(Document doc, Map<String, String> namespaces) {
-		this.resResolver = new ResourceResolver();
-		if (doc != null) {
-			this.doc = doc;
-		} else {
-			this.doc = resResolver.getDocumentBuilder().newDocument();
+		this.xmlContext = new XMLContext();
+		for (Map.Entry<String, String> entry : namespaces.entrySet()) {
+			xmlContext.addNamespace(entry.getKey(), entry.getValue());
 		}
 		
-		XPathContextImpl nsContext = new XPathContextImpl();
-		if (namespaces == null) {
+		if (doc != null) {
+			this.doc = doc;
+			
 			Object expr = compileXPath("//namespace::*");
 			NodeList list = evaluate(expr, doc, NodeList.class);
 			for (int i = 0; i < list.getLength(); i++) {
@@ -109,20 +107,18 @@ public class XML implements Serializable {
 					prefix = XMLConstants.DEFAULT_NS_PREFIX;
 				}
 				
-				nsContext.addNamespace(prefix, node.getNodeValue());
+				xmlContext.addNamespace(prefix, node.getNodeValue());
 			}
 		} else {
-			for (Map.Entry<String, String> entry : namespaces.entrySet()) {
-				nsContext.addNamespace(entry.getKey(), entry.getValue());
-			}
+			this.doc = XMLContext.getDocumentBuilder().newDocument();
 		}
-		this.xpathContext = nsContext;
+		
+		xmlContext.addFunction(null, "document", new DocumentFunction(doc.getBaseURI()));
 	}
 	
-	XML(Document doc, ResourceResolver resResolver, XPathContextImpl xpathContext) {
+	XML(Document doc, XMLContext nsContext) {
 		this.doc = doc;
-		this.resResolver = resResolver;
-		this.xpathContext = xpathContext;
+		this.xmlContext = nsContext;
 	}
 	
 	public Document getDocument() {
@@ -178,23 +174,22 @@ public class XML implements Serializable {
 		StringBuilder sb = new StringBuilder();
 		sb.append("<x");
 		
-		for (Map.Entry<String, List<String>> entry : xpathContext) {
-			String prefix = entry.getKey();
-			List<String> uris = entry.getValue();
-			
-			if (uris.isEmpty()) continue;
+		for (String prefix : xmlContext.getPrefixes()) {
+			String uri = xmlContext.getNamespaceURI(prefix);
 			if (prefix != null && !prefix.isEmpty()) {
 				sb.append(" xmlns:").append(prefix).append("=\"");
 			} else {
 				sb.append(" xmlns=\"");
 			}
-			sb.append(uris.get(0).replace("\"", "&quot;")).append("\"");
+			sb.append(uri.replace("\"", "&quot;")).append("\"");
 		}
 		sb.append(">").append(text).append("</x>");
 		
 		try {
-			DocumentBuilder db = resResolver.getDocumentBuilder();
-			Document ndoc = db.parse(new InputSource(new StringReader(sb.toString())));
+			DocumentBuilder db = XMLContext.getDocumentBuilder();
+			InputSource src = new InputSource(new StringReader(sb.toString()));
+			src.setPublicId(doc.getBaseURI());
+			Document ndoc = db.parse(src);
 			
 			NodeList list = ndoc.getDocumentElement().getChildNodes();
 			Nodes nodes = new Nodes(this, null, list.getLength());
@@ -231,7 +226,7 @@ public class XML implements Serializable {
 	}
 	
 	public XML clone() {
-		return new XML((Document)doc.cloneNode(true), resResolver, xpathContext);
+		return new XML((Document)doc.cloneNode(true), xmlContext);
 	}
 	
 	public Transformer stylesheet() throws TransformerConfigurationException {
@@ -241,10 +236,9 @@ public class XML implements Serializable {
 	}
 	
 	public XML transform(Transformer t) throws TransformerException {
-		t.setURIResolver(new ResourceResolver());
 		DOMResult result = new DOMResult();
 		t.transform(new DOMSource(doc), result);
-		return new XML((Document)result.getNode(), resResolver, xpathContext);
+		return new XML((Document)result.getNode(), xmlContext);
 	}
 	
 	public void writeTo(File file) throws IOException {
@@ -276,8 +270,9 @@ public class XML implements Serializable {
 		XPath xp;
 		try {
 			xp = new DOMXPath(xpath);
-			xp.setNamespaceContext(xpathContext);
-			xp.setFunctionContext(xpathContext);
+			xp.setNamespaceContext(xmlContext);
+			xp.setVariableContext(xmlContext);
+			xp.setFunctionContext(xmlContext);
 		} catch (JaxenException e) {
 			throw new IllegalArgumentException(e);
 		}

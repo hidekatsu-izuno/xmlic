@@ -9,8 +9,6 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import net.arnx.xmlic.internal.util.ResourceResolver;
-
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -86,7 +84,6 @@ public class XMLLoader {
 		DocumentBuilder db;
 		try {
 			db = dbf.newDocumentBuilder();
-			db.setEntityResolver(new ResourceResolver());
 		} catch (ParserConfigurationException e) {
 			throw new IllegalArgumentException(e.getMessage(), e);
 		}
