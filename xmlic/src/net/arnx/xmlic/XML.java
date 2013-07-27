@@ -290,7 +290,6 @@ public class XML implements Serializable {
 		final FunctionContext parent = xpath.getFunctionContext();
 		final CurrentFunction current = new CurrentFunction(node);
 		xpath.setFunctionContext(new FunctionContext() {
-			
 			@Override
 			public Function getFunction(String namespaceURI, String prefix, String localName) throws UnresolvableException {
 				if (namespaceURI == null && "current".equals(localName)) {
