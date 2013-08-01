@@ -16,9 +16,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
@@ -82,23 +80,11 @@ public class XML implements Serializable {
 	final XMLContext xmlContext;
 	
 	public XML() {
-		this(null, Collections.<String, String>emptyMap());
-	}
-	
-	public XML(Map<String, String> namespaces) {
-		this(null, namespaces);
+		this(null);
 	}
 	
 	public XML(Document doc) {
-		this(doc, Collections.<String, String>emptyMap());
-	}
-	
-	public XML(Document doc, Map<String, String> namespaces) {
 		this.xmlContext = new XMLContext();
-		for (Map.Entry<String, String> entry : namespaces.entrySet()) {
-			xmlContext.addNamespace(entry.getKey(), entry.getValue());
-		}
-		
 		if (doc != null) {
 			this.doc = doc;
 			
@@ -111,7 +97,9 @@ public class XML implements Serializable {
 					prefix = XMLConstants.DEFAULT_NS_PREFIX;
 				}
 				
-				xmlContext.addNamespace(prefix, node.getNodeValue());
+				if (xmlContext.getNamespaceURI(prefix) == null) {
+					xmlContext.addNamespace(prefix, node.getNodeValue());
+				}
 			}
 		} else {
 			this.doc = XMLContext.getDocumentBuilder().newDocument();
@@ -127,6 +115,14 @@ public class XML implements Serializable {
 	
 	public Document getDocument() {
 		return doc;
+	}
+	
+	public void addNamespace(String prefix, String uri) {
+		xmlContext.addNamespace(prefix, uri);
+	}
+	
+	public void removeNamespace(String prefix) {
+		xmlContext.removeNamespace(prefix);
 	}
 	
 	public Nodes doc() {

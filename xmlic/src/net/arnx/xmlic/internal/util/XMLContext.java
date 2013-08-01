@@ -1,15 +1,9 @@
 package net.arnx.xmlic.internal.util;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
+import java.util.Collection;
 import java.util.Map;
-import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
@@ -27,7 +21,7 @@ import net.arnx.xmlic.internal.org.jaxen.XPathFunctionContext;
 public class XMLContext implements NamespaceContext, VariableContext, FunctionContext, Serializable {
 	private static final long serialVersionUID = 1L;
 	
-	private Map<String, List<String>> nsMap = Collections.synchronizedMap(new LinkedHashMap<String, List<String>>());
+	private Map<String, String> nsMap = new ConcurrentHashMap<String, String>();
 	private SimpleVariableContext varContext = new SimpleVariableContext();
 	private XPathFunctionContext fnContext = new XPathFunctionContext(false);
 	
@@ -48,31 +42,25 @@ public class XMLContext implements NamespaceContext, VariableContext, FunctionCo
 	}
 	
 	public void addNamespace(String prefix, String namespaceURI) {
-		synchronized (this) {
-			List<String> list = nsMap.get(prefix);
-			if (list == null) {
-				list = new ArrayList<String>(1);
-				list.add(namespaceURI);
-				nsMap.put(prefix, list);
-			} else if (!list.contains(namespaceURI)) {
-				list.add(namespaceURI);
-			}
-		}
+		nsMap.put(prefix, namespaceURI);
+	}
+	
+	public void removeNamespace(String prefix) {
+		nsMap.remove(prefix);
 	}
 	
 	public String getNamespaceURI(String prefix) {
 		if (prefix == null) {
 			throw new IllegalArgumentException("prefix is null.");
 		} else if (XMLConstants.DEFAULT_NS_PREFIX.equals(prefix)) {
-			List<String> list = nsMap.get(prefix);
-			return (list != null && !list.isEmpty()) ? list.get(0) : XMLConstants.NULL_NS_URI;
+			String uri= nsMap.get(prefix);
+			return (uri != null) ? uri : XMLConstants.NULL_NS_URI;
 		} else if (XMLConstants.XML_NS_PREFIX.equals(prefix)) {
 			return XMLConstants.XML_NS_URI;
 		} else if (XMLConstants.XMLNS_ATTRIBUTE.equals(prefix)) {
 			return XMLConstants.XMLNS_ATTRIBUTE_NS_URI;
 		} else {
-			List<String> list = nsMap.get(prefix);
-			return (list != null && !list.isEmpty()) ? list.get(0) : null;
+			return nsMap.get(prefix);
 		}
 	}
 	
@@ -86,8 +74,8 @@ public class XMLContext implements NamespaceContext, VariableContext, FunctionCo
 		} else if (XMLConstants.XMLNS_ATTRIBUTE_NS_URI.equals(namespaceURI)) {
 			return XMLConstants.XMLNS_ATTRIBUTE;
 		} else {
-			for (Map.Entry<String, List<String>> entry : nsMap.entrySet()) {
-				if (entry.getValue().contains(namespaceURI)) {
+			for (Map.Entry<String, String> entry : nsMap.entrySet()) {
+				if (namespaceURI.equals(entry.getValue())) {
 					return entry.getKey();
 				}
 			}
@@ -95,28 +83,8 @@ public class XMLContext implements NamespaceContext, VariableContext, FunctionCo
 		}
 	}
 	
-	public Set<String> getPrefixes() {
-		return Collections.unmodifiableSet(nsMap.keySet());
-	}
-	
-	public Iterator<?> getPrefixes(String namespaceURI) {
-		if (namespaceURI == null) {
-			throw new IllegalArgumentException("namespaceURI is null.");
-		} else if (XMLConstants.NULL_NS_URI.equals(namespaceURI)) {
-			return Arrays.asList(XMLConstants.DEFAULT_NS_PREFIX).iterator();
-		} else if (XMLConstants.XML_NS_URI.equals(namespaceURI)) {
-			return Arrays.asList(XMLConstants.XML_NS_PREFIX).iterator();
-		} else if (XMLConstants.XMLNS_ATTRIBUTE_NS_URI.equals(namespaceURI)) {
-			return Arrays.asList(XMLConstants.XMLNS_ATTRIBUTE).iterator();
-		} else {
-			Set<String> result = new LinkedHashSet<String>();
-			for (Map.Entry<String, List<String>> entry : nsMap.entrySet()) {
-				if (entry.getValue().contains(namespaceURI)) {
-					result.add(entry.getKey());
-				}
-			}
-			return Collections.unmodifiableSet(result).iterator();
-		}
+	public Collection<String> getPrefixes() {
+		return nsMap.keySet();
 	}
 	
 	@Override
