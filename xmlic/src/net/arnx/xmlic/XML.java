@@ -346,20 +346,6 @@ public class XML implements Serializable {
 		}
 	}
 	
-	public static <T> List<T> each(List<T> list, Visitor<T> func) {
-		if (list == null || list.isEmpty()) return list;
-		
-		int i = 0;
-		for (T value : list) {
-			if (Boolean.FALSE.equals(func.visit(i, value))) {
-				return list;
-			}
-			i++;
-		}
-		
-		return list;
-	}
-	
 	@Override
 	public String toString() {
 		XMLWriter xwriter = new XMLWriter();
