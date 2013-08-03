@@ -277,6 +277,8 @@ public class XML implements Serializable {
 			xpath.setNamespaceContext(xmlContext);
 			xpath.setVariableContext(xmlContext);
 			xpath.setFunctionContext(xmlContext);
+		} catch (net.arnx.xmlic.internal.org.jaxen.XPathSyntaxException e) {
+			throw new XPathSyntaxException(e);
 		} catch (JaxenException e) {
 			throw new IllegalArgumentException(e);
 		}
@@ -337,6 +339,8 @@ public class XML implements Serializable {
 			} else {
 				throw new UnsupportedOperationException("Unsupported Convert class: " + cls);
 			}
+		} catch (net.arnx.xmlic.internal.org.jaxen.XPathSyntaxException e) {
+			throw new XPathSyntaxException(e);
 		} catch (JaxenException e) {
 			throw new IllegalStateException(e);
 		}
