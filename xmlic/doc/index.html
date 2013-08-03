@@ -579,11 +579,13 @@ writer.writeTo(new FileOutputStream("test.xml"), xml.getDocument());
 
 <h2 id="releasenote">リリースノート</h2>
 
-<h3>2013/7/16 version 0.8.2</h3>
+<h3>2013/8/3 version 0.8.2</h3>
 <ul>
 <li>XPath API の動作が導入するライブラリによって結構異なることがわかったので　jaxen を統合しました（jar 内にパッケージを変更して入れたので、他に jar を追加する必要はありません）。</li>
 <li>サンプルで　<code>//foo</code> となっていた部分を <code>.//foo</code> に修正しました。</li>
 <li>Translater は Mapper に名前を変更するとともに、Nodes を取得するように変更しました。</li>
+<li>XML.load で読み込んだ時にネームスペースマッピングを変更する方法がなかった問題を改善しました。</li>
+<li>XPath 関数としてXSLT同様の動作をする document() と current() を追加しました。</li>
 </ul>
 
 <h3>2013/7/16 version 0.8.1</h3>
