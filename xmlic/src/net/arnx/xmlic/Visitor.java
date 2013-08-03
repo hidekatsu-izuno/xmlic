@@ -1,5 +1,5 @@
 package net.arnx.xmlic;
 
-public interface Visitor<T> {
-	public boolean visit(int index, T node);
+public interface Visitor {
+	public Boolean visit(int index, Nodes node);
 }

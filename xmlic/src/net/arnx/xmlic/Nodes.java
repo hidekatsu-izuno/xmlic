@@ -341,7 +341,7 @@ public class Nodes extends ArrayList<Node> {
 		return this;
 	}
 	
-	public Nodes attr(String name, Mapper<String> func) {
+	public Nodes attr(String name, Mapper func) {
 		if (name == null) throw new IllegalArgumentException("name is null");
 		if (func == null) return this;
 		
@@ -473,12 +473,12 @@ public class Nodes extends ArrayList<Node> {
 		return false;
 	}
 	
-	public boolean is(Visitor<Nodes> func) {
+	public boolean is(Visitor func) {
 		if (func == null || isEmpty()) return false;
 		
 		int i = 0;
 		for (Node self : this) {
-			if (func.visit(i, getOwner().translate(self))) {
+			if (Boolean.TRUE.equals(func.visit(i, getOwner().translate(self)))) {
 				return true;
 			}
 			i++;
@@ -535,14 +535,14 @@ public class Nodes extends ArrayList<Node> {
 		return -1;
 	}
 	
-	public Nodes each(Visitor<Nodes> func) {
+	public Nodes each(Visitor func) {
 		if (func == null || isEmpty()) {
 			return this;
 		}
 		
 		int i = 0;
 		for (Node self : this) {
-			if (!func.visit(i, getOwner().translate(self))) {
+			if (Boolean.FALSE.equals(func.visit(i, getOwner().translate(self)))) {
 				return this;
 			}
 			i++;
@@ -753,7 +753,7 @@ public class Nodes extends ArrayList<Node> {
 		return results;
 	}
 	
-	public Nodes filter(Visitor<Nodes> func) {
+	public Nodes filter(Visitor func) {
 		if (func == null || isEmpty()) {
 			return new Nodes(getOwner(), this, 0);
 		}
@@ -761,7 +761,7 @@ public class Nodes extends ArrayList<Node> {
 		Nodes results = new Nodes(getOwner(), this, size());
 		int i = 0;
 		for (Node self : this) {
-			if (func.visit(i, getOwner().translate(self))) {
+			if (Boolean.TRUE.equals(func.visit(i, getOwner().translate(self)))) {
 				results.add(self);
 			}
 			i++;
@@ -1658,6 +1658,10 @@ public class Nodes extends ArrayList<Node> {
 			}
 		}
 		return this;
+	}
+	
+	public int getLength() {
+		return size();
 	}
 	
 	@Override

@@ -1,5 +1,5 @@
 package net.arnx.xmlic;
 
-public interface Mapper<T> {
-	public T map(int i, T value);
+public interface Mapper {
+	public String map(int i, String value);
 }
