@@ -129,7 +129,7 @@ public class NodesTest {
 	public void testFilter() throws IOException {
 		XML xml = XML.load(getClass().getResource("test.xml"));
 		assertEquals("<li>t4</li>", xml.find("//li[position()=1]").filter("text()='t4'").toString());
-		assertEquals("<li>t4</li>", xml.find("//li[position()=1]").filter(new Visitor() {
+		assertEquals("<li>t4</li>", xml.find("//li[position()=1]").filter(new Visitor<Nodes>() {
 			@Override
 			public Boolean visit(int index, Nodes node) {
 				return "t4".equals(node.text());
