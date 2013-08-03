@@ -117,11 +117,15 @@ public class XML implements Serializable {
 		return doc;
 	}
 	
-	public void addNamespace(String prefix, String uri) {
+	public void addNamespaceMapping(String prefix, String uri) {
 		xmlContext.addNamespace(prefix, uri);
 	}
 	
-	public void removeNamespace(String prefix) {
+	public String getNamespaceMapping(String prefix) {
+		return xmlContext.getNamespaceURI(prefix);
+	}
+	
+	public void removeNamespaceMapping(String prefix) {
 		xmlContext.removeNamespace(prefix);
 	}
 	
