@@ -1,10 +1,12 @@
 package net.arnx.xmlic.internal.function;
 
 import java.net.URI;
-import java.net.URISyntaxException;
+import java.util.Collections;
 import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
+
+import org.w3c.dom.Document;
 
 import net.arnx.xmlic.internal.org.jaxen.Context;
 import net.arnx.xmlic.internal.org.jaxen.Function;
@@ -14,16 +16,6 @@ import net.arnx.xmlic.internal.org.jaxen.function.StringFunction;
 import net.arnx.xmlic.internal.util.XMLContext;
 
 public class DocumentFunction implements Function {
-	private final URI base;
-	
-	public DocumentFunction(String base) {
-		try {
-			this.base = (base != null) ? new URI(base) : null;
-		} catch (URISyntaxException e) {
-			throw new IllegalArgumentException(e);
-		}
-	}
-	
 	@SuppressWarnings("rawtypes")
 	@Override
 	public Object call(Context context, List args) throws FunctionCallException {
@@ -31,13 +23,18 @@ public class DocumentFunction implements Function {
 			throw new FunctionCallException("document() requires one argument.");
 		}
 		
+		List contextNodes = context.getNodeSet();
+		if (contextNodes.isEmpty()) {
+			return Collections.EMPTY_LIST;
+		}
+		Navigator nav = context.getNavigator();
+		Document doc = (Document)nav.getDocumentNode(contextNodes.get(0));
+		
 		try {
-			Navigator nav = context.getNavigator();
-			
 			URI uri = new URI(StringFunction.evaluate(args.get(0), nav));
 			if (!uri.isAbsolute()) {
-				if (base != null) {
-					uri = base.resolve(uri);
+				if (doc.getBaseURI() != null) {
+					uri = new URI(doc.getBaseURI()).resolve(uri);
 				} else {
 					throw new FunctionCallException("base url is missing.");
 				}

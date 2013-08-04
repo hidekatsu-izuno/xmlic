@@ -10,13 +10,11 @@ import java.io.Serializable;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.math.BigDecimal;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
@@ -28,15 +26,9 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.dom.DOMSource;
 
-import net.arnx.xmlic.internal.function.CurrentFunction;
-import net.arnx.xmlic.internal.function.DocumentFunction;
-import net.arnx.xmlic.internal.org.jaxen.Function;
-import net.arnx.xmlic.internal.org.jaxen.FunctionContext;
-import net.arnx.xmlic.internal.org.jaxen.JaxenException;
-import net.arnx.xmlic.internal.org.jaxen.UnresolvableException;
 import net.arnx.xmlic.internal.org.jaxen.XPath;
-import net.arnx.xmlic.internal.org.jaxen.dom.DOMXPath;
 import net.arnx.xmlic.internal.util.XMLContext;
+import net.arnx.xmlic.internal.util.XMLContext.Key;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -104,8 +96,6 @@ public class XML implements Serializable {
 		} else {
 			this.doc = XMLContext.getDocumentBuilder().newDocument();
 		}
-		
-		xmlContext.addFunction(null, "document", new DocumentFunction(this.doc.getBaseURI()));
 	}
 	
 	XML(Document doc, XMLContext nsContext) {
@@ -127,6 +117,14 @@ public class XML implements Serializable {
 	
 	public void removeNamespaceMapping(String prefix) {
 		xmlContext.removeNamespace(prefix);
+	}
+	
+	public void addKey(String name, String match, String use) {
+		xmlContext.addKey(name, new Key(match, use));
+	}
+	
+	public void removeKey(String name) {
+		xmlContext.removeKey(name);
 	}
 	
 	public Nodes doc() {
@@ -271,79 +269,11 @@ public class XML implements Serializable {
 	}
 	
 	Object compileXPath(String text) {
-		XPath xpath;
-		try {
-			xpath = new DOMXPath(text);
-			xpath.setNamespaceContext(xmlContext);
-			xpath.setVariableContext(xmlContext);
-			xpath.setFunctionContext(xmlContext);
-		} catch (net.arnx.xmlic.internal.org.jaxen.XPathSyntaxException e) {
-			throw new XPathSyntaxException(e);
-		} catch (JaxenException e) {
-			throw new IllegalArgumentException(e);
-		}
-		return xpath;
+		return xmlContext.compileXPath(text);
 	}
 	
-	@SuppressWarnings("unchecked")
 	<T> T evaluate(Object expr, Node node, Class<T> cls) {
-		XPath xpath = (XPath)expr;
-		
-		final FunctionContext parent = xpath.getFunctionContext();
-		final CurrentFunction current = new CurrentFunction(node);
-		xpath.setFunctionContext(new FunctionContext() {
-			@Override
-			public Function getFunction(String namespaceURI, String prefix, String localName) throws UnresolvableException {
-				if (namespaceURI == null && "current".equals(localName)) {
-					return current;
-				}
-				return parent.getFunction(namespaceURI, prefix, localName);
-			}
-		});
-		
-		try {
-			if (cls.equals(Nodes.class)) {
-				List<Node> list = (List<Node>)xpath.selectNodes(node);
-				return (T)((list != null) ? translate(list) : null);
-			} else if (cls.equals(List.class)) {
-				return (T)xpath.selectNodes(node);
-			} else if (cls.equals(NodeList.class)) {
-				return (T)new ListNodeList(xpath.selectNodes(node));
-			} else if (cls.equals(Node.class)) {
-				return (T)xpath.selectSingleNode(node);
-			} else if (cls.equals(String.class)) {
-				return (T)xpath.stringValueOf(node);
-			} else if (cls.equals(boolean.class) || cls.equals(Boolean.class)) {
-				return (T)Boolean.valueOf(xpath.booleanValueOf(node));
-			} else if (cls.equals(Number.class) || cls.equals(double.class) || cls.equals(Double.class)) {
-				Number num = xpath.numberValueOf(node);
-				return (T)(Double)((num != null) ? num.doubleValue() : cls.equals(double.class) ? 0.0 : null);
-			} else if (cls.equals(float.class) || cls.equals(Float.class)) {
-				Number num = xpath.numberValueOf(node);
-				return (T)(Float)((num != null) ? num.floatValue() : cls.equals(float.class) ? 0.0F : null);
-			} else if (cls.equals(long.class) || cls.equals(Long.class)) {
-				Number num = xpath.numberValueOf(node);
-				return (T)(Long)((num != null) ? num.longValue() : cls.equals(long.class) ? 0L : null);
-			} else if (cls.equals(int.class) || cls.equals(Integer.class)) {
-				Number num = xpath.numberValueOf(node);
-				return (T)(Integer)((num != null) ? num.intValue() : cls.equals(int.class) ? 0 : null);
-			} else if (cls.equals(short.class) || cls.equals(Short.class)) {
-				Number num = xpath.numberValueOf(node);
-				return (T)(Short)((num != null) ? num.shortValue() : cls.equals(short.class) ? (short)0 : null);
-			} else if (cls.equals(byte.class) || cls.equals(Byte.class)) {
-				Number num = xpath.numberValueOf(node);
-				return (T)(Byte)((num != null) ? num.byteValue() : cls.equals(byte.class) ? (byte)0 : null);
-			} else if (cls.equals(BigDecimal.class)) {
-				Number num = xpath.numberValueOf(node);
-				return (T)((num != null) ? new BigDecimal(num.doubleValue()) : null);
-			} else {
-				throw new UnsupportedOperationException("Unsupported Convert class: " + cls);
-			}
-		} catch (net.arnx.xmlic.internal.org.jaxen.XPathSyntaxException e) {
-			throw new XPathSyntaxException(e);
-		} catch (JaxenException e) {
-			throw new IllegalStateException(e);
-		}
+		return xmlContext.evaluate(this, (XPath)expr, node, cls);
 	}
 	
 	@Override
@@ -363,24 +293,5 @@ public class XML implements Serializable {
 			}
 		}
 		return writer.toString();
-	}
-	
-	private static class ListNodeList implements NodeList {
-		private List<Node> items;
-		
-		public ListNodeList(List<Node> items) {
-			this.items = items;
-		}
-		
-		@Override
-		public Node item(int index) {
-			return items.get(index);
-		}
-
-		@Override
-		public int getLength() {
-			return items.size();
-		}
-		
 	}
 }

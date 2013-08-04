@@ -6,10 +6,10 @@ public class XPathSyntaxException extends RuntimeException {
 	private final String xpath;
 	private final int position;
 	
-	XPathSyntaxException(net.arnx.xmlic.internal.org.jaxen.XPathSyntaxException e) {
-		super(e.getMultilineMessage(), e);
-		this.xpath = e.getXPath();
-		this.position = e.getPosition();
+	public XPathSyntaxException(String xpath, int pos, String message, Throwable t) {
+		super(message, t);
+		this.xpath = xpath;
+		this.position = pos;
 	}
 	
 	public String getXPath() {

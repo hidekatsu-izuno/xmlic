@@ -2,19 +2,12 @@ package net.arnx.xmlic.internal.function;
 
 import java.util.List;
 
-import org.w3c.dom.Node;
-
 import net.arnx.xmlic.internal.org.jaxen.Context;
 import net.arnx.xmlic.internal.org.jaxen.Function;
 import net.arnx.xmlic.internal.org.jaxen.FunctionCallException;
+import net.arnx.xmlic.internal.util.XMLContext;
 
 public class CurrentFunction implements Function {
-	private final Node node;
-	
-	public CurrentFunction(Node node) {
-		this.node = node;
-	}
-	
 	@SuppressWarnings("rawtypes")
 	@Override
 	public Object call(Context context, List args) throws FunctionCallException {
@@ -22,6 +15,7 @@ public class CurrentFunction implements Function {
 			throw new FunctionCallException("current() requires no argument.");
 		}
 		
-		return node;
+		XMLContext xcontext = (XMLContext)context.getContextSupport().getVariableContext();
+		return xcontext.getCurrentNode();
 	}
 }
