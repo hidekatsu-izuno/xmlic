@@ -635,7 +635,7 @@ public class Nodes extends ArrayList<Node> {
 			return new Nodes(this, this);
 		}
 		
-		Object expr = getOwner().compileXPath(xpath);
+		Object expr = getOwner().compileXPath(toFullXPath(xpath));
 		
 		Nodes results = new Nodes(getOwner(), this, size() * 2);
 		results.addAll(this);
@@ -723,7 +723,8 @@ public class Nodes extends ArrayList<Node> {
 			return new Nodes(getOwner(), this, 0);
 		}
 		
-		Object expr = getOwner().compileXPath(xpath);
+		Object expr = getOwner().compileXPath(toFullXPath(xpath));
+		
 		Nodes results = new Nodes(getOwner(), this, size());
 		for (Node self : this) {
 			NodeList list = getOwner().evaluate(expr, self, NodeList.class);
@@ -1561,7 +1562,7 @@ public class Nodes extends ArrayList<Node> {
 			return this;
 		}
 		
-		Object expr = getOwner().compileXPath(xpath);
+		Object expr = getOwner().compileXPath(toFullXPath(xpath));
 		for (Node self : this) {
 			if (self == null) continue;
 			if (self.getNodeType() != Node.ELEMENT_NODE) continue;
@@ -1751,6 +1752,10 @@ public class Nodes extends ArrayList<Node> {
 		Node bup = (b != null) ? b.getParentNode() : null;
 		return (a == bup || (bup != null && bup instanceof Element 
 				&& (a.compareDocumentPosition(bup) & Node.DOCUMENT_POSITION_CONTAINED_BY) != 0));
+	}
+	
+	static String toFullXPath(String pattern) {
+		return pattern;
 	}
 	
 	static String escapeFilter(String filter) {
