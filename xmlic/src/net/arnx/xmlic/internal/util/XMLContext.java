@@ -2,7 +2,10 @@ package net.arnx.xmlic.internal.util;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -31,6 +34,9 @@ import net.arnx.xmlic.internal.org.jaxen.VariableContext;
 import net.arnx.xmlic.internal.org.jaxen.XPath;
 import net.arnx.xmlic.internal.org.jaxen.XPathFunctionContext;
 import net.arnx.xmlic.internal.org.jaxen.dom.DOMXPath;
+import net.arnx.xmlic.internal.org.jaxen.function.BooleanFunction;
+import net.arnx.xmlic.internal.org.jaxen.function.NumberFunction;
+import net.arnx.xmlic.internal.org.jaxen.function.StringFunction;
 
 public class XMLContext implements NamespaceContext, VariableContext, FunctionContext, Serializable {
 	private static final long serialVersionUID = 1L;
@@ -161,47 +167,99 @@ public class XMLContext implements NamespaceContext, VariableContext, FunctionCo
 		return xpath;
 	}
 	
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public <T> T evaluate(XML owner, XPath xpath, Node node, Class<T> cls) {
 		try {
 			current.set(node);
 			
-			if (cls.equals(Nodes.class)) {
-				List<Node> list = (List<Node>)xpath.selectNodes(node);
-				return (T)((list != null) ? owner.translate(list) : null);
+			List result = xpath.selectNodes(node);
+			if (cls.equals(Object.class)) {
+				return (T)result;
+			} if (result == null || result.isEmpty() || (result.size() == 1 && result.get(0) == null)) {
+				if (cls.equals(Nodes.class)) {
+					List<Node> nodes = Collections.emptyList();
+					return (T)owner.translate(nodes);
+				} else if (cls.equals(List.class)) {
+					return (T)new ArrayList(0);
+				} else if (cls.equals(NodeList.class)) {
+					return (T)new ListNodeList(Collections.EMPTY_LIST);
+				} else if (cls.equals(String.class)) {
+					return null;
+				} else if (cls.equals(Boolean.class)) {
+					return null;
+				} else if (cls.equals(boolean.class)) {
+					return (T)Boolean.FALSE;
+				} else if (cls.equals(Short.class)) {
+					return null;
+				} else if (cls.equals(short.class)) {
+					return (T)Short.valueOf((byte)0);
+				} else if (cls.equals(Integer.class)) {
+					return null;
+				} else if (cls.equals(int.class)) {
+					return (T)Integer.valueOf(0);
+				} else if (cls.equals(Long.class)) {
+					return null;
+				} else if (cls.equals(long.class)) {
+					return (T)Long.valueOf(0L);
+				} else if (cls.equals(Float.class)) {
+					return null;
+				} else if (cls.equals(float.class)) {
+					return (T)Float.valueOf(0.0F);
+				} else if (cls.equals(Double.class)) {
+					return null;
+				} else if (cls.equals(double.class)) {
+					return (T)Double.valueOf(0.0);
+				} else if (cls.equals(Number.class)) {
+					return null;
+				} else if (cls.equals(BigInteger.class)) {
+					return null;
+				} else if (cls.equals(BigDecimal.class)) {
+					return null;
+				} else {
+					throw new UnsupportedOperationException("class " + cls.getName() + " is unsupported.");
+				}
+			} else if (cls.equals(Nodes.class)) {
+				if (result.size() == 1) {
+					if (result.get(0) instanceof Node) {
+						return (T)owner.translate((Node)result.get(0));
+					} else {
+						throw new UnsupportedOperationException("result is not Node: " + result.get(0).getClass().getName());
+					}
+				} else {
+					throw new IllegalStateException("multiple result found.");
+				}
 			} else if (cls.equals(List.class)) {
-				return (T)xpath.selectNodes(node);
+				if (result.get(0) instanceof Node) {
+					return (T)result;
+				} else {
+					throw new UnsupportedOperationException("result is not Node: " + result.get(0).getClass().getName());
+				}
 			} else if (cls.equals(NodeList.class)) {
-				return (T)new ListNodeList(xpath.selectNodes(node));
-			} else if (cls.equals(Node.class)) {
-				return (T)xpath.selectSingleNode(node);
+				if (result.get(0) instanceof Node) {
+					return (T)new ListNodeList(result);
+				} else {
+					throw new UnsupportedOperationException("result is not Node: " + result.get(0).getClass().getName());
+				}
 			} else if (cls.equals(String.class)) {
-				return (T)xpath.stringValueOf(node);
-			} else if (cls.equals(boolean.class) || cls.equals(Boolean.class)) {
-				return (T)Boolean.valueOf(xpath.booleanValueOf(node));
-			} else if (cls.equals(Number.class) || cls.equals(double.class) || cls.equals(Double.class)) {
-				Number num = xpath.numberValueOf(node);
-				return (T)(Double)((num != null) ? num.doubleValue() : cls.equals(double.class) ? 0.0 : null);
-			} else if (cls.equals(float.class) || cls.equals(Float.class)) {
-				Number num = xpath.numberValueOf(node);
-				return (T)(Float)((num != null) ? num.floatValue() : cls.equals(float.class) ? 0.0F : null);
-			} else if (cls.equals(long.class) || cls.equals(Long.class)) {
-				Number num = xpath.numberValueOf(node);
-				return (T)(Long)((num != null) ? num.longValue() : cls.equals(long.class) ? 0L : null);
-			} else if (cls.equals(int.class) || cls.equals(Integer.class)) {
-				Number num = xpath.numberValueOf(node);
-				return (T)(Integer)((num != null) ? num.intValue() : cls.equals(int.class) ? 0 : null);
-			} else if (cls.equals(short.class) || cls.equals(Short.class)) {
-				Number num = xpath.numberValueOf(node);
-				return (T)(Short)((num != null) ? num.shortValue() : cls.equals(short.class) ? (short)0 : null);
-			} else if (cls.equals(byte.class) || cls.equals(Byte.class)) {
-				Number num = xpath.numberValueOf(node);
-				return (T)(Byte)((num != null) ? num.byteValue() : cls.equals(byte.class) ? (byte)0 : null);
+				return (T)StringFunction.evaluate(result, xpath.getNavigator());
+			} else if (cls.equals(Boolean.class) || cls.equals(boolean.class)) {
+				return (T)BooleanFunction.evaluate(result, xpath.getNavigator());
+			} else if (cls.equals(Short.class) || cls.equals(short.class)) {
+				return (T)Short.valueOf(NumberFunction.evaluate(result, xpath.getNavigator()).shortValue());
+			} else if (cls.equals(Integer.class) || cls.equals(int.class)) {
+				return (T)Integer.valueOf(NumberFunction.evaluate(result, xpath.getNavigator()).intValue());
+			} else if (cls.equals(Long.class) || cls.equals(long.class)) {
+				return (T)Long.valueOf(NumberFunction.evaluate(result, xpath.getNavigator()).longValue());
+			} else if (cls.equals(Float.class) || cls.equals(float.class)) {
+				return (T)Float.valueOf(NumberFunction.evaluate(result, xpath.getNavigator()).floatValue());
+			} else if (cls.equals(Double.class) || cls.equals(double.class) || cls.equals(Number.class)) {
+				return (T)NumberFunction.evaluate(result, xpath.getNavigator());
+			} else if (cls.equals(BigInteger.class)) {
+				return (T)BigInteger.valueOf(NumberFunction.evaluate(result, xpath.getNavigator()).longValue());
 			} else if (cls.equals(BigDecimal.class)) {
-				Number num = xpath.numberValueOf(node);
-				return (T)((num != null) ? new BigDecimal(num.doubleValue()) : null);
+				return (T)BigDecimal.valueOf(NumberFunction.evaluate(result, xpath.getNavigator()));
 			} else {
-				throw new UnsupportedOperationException("Unsupported Convert class: " + cls);
+				throw new UnsupportedOperationException("class " + cls.getName() + " is unsupported.");
 			}
 		} catch (net.arnx.xmlic.internal.org.jaxen.XPathSyntaxException e) {
 			throw new XPathSyntaxException(e.getXPath(), e.getPosition(), e.getMultilineMessage(), e);
