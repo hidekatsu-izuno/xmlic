@@ -4,6 +4,8 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import org.w3c.dom.Node;
+
 import net.arnx.xmlic.internal.org.jaxen.Context;
 import net.arnx.xmlic.internal.org.jaxen.Function;
 import net.arnx.xmlic.internal.org.jaxen.FunctionCallException;
@@ -24,14 +26,11 @@ public class KeyFunction implements Function {
 			throw new FunctionCallException("invalid argument: key(string, node)");
 		}
 		
-		List contextNodes = context.getNodeSet();
-		if (contextNodes.isEmpty()) {
-			return Collections.EMPTY_LIST;
-		}
 		Navigator nav = context.getNavigator();
-		Object doc = nav.getDocumentNode(contextNodes.get(0));
-		
 		XMLContext xcontext = (XMLContext)context.getContextSupport().getVariableContext();
+		Node current = xcontext.getCurrentNode();
+		Object doc = nav.getDocumentNode(current);
+		
 		Key key = xcontext.getKey((String)args.get(0));
 		String value = StringFunction.evaluate(args.get(1), nav);
 		if (value == null) {
@@ -39,7 +38,7 @@ public class KeyFunction implements Function {
 		}
 		
 		try {
-			List result = nav.parseXPath(key.match).selectNodes(doc);
+			List result = nav.parseXPath(".//" + key.match).selectNodes(doc);
 			XPath use = nav.parseXPath(key.use);
 			Iterator i = result.iterator();
 			while (i.hasNext()) {
