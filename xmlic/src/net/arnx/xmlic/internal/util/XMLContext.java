@@ -175,7 +175,8 @@ public class XMLContext implements NamespaceContext, VariableContext, FunctionCo
 			List result = xpath.selectNodes(node);
 			if (cls.equals(Object.class)) {
 				return (T)result;
-			} if (result == null || result.isEmpty() || (result.size() == 1 && result.get(0) == null)) {
+			} if (!cls.isPrimitive() 
+					&& (result == null || result.isEmpty() || (result.size() == 1 && result.get(0) == null))) {
 				if (cls.equals(Nodes.class)) {
 					List<Node> nodes = Collections.emptyList();
 					return (T)owner.translate(nodes);
@@ -183,37 +184,15 @@ public class XMLContext implements NamespaceContext, VariableContext, FunctionCo
 					return (T)new ArrayList(0);
 				} else if (cls.equals(NodeList.class)) {
 					return (T)new ListNodeList(Collections.EMPTY_LIST);
-				} else if (cls.equals(String.class)) {
-					return null;
-				} else if (cls.equals(Boolean.class)) {
-					return null;
-				} else if (cls.equals(boolean.class)) {
-					return (T)Boolean.FALSE;
-				} else if (cls.equals(Short.class)) {
-					return null;
-				} else if (cls.equals(short.class)) {
-					return (T)Short.valueOf((byte)0);
-				} else if (cls.equals(Integer.class)) {
-					return null;
-				} else if (cls.equals(int.class)) {
-					return (T)Integer.valueOf(0);
-				} else if (cls.equals(Long.class)) {
-					return null;
-				} else if (cls.equals(long.class)) {
-					return (T)Long.valueOf(0L);
-				} else if (cls.equals(Float.class)) {
-					return null;
-				} else if (cls.equals(float.class)) {
-					return (T)Float.valueOf(0.0F);
-				} else if (cls.equals(Double.class)) {
-					return null;
-				} else if (cls.equals(double.class)) {
-					return (T)Double.valueOf(0.0);
-				} else if (cls.equals(Number.class)) {
-					return null;
-				} else if (cls.equals(BigInteger.class)) {
-					return null;
-				} else if (cls.equals(BigDecimal.class)) {
+				} else if (cls.equals(String.class)
+						|| cls.equals(Boolean.class)
+						|| cls.equals(Short.class)
+						|| cls.equals(Integer.class)
+						|| cls.equals(Long.class)
+						|| cls.equals(Double.class)
+						|| cls.equals(Number.class)
+						|| cls.equals(BigInteger.class)
+						|| cls.equals(BigDecimal.class)) {
 					return null;
 				} else {
 					throw new UnsupportedOperationException("class " + cls.getName() + " is unsupported.");
