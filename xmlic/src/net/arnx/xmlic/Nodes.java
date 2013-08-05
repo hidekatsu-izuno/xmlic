@@ -1199,7 +1199,8 @@ public class Nodes extends ArrayList<Node> {
 		boolean first = true;
 		for (Node self : this) {
 			if (self == null) continue;
-			if (self.getNodeType() != Node.ELEMENT_NODE) continue;
+			if (self.getNodeType() != Node.ELEMENT_NODE
+					&& self.getNodeType() != Node.DOCUMENT_NODE) continue;
 			
 			Node ref = self.getFirstChild();
 			for (Node node : nodes) {
@@ -1227,7 +1228,8 @@ public class Nodes extends ArrayList<Node> {
 		Nodes results = new Nodes(getOwner(), this, nodes.size());
 		for (Node node : nodes) {
 			if (node == null) continue;
-			if (node.getNodeType() != Node.ELEMENT_NODE) continue;
+			if (node.getNodeType() != Node.ELEMENT_NODE
+					&& node.getNodeType() != Node.DOCUMENT_NODE) continue;
 			
 			Node ref = node.getFirstChild();
 			for (Node self : this) {
@@ -1256,7 +1258,8 @@ public class Nodes extends ArrayList<Node> {
 		boolean first = true;
 		for (Node self : this) {
 			if (self == null) continue;
-			if (self.getNodeType() != Node.ELEMENT_NODE) continue;
+			if (self.getNodeType() != Node.ELEMENT_NODE
+					&& self.getNodeType() != Node.DOCUMENT_NODE) continue;
 			
 			for (Node node : nodes) {
 				if (node == null) continue;
@@ -1278,7 +1281,8 @@ public class Nodes extends ArrayList<Node> {
 		Nodes result = new Nodes(getOwner(), this, nodes.size());
 		for (Node node : nodes) {
 			if (node == null) continue;
-			if (node.getNodeType() != Node.ELEMENT_NODE) continue;
+			if (node.getNodeType() != Node.ELEMENT_NODE
+					&& node.getNodeType() != Node.DOCUMENT_NODE) continue;
 
 			for (Node self : this) {
 				if (self == null) continue;

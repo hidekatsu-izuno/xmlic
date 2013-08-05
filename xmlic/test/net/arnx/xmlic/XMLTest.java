@@ -16,6 +16,7 @@ public class XMLTest {
 	@Test
 	public void testXML() {
 		assertEquals("", new XML().toString());
+		assertEquals("<div>test</div>", new XML().doc().append("<div>test</div>").toString());
 	}
 	
 	@Test
