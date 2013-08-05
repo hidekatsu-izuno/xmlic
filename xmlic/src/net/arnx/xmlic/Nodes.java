@@ -1196,6 +1196,7 @@ public class Nodes extends ArrayList<Node> {
 	public Nodes prepend(Nodes nodes) {
 		if (nodes == null) return this;
 		
+		boolean first = true;
 		for (Node self : this) {
 			if (self == null) continue;
 			if (self.getNodeType() != Node.ELEMENT_NODE) continue;
@@ -1203,13 +1204,15 @@ public class Nodes extends ArrayList<Node> {
 			Node ref = self.getFirstChild();
 			for (Node node : nodes) {
 				if (node == null) continue;
-				node = node.cloneNode(true);
+				
+				if (!first) node = node.cloneNode(true);
 				if (ref != null) {
 					self.insertBefore(node, ref);
 				} else {
 					self.appendChild(node);
 				}
 			}
+			first = false;
 		}
 		return this;
 	}
@@ -1250,15 +1253,17 @@ public class Nodes extends ArrayList<Node> {
 	public Nodes append(Nodes nodes) {
 		if (nodes.isEmpty()) return this;
 		
+		boolean first = true;
 		for (Node self : this) {
 			if (self == null) continue;
 			if (self.getNodeType() != Node.ELEMENT_NODE) continue;
-
+			
 			for (Node node : nodes) {
 				if (node == null) continue;
-				node = node.cloneNode(true);
+				if (!first) node = node.cloneNode(true);
 				self.appendChild(node);
 			}
+			first = false;
 		}
 		return this;
 	}
@@ -1292,6 +1297,7 @@ public class Nodes extends ArrayList<Node> {
 	public Nodes before(Nodes nodes) {
 		if (nodes == null) return this;
 		
+		boolean first = true;
 		for (Node self : this) {
 			if (self == null) continue;
 			if (self.getNodeType() != Node.ELEMENT_NODE) continue;
@@ -1301,9 +1307,11 @@ public class Nodes extends ArrayList<Node> {
 			
 			for (Node node : nodes) {
 				if (node == null) continue;
-				node = node.cloneNode(true);
+				
+				if (!first) node = node.cloneNode(true);
 				parent.insertBefore(node, self);
 			}
+			first = false;
 		}
 		return this;
 	}
@@ -1333,6 +1341,7 @@ public class Nodes extends ArrayList<Node> {
 	public Nodes after(Nodes nodes) {
 		if (nodes == null) return this;
 		
+		boolean first = true;
 		for (Node self : this) {
 			if (self == null) continue;
 			if (self.getNodeType() != Node.ELEMENT_NODE) continue;
@@ -1342,13 +1351,16 @@ public class Nodes extends ArrayList<Node> {
 			
 			Node next = self.getNextSibling();
 			for (Node node : nodes) {
-				node = node.cloneNode(true);
+				if (node == null) continue;
+				
+				if (!first) node = node.cloneNode(true);
 				if (next != null) {
 					parent.insertBefore(node, next);
 				} else {
 					parent.appendChild(node);
 				}
 			}
+			first = false;
 		}
 		return this;
 	}

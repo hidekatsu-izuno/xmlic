@@ -40,61 +40,67 @@ public class XML implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	public static XML load(File file) throws IOException {
-		XMLLoader parser = new XMLLoader();
-		return new XML(parser.load(file.toURI()));
+		XMLLoader loader = new XMLLoader();
+		return new XML(loader.load(file.toURI()));
 	}
 	
 	public static XML load(URI uri) throws IOException {
-		XMLLoader parser = new XMLLoader();
-		return new XML(parser.load(uri));
+		XMLLoader loader = new XMLLoader();
+		return new XML(loader.load(uri));
 	}
 	
 	public static XML load(URL url) throws IOException {
 		try {
-			XMLLoader parser = new XMLLoader();
-			return new XML(parser.load(url.toURI()));
+			XMLLoader loader = new XMLLoader();
+			return new XML(loader.load(url.toURI()));
 		} catch (URISyntaxException e) {
 			throw new IllegalArgumentException(e);
 		}
 	}
 	
 	public static XML load(InputStream in) throws IOException {
-		XMLLoader parser = new XMLLoader();
-		return new XML(parser.load(in));
+		XMLLoader loader = new XMLLoader();
+		return new XML(loader.load(in));
 	}
 	
 	public static XML load(Reader reader) throws IOException {
-		XMLLoader parser = new XMLLoader();
-		return new XML(parser.load(reader));
+		XMLLoader loader = new XMLLoader();
+		return new XML(loader.load(reader));
 	}
 	
 	final Document doc;
 	final XMLContext xmlContext;
 	
 	public XML() {
-		this(null);
+		this.xmlContext = new XMLContext();
+		this.doc = XMLContext.getDocumentBuilder().newDocument();
+	}
+	
+	public XML(String text) {
+		this.xmlContext = new XMLContext();
+		try {
+			this.doc = XMLContext.getDocumentBuilder().parse(new InputSource(new StringReader(text)));
+		} catch (Exception e) {
+			throw new IllegalStateException(e.getMessage(), e);
+		}
 	}
 	
 	public XML(Document doc) {
 		this.xmlContext = new XMLContext();
-		if (doc != null) {
-			this.doc = doc;
-			
-			Object expr = compileXPath("//namespace::*");
-			NodeList list = evaluate(expr, doc, NodeList.class);
-			for (int i = 0; i < list.getLength(); i++) {
-				Node node = list.item(i);
-				String prefix = node.getLocalName();
-				if (XMLConstants.XMLNS_ATTRIBUTE.equals(prefix)) {
-					prefix = XMLConstants.DEFAULT_NS_PREFIX;
-				}
-				
-				if (xmlContext.getNamespaceURI(prefix) == null) {
-					xmlContext.addNamespace(prefix, node.getNodeValue());
-				}
+		this.doc = doc;
+		
+		Object expr = compileXPath("//namespace::*");
+		NodeList list = evaluate(expr, doc, NodeList.class);
+		for (int i = 0; i < list.getLength(); i++) {
+			Node node = list.item(i);
+			String prefix = node.getLocalName();
+			if (XMLConstants.XMLNS_ATTRIBUTE.equals(prefix)) {
+				prefix = XMLConstants.DEFAULT_NS_PREFIX;
 			}
-		} else {
-			this.doc = XMLContext.getDocumentBuilder().newDocument();
+			
+			if (xmlContext.getNamespaceURI(prefix) == null) {
+				xmlContext.addNamespace(prefix, node.getNodeValue());
+			}
 		}
 	}
 	
@@ -103,7 +109,7 @@ public class XML implements Serializable {
 		this.xmlContext = nsContext;
 	}
 	
-	public Document getDocument() {
+	public Document get() {
 		return doc;
 	}
 	

@@ -16,9 +16,6 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
 import net.arnx.xmlic.Nodes;
 import net.arnx.xmlic.XML;
 import net.arnx.xmlic.XPathSyntaxException;
@@ -37,6 +34,9 @@ import net.arnx.xmlic.internal.org.jaxen.dom.DOMXPath;
 import net.arnx.xmlic.internal.org.jaxen.function.BooleanFunction;
 import net.arnx.xmlic.internal.org.jaxen.function.NumberFunction;
 import net.arnx.xmlic.internal.org.jaxen.function.StringFunction;
+
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 public class XMLContext implements NamespaceContext, VariableContext, FunctionContext, Serializable {
 	private static final long serialVersionUID = 1L;
