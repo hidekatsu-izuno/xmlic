@@ -478,7 +478,7 @@ public class Nodes extends ArrayList<Node> {
 		
 		int i = 0;
 		for (Node self : this) {
-			if (Boolean.TRUE.equals(func.visit(i, getOwner().translate(self)))) {
+			if (func.visit(i, getOwner().translate(self))) {
 				return true;
 			}
 			i++;
@@ -542,7 +542,7 @@ public class Nodes extends ArrayList<Node> {
 		
 		int i = 0;
 		for (Node self : this) {
-			if (Boolean.FALSE.equals(func.visit(i, getOwner().translate(self)))) {
+			if (!func.visit(i, getOwner().translate(self))) {
 				return this;
 			}
 			i++;
@@ -762,7 +762,7 @@ public class Nodes extends ArrayList<Node> {
 		Nodes results = new Nodes(getOwner(), this, size());
 		int i = 0;
 		for (Node self : this) {
-			if (Boolean.TRUE.equals(func.visit(i, getOwner().translate(self)))) {
+			if (func.visit(i, getOwner().translate(self))) {
 				results.add(self);
 			}
 			i++;

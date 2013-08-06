@@ -131,7 +131,7 @@ public class NodesTest {
 		assertEquals("<li>t4</li>", xml.find("//li[position()=1]").filter("text()='t4'").toString());
 		assertEquals("<li>t4</li>", xml.find("//li[position()=1]").filter(new Visitor<Nodes>() {
 			@Override
-			public Boolean visit(int index, Nodes node) {
+			public boolean visit(int index, Nodes node) {
 				return "t4".equals(node.text());
 			};
 		}).toString());
