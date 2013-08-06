@@ -38,6 +38,20 @@ import org.xml.sax.SAXException;
 
 public class XML implements Serializable {
 	private static final long serialVersionUID = 1L;
+	
+	private static final String[] ESCAPE_CHARS = new String[128];
+	
+	static {
+		for (int i = 0; i < 32; i++) {
+			ESCAPE_CHARS[i] = "&#";
+		}
+		ESCAPE_CHARS['&'] = "&amp;";
+		ESCAPE_CHARS['<'] = "&lt;";
+		ESCAPE_CHARS['>'] = "&gt;";
+		ESCAPE_CHARS['\''] = "&apos;";
+		ESCAPE_CHARS['"'] = "&quot;";
+		ESCAPE_CHARS[0x7F] = "&#";
+	}
 
 	public static XML load(File file) throws IOException {
 		XMLLoader loader = new XMLLoader();
@@ -299,5 +313,195 @@ public class XML implements Serializable {
 			}
 		}
 		return writer.toString();
+	}
+	
+	public static String escape(String text) {
+		StringBuilder sb = null;
+		int start = 0;
+		for (int i = 0; i < text.length(); i++) {
+			int c = text.charAt(i);
+			if (c < ESCAPE_CHARS.length) {
+				String x = ESCAPE_CHARS[c];
+				if (x != null) {
+					if (sb == null) sb = new StringBuilder((int)(text.length() * 1.5));
+					if (start < i) sb.append(text, start, i);
+					sb.append(x);
+					if (!x.endsWith(";")) sb.append((int)c).append(";");
+					start = i + 1;
+				}
+			}
+		}
+		if (sb != null) {
+			if (start < text.length()) sb.append(text, start, text.length());
+			text = sb.toString();
+		}
+		return text;
+	}
+	
+	public static String unescape(String text) {
+		StringBuilder sb = null;
+		int start = 0;
+		
+		// 0 & 1 a 2 m 3 p 4
+		// 0 & 1 a 2 p 5 o 6 s 7
+		// 0 & 1 l 8 t 9
+		// 0 & 1 g 10 t 11
+		// 0 & 1 q 12 u 13 o 14 t 15
+		// 0 & 1 # 16 [0-9]+ 17 ; 0
+		int state = 0;
+		for (int i = 0; i < text.length(); i++) {
+			int c = text.charAt(i);
+			switch (c) {
+			case '&':
+				if (state == 0) {
+					state = 1;
+				} else {
+					state = 0;
+				}
+				break;
+			case 'a':
+				if (state == 1) {
+					state = 2;
+				} else {
+					state = 0;
+				}
+				break;
+			case 'm':
+				if (state == 2) {
+					state = 3;
+				} else {
+					state = 0;
+				}
+				break;
+			case 'p':
+				if (state == 2) {
+					state = 5;
+				} else if (state == 3) {
+					state = 4;
+				} else {
+					state = 0;
+				}
+				break;
+			case 'o':
+				if (state == 5) {
+					state = 6;
+				} else if (state == 13) {
+					state = 14;
+				} else {
+					state = 0;
+				}
+				break;
+			case 's':
+				if (state == 6) {
+					state = 7;
+				} else {
+					state = 0;
+				}
+				break;
+			case 'l':
+				if (state == 1) {
+					state = 8;
+				} else {
+					state = 0;
+				}
+				break;
+			case 'g':
+				if (state == 1) {
+					state = 10;
+				} else {
+					state = 0;
+				}
+				break;
+			case 't':
+				if (state == 8) {
+					state = 9;
+				} else if (state == 10) {
+					state = 11;
+				} else if (state == 14) {
+					state = 15;
+				} else {
+					state = 0;
+				}
+				break;
+			case 'q':
+				if (state == 1) {
+					state = 12;
+				} else {
+					state = 0;
+				}
+				break;
+			case 'u':
+				if (state == 12) {
+					state = 13;
+				} else {
+					state = 0;
+				}
+				break;
+			case '#':
+				if (state == 1) {
+					state = 16;
+				} else {
+					state = 0;
+				}
+				break;
+			case '0':
+			case '1':
+			case '2':
+			case '3':
+			case '4':
+			case '5':
+			case '6':
+			case '7':
+			case '8':
+			case '9':
+				if (state >= 16) {
+					state++;
+				} else {
+					state = 0;
+				}
+				break;
+			case ';':
+				if (state == 4) {
+					if (sb == null) sb = new StringBuilder(text.length());
+					if (start < i - 4) sb.append(text, start, i - 4);
+					sb.append('&');
+					start = i + 1;
+				} else if (state == 7) {
+					if (sb == null) sb = new StringBuilder(text.length());
+					if (start < i - 5) sb.append(text, start, i - 5);
+					sb.append('\'');
+					start = i + 1;
+				} else if (state == 9) {
+					if (sb == null) sb = new StringBuilder(text.length());
+					if (start < i - 3) sb.append(text, start, i - 3);
+					sb.append('<');
+					start = i + 1;
+				} else if (state == 11) {
+					if (sb == null) sb = new StringBuilder(text.length());
+					if (start < i - 3) sb.append(text, start, i - 3);
+					sb.append('>');
+					start = i + 1;
+				} else if (state == 15) {
+					if (sb == null) sb = new StringBuilder(text.length());
+					if (start < i - 5) sb.append(text, start, i - 5);
+					sb.append('"');
+					start = i + 1;
+				} else if (state > 16) {
+					if (sb == null) sb = new StringBuilder(text.length());
+					if (start < i - (state - 16)) sb.append(text, start, i - (state - 16));
+					String num = text.substring(state - 16, i);
+					sb.appendCodePoint(Integer.parseInt(num));
+					start = i + 1;
+				} else {
+					state = 0;
+				}
+				break;
+			}
+		}
+		if (sb != null) {
+			if (start < text.length()) sb.append(text, start, text.length());
+			text = sb.toString();
+		}
+		return text;
 	}
 }
