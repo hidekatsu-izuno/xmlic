@@ -10,6 +10,7 @@ import net.arnx.xmlic.internal.org.jaxen.Context;
 import net.arnx.xmlic.internal.org.jaxen.Function;
 import net.arnx.xmlic.internal.org.jaxen.FunctionCallException;
 import net.arnx.xmlic.internal.org.jaxen.Navigator;
+import net.arnx.xmlic.internal.org.jaxen.UnresolvableException;
 import net.arnx.xmlic.internal.org.jaxen.XPath;
 import net.arnx.xmlic.internal.org.jaxen.function.StringFunction;
 import net.arnx.xmlic.internal.org.jaxen.saxpath.SAXPathException;
@@ -26,10 +27,15 @@ public class KeyFunction implements Function {
 			throw new FunctionCallException("invalid argument: key(string, node)");
 		}
 		
+		XMLContext xcontext;
+		try {
+			xcontext = (XMLContext)context.getVariableValue(null, null, XMLContext.VARIABLE_NAME);
+		} catch (UnresolvableException e) {
+			throw new FunctionCallException(e);
+		}
+		
 		Navigator nav = context.getNavigator();
-		XMLContext xcontext = (XMLContext)context.getContextSupport().getVariableContext();
-		Node current = xcontext.getCurrentNode();
-		Object doc = nav.getDocumentNode(current);
+		Object doc = nav.getDocumentNode(xcontext.getCurrentNode());
 		
 		Key key = xcontext.getKey((String)args.get(0));
 		String value = StringFunction.evaluate(args.get(1), nav);

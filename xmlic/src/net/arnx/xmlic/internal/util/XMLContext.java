@@ -22,8 +22,9 @@ import net.arnx.xmlic.XPathSyntaxException;
 import net.arnx.xmlic.internal.function.CurrentFunction;
 import net.arnx.xmlic.internal.function.DocumentFunction;
 import net.arnx.xmlic.internal.function.KeyFunction;
+import net.arnx.xmlic.internal.org.jaxen.Context;
+import net.arnx.xmlic.internal.org.jaxen.ContextSupport;
 import net.arnx.xmlic.internal.org.jaxen.Function;
-import net.arnx.xmlic.internal.org.jaxen.FunctionContext;
 import net.arnx.xmlic.internal.org.jaxen.JaxenException;
 import net.arnx.xmlic.internal.org.jaxen.NamespaceContext;
 import net.arnx.xmlic.internal.org.jaxen.UnresolvableException;
@@ -31,6 +32,7 @@ import net.arnx.xmlic.internal.org.jaxen.VariableContext;
 import net.arnx.xmlic.internal.org.jaxen.XPath;
 import net.arnx.xmlic.internal.org.jaxen.XPathFunctionContext;
 import net.arnx.xmlic.internal.org.jaxen.dom.DOMXPath;
+import net.arnx.xmlic.internal.org.jaxen.dom.DocumentNavigator;
 import net.arnx.xmlic.internal.org.jaxen.function.BooleanFunction;
 import net.arnx.xmlic.internal.org.jaxen.function.NumberFunction;
 import net.arnx.xmlic.internal.org.jaxen.function.StringFunction;
@@ -38,20 +40,21 @@ import net.arnx.xmlic.internal.org.jaxen.function.StringFunction;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-public class XMLContext implements NamespaceContext, VariableContext, FunctionContext, Serializable {
+public class XMLContext implements Serializable {
 	private static final long serialVersionUID = 1L;
+	
+	public static final String VARIABLE_NAME = "__XML_CONTEXT__";
 	
 	private ThreadLocal<Node> current = new ThreadLocal<Node>();
 	
-	private Map<String, String> nsMap = new ConcurrentHashMap<String, String>();
 	private Map<String, Key> keyMap = new ConcurrentHashMap<String, Key>();
-	private Map<QName, Object> varMap = new ConcurrentHashMap<QName, Object>();
-	private XPathFunctionContext fnContext = new XPathFunctionContext(false);
+	private NamespaceContextImpl nsContext = new NamespaceContextImpl();
+	private VariableContextImpl varContext = new VariableContextImpl();
+	private FunctionContextImpl fnContext = new FunctionContextImpl();
+	private ContextSupport support = new ContextSupport(nsContext, fnContext, varContext, 
+			DocumentNavigator.getInstance());
 	
 	public XMLContext() {
-		fnContext.registerFunction(null, "document", new DocumentFunction());
-		fnContext.registerFunction(null, "current", new CurrentFunction());
-		fnContext.registerFunction(null, "key", new KeyFunction());
 	}
 	
 	public static DocumentBuilder getDocumentBuilder() {
@@ -67,55 +70,8 @@ public class XMLContext implements NamespaceContext, VariableContext, FunctionCo
 		}
 	}
 	
-	public void addNamespace(String prefix, String namespaceURI) {
-		nsMap.put(prefix, namespaceURI);
-	}
-	
-	public void removeNamespace(String prefix) {
-		nsMap.remove(prefix);
-	}
-	
-	public String getNamespaceURI(String prefix) {
-		if (prefix == null) {
-			throw new IllegalArgumentException("prefix is null.");
-		} else if (XMLConstants.DEFAULT_NS_PREFIX.equals(prefix)) {
-			String uri= nsMap.get(prefix);
-			return (uri != null) ? uri : XMLConstants.NULL_NS_URI;
-		} else if (XMLConstants.XML_NS_PREFIX.equals(prefix)) {
-			return XMLConstants.XML_NS_URI;
-		} else if (XMLConstants.XMLNS_ATTRIBUTE.equals(prefix)) {
-			return XMLConstants.XMLNS_ATTRIBUTE_NS_URI;
-		} else {
-			return nsMap.get(prefix);
-		}
-	}
-	
-	public String getPrefix(String namespaceURI) {
-		if (namespaceURI == null) {
-			throw new IllegalArgumentException("namespaceURI is null.");
-		} else if (XMLConstants.NULL_NS_URI.equals(namespaceURI)) {
-			return XMLConstants.DEFAULT_NS_PREFIX;
-		} else if (XMLConstants.XML_NS_URI.equals(namespaceURI)) {
-			return XMLConstants.XML_NS_PREFIX;
-		} else if (XMLConstants.XMLNS_ATTRIBUTE_NS_URI.equals(namespaceURI)) {
-			return XMLConstants.XMLNS_ATTRIBUTE;
-		} else {
-			for (Map.Entry<String, String> entry : nsMap.entrySet()) {
-				if (namespaceURI.equals(entry.getValue())) {
-					return entry.getKey();
-				}
-			}
-			return null;
-		}
-	}
-	
-	public Collection<String> getPrefixes() {
-		return nsMap.keySet();
-	}
-	
-	@Override
-	public String translateNamespacePrefixToUri(String prefix) {
-		return getNamespaceURI(prefix);
+	public Context getContext() {
+		return new Context(support);
 	}
 	
 	public Node getCurrentNode() {
@@ -134,31 +90,57 @@ public class XMLContext implements NamespaceContext, VariableContext, FunctionCo
 		keyMap.remove(name);
 	}
 	
-	public void addVariable(String namespaceURI, String localName, Object value) {
-		varMap.put(new QName(namespaceURI, localName), value);
+	public void addNamespace(String prefix, String namespaceURI) {
+		nsContext.addNamespace(prefix, namespaceURI);
 	}
 	
-	@Override
-	public Object getVariableValue(String namespaceURI, String prefix, String localName) throws UnresolvableException {
-		return varMap.get(new QName(namespaceURI, localName));
+	public void removeNamespace(String prefix) {
+		nsContext.removeNamespace(prefix);
+	}
+	
+	public String getNamespaceURI(String prefix) {
+		return nsContext.translateNamespacePrefixToUri(prefix);
+	}
+	
+	public String getPrefix(String namespaceURI) {
+		return nsContext.getPrefix(namespaceURI);
+	}
+	
+	public Collection<String> getPrefixes() {
+		return nsContext.getPrefixes();
+	}
+	
+	public void addVariable(String namespaceURI, String localName, Object value) {
+		varContext.addVariable(namespaceURI, localName, value);
+	}
+	
+	public Object getVariable(String namespaceURI, String localName) {
+		try {
+			return varContext.getVariableValue(namespaceURI, null, localName);
+		} catch (UnresolvableException e) {
+			throw new IllegalStateException(e);
+		}
 	}
 	
 	public void addFunction(String namespaceURI, String localName, Function function) {
 		fnContext.registerFunction(namespaceURI, localName, function);
 	}
-
-	@Override
-	public Function getFunction(String namespaceURI, String prefix, String localName) throws UnresolvableException {
-		return fnContext.getFunction(namespaceURI, prefix, localName);
+	
+	public Function getFunction(String namespaceURI, String localName) {
+		try {
+			return fnContext.getFunction(namespaceURI, null, localName);
+		} catch (UnresolvableException e) {
+			throw new IllegalStateException(e);
+		}
 	}
 	
 	public XPath compileXPath(String text) {
 		XPath xpath;
 		try {
 			xpath = new DOMXPath(text);
-			xpath.setNamespaceContext(this);
-			xpath.setVariableContext(this);
-			xpath.setFunctionContext(this);
+			xpath.setNamespaceContext(nsContext);
+			xpath.setVariableContext(varContext);
+			xpath.setFunctionContext(fnContext);
 		} catch (net.arnx.xmlic.internal.org.jaxen.XPathSyntaxException e) {
 			throw new XPathSyntaxException(e.getXPath(), e.getPosition(), e.getMultilineMessage(), e);
 		} catch (JaxenException e) {
@@ -259,6 +241,81 @@ public class XMLContext implements NamespaceContext, VariableContext, FunctionCo
 		}
 	}
 	
+	private class NamespaceContextImpl implements NamespaceContext {
+		private Map<String, String> nsMap = new ConcurrentHashMap<String, String>();
+		
+		public void addNamespace(String prefix, String namespaceURI) {
+			nsMap.put(prefix, namespaceURI);
+		}
+		
+		public void removeNamespace(String prefix) {
+			nsMap.remove(prefix);
+		}
+		
+		public String getPrefix(String namespaceURI) {
+			if (namespaceURI == null) {
+				throw new IllegalArgumentException("namespaceURI is null.");
+			} else if (XMLConstants.NULL_NS_URI.equals(namespaceURI)) {
+				return XMLConstants.DEFAULT_NS_PREFIX;
+			} else if (XMLConstants.XML_NS_URI.equals(namespaceURI)) {
+				return XMLConstants.XML_NS_PREFIX;
+			} else if (XMLConstants.XMLNS_ATTRIBUTE_NS_URI.equals(namespaceURI)) {
+				return XMLConstants.XMLNS_ATTRIBUTE;
+			} else {
+				for (Map.Entry<String, String> entry : nsMap.entrySet()) {
+					if (namespaceURI.equals(entry.getValue())) {
+						return entry.getKey();
+					}
+				}
+				return null;
+			}
+		}
+		
+		public Collection<String> getPrefixes() {
+			return nsMap.keySet();
+		}
+		
+		@Override
+		public String translateNamespacePrefixToUri(String prefix) {
+			if (prefix == null) {
+				throw new IllegalArgumentException("prefix is null.");
+			} else if (XMLConstants.DEFAULT_NS_PREFIX.equals(prefix)) {
+				String uri= nsMap.get(prefix);
+				return (uri != null) ? uri : XMLConstants.NULL_NS_URI;
+			} else if (XMLConstants.XML_NS_PREFIX.equals(prefix)) {
+				return XMLConstants.XML_NS_URI;
+			} else if (XMLConstants.XMLNS_ATTRIBUTE.equals(prefix)) {
+				return XMLConstants.XMLNS_ATTRIBUTE_NS_URI;
+			} else {
+				return nsMap.get(prefix);
+			}
+		}
+	}
+	
+	private class VariableContextImpl implements VariableContext {
+		private Map<QName, Object> varMap = new ConcurrentHashMap<QName, Object>();
+		
+		public void addVariable(String namespaceURI, String localName, Object value) {
+			varMap.put(new QName(namespaceURI, localName), value);
+		}
+		
+		@Override
+		public Object getVariableValue(String namespaceURI, String prefix, String localName) throws UnresolvableException {
+			if (namespaceURI == null && VARIABLE_NAME.equals(localName)) {
+				return XMLContext.this;
+			}
+			return varMap.get(new QName(namespaceURI, localName));
+		}
+	}
+	
+	private class FunctionContextImpl extends XPathFunctionContext {
+		public FunctionContextImpl() {
+			super(false);
+			registerFunction(null, "document", new DocumentFunction());
+			registerFunction(null, "current", new CurrentFunction());
+			registerFunction(null, "key", new KeyFunction());
+		}
+	}
 	
 	private static class ListNodeList implements NodeList {
 		private List<Node> items;

@@ -1,7 +1,6 @@
 package net.arnx.xmlic.internal.function;
 
 import java.net.URI;
-import java.util.Collections;
 import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -12,6 +11,7 @@ import net.arnx.xmlic.internal.org.jaxen.Context;
 import net.arnx.xmlic.internal.org.jaxen.Function;
 import net.arnx.xmlic.internal.org.jaxen.FunctionCallException;
 import net.arnx.xmlic.internal.org.jaxen.Navigator;
+import net.arnx.xmlic.internal.org.jaxen.UnresolvableException;
 import net.arnx.xmlic.internal.org.jaxen.function.StringFunction;
 import net.arnx.xmlic.internal.util.XMLContext;
 
@@ -23,12 +23,15 @@ public class DocumentFunction implements Function {
 			throw new FunctionCallException("document() requires one argument.");
 		}
 		
-		List contextNodes = context.getNodeSet();
-		if (contextNodes.isEmpty()) {
-			return Collections.EMPTY_LIST;
+		XMLContext xcontext;
+		try {
+			xcontext = (XMLContext)context.getVariableValue(null, null, XMLContext.VARIABLE_NAME);
+		} catch (UnresolvableException e) {
+			throw new FunctionCallException(e);
 		}
+		
 		Navigator nav = context.getNavigator();
-		Document doc = (Document)nav.getDocumentNode(contextNodes.get(0));
+		Document doc = (Document)nav.getDocumentNode(xcontext.getCurrentNode());
 		
 		try {
 			URI uri = new URI(StringFunction.evaluate(args.get(0), nav));
