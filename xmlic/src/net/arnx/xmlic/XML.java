@@ -488,13 +488,12 @@ public class XML implements Serializable {
 					start = i + 1;
 				} else if (state > 16) {
 					if (sb == null) sb = new StringBuilder(text.length());
-					if (start < i - (state - 16)) sb.append(text, start, i - (state - 16));
-					String num = text.substring(state - 16, i);
+					if (start < i - (state - 16 + 2)) sb.append(text, start, i - (state - 16 + 2));
+					String num = text.substring(i - (state - 16), i);
 					sb.appendCodePoint(Integer.parseInt(num));
 					start = i + 1;
-				} else {
-					state = 0;
 				}
+				state = 0;
 				break;
 			}
 		}

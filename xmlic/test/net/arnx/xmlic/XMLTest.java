@@ -61,4 +61,24 @@ public class XMLTest {
 		assertEquals(xml.toString(), XML.load(tmpfile).toString());
 		tmpfile.delete();		
 	}
+	
+	@Test
+	public void testEscape() throws IOException {
+		assertEquals("abcde", XML.escape("abcde"));
+		assertEquals("&lt;abcde&gt;", XML.escape("<abcde>"));
+		assertEquals("a&gt;bcd&lt;e", XML.escape("a>bcd<e"));
+		assertEquals("&apos;abcde&quot;", XML.escape("'abcde\""));
+		assertEquals("a&quot;bcd&apos;e", XML.escape("a\"bcd'e"));
+		assertEquals("a&#0;b&#13;c&#10;d&#9;e", XML.escape("a\0b\rc\nd\te"));
+	}
+	
+	@Test
+	public void testUnescape() throws IOException {
+		assertEquals("abcde", XML.unescape("abcde"));
+		assertEquals("<abcde>", XML.unescape("&lt;abcde&gt;"));
+		assertEquals("a>bcd<e", XML.unescape("a&gt;bcd&lt;e"));
+		assertEquals("'abcde\"", XML.unescape("&apos;abcde&quot;"));
+		assertEquals("a\"bcd'e", XML.unescape("a&quot;bcd&apos;e"));
+		assertEquals("a\0b\rc\nd\te", XML.unescape("a&#0;b&#13;c&#10;d&#9;e"));
+	}
 }
