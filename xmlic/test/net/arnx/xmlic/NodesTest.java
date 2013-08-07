@@ -197,7 +197,7 @@ public class NodesTest {
 		assertEquals(true, xml.find("//li[position()=1]").is("text()='t1'"));
 		assertEquals(true, xml.find("//li[position()=1]").is("ul/li"));
 		assertEquals(false, xml.find("//li[position()=1]").is("*[position()=2]"));
-		assertEquals(false, xml.find("//li[position()=1]").is("text()='t2'"));
+		assertEquals(false, xml.find("//li[position()=1]/..").is("text()='t1'"));
 		assertEquals(false, xml.find("//li[position()=1]").is("ol/li"));
 	}
 	
