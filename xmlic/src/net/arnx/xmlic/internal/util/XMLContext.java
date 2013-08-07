@@ -17,6 +17,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import net.arnx.xmlic.Nodes;
+import net.arnx.xmlic.Visitor;
 import net.arnx.xmlic.XML;
 import net.arnx.xmlic.XPathSyntaxException;
 import net.arnx.xmlic.internal.function.CurrentFunction;
@@ -36,6 +37,9 @@ import net.arnx.xmlic.internal.org.jaxen.dom.DocumentNavigator;
 import net.arnx.xmlic.internal.org.jaxen.function.BooleanFunction;
 import net.arnx.xmlic.internal.org.jaxen.function.NumberFunction;
 import net.arnx.xmlic.internal.org.jaxen.function.StringFunction;
+import net.arnx.xmlic.internal.org.jaxen.pattern.Pattern;
+import net.arnx.xmlic.internal.org.jaxen.pattern.PatternParser;
+import net.arnx.xmlic.internal.org.jaxen.saxpath.SAXPathException;
 
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -132,6 +136,31 @@ public class XMLContext implements Serializable {
 		} catch (UnresolvableException e) {
 			throw new IllegalStateException(e);
 		}
+	}
+	
+	public Visitor<Node> compileXPathPattern(String text) {
+		final Pattern pattern;
+		final Context context = getContext();
+		try {
+			pattern = PatternParser.parse(text);
+		} catch (net.arnx.xmlic.internal.org.jaxen.XPathSyntaxException e) {
+			throw new XPathSyntaxException(e.getXPath(), e.getPosition(), e.getMultilineMessage(), e);
+		} catch (JaxenException e) {
+			throw new IllegalArgumentException(e);
+		} catch (SAXPathException e) {
+			throw new IllegalArgumentException(e);
+		}
+		
+		return new Visitor<Node>() {
+			@Override
+			public boolean visit(int index, Node node) {
+				try {
+					return pattern.matches(node, context);
+				} catch (JaxenException e) {
+					throw new IllegalStateException(e);
+				}
+			}
+		};
 	}
 	
 	public XPath compileXPath(String text) {

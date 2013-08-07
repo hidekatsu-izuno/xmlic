@@ -288,6 +288,10 @@ public class XML implements Serializable {
 		}
 	}
 	
+	Visitor<Node> compileXPathPattern(String text) {
+		return xmlContext.compileXPathPattern(text);
+	}
+	
 	Object compileXPath(String text) {
 		return xmlContext.compileXPath(text);
 	}

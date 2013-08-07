@@ -4,8 +4,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import org.w3c.dom.Node;
-
 import net.arnx.xmlic.internal.org.jaxen.Context;
 import net.arnx.xmlic.internal.org.jaxen.Function;
 import net.arnx.xmlic.internal.org.jaxen.FunctionCallException;

@@ -193,8 +193,12 @@ public class NodesTest {
 	@Test
 	public void testIs() throws IOException {
 		XML xml = XML.load(getClass().getResource("test.xml"));
-		assertEquals(true, xml.find("//li[position()=1]").is("position()=1"));
-		assertEquals(false, xml.find("//li[position()=1]").is("position()=2"));
+		assertEquals(true, xml.find("//li[position()=1]").is("*[position()=1]"));
+		assertEquals(true, xml.find("//li[position()=1]").is("text()='t1'"));
+		assertEquals(true, xml.find("//li[position()=1]").is("ul/li"));
+		assertEquals(false, xml.find("//li[position()=1]").is("*[position()=2]"));
+		assertEquals(false, xml.find("//li[position()=1]").is("text()='t2'"));
+		assertEquals(false, xml.find("//li[position()=1]").is("ol/li"));
 	}
 	
 	@Test
@@ -457,18 +461,5 @@ public class NodesTest {
 		assertEquals("t1", xml.find("//li").xml());
 		assertEquals("<li><span>xml</span></li><li><span>xml</span></li><li><span>xml</span></li><li><span>xml</span></li><li><span>xml</span></li><li><span>xml</span></li><li><span>xml</span></li><li><span>xml</span></li><li><span>xml</span></li>", xml.find("//li").xml("<span>xml</span>").toString());
 		assertEquals("<li>xml</li><li>xml</li><li>xml</li><li>xml</li><li>xml</li><li>xml</li><li>xml</li><li>xml</li><li>xml</li>", xml.find("//li").xml("xml").toString());
-	}
-	
-	@Test
-	public void testEscape() {
-		assertEquals("abc[]", Nodes.escapeFilter("abc[]"));
-		assertEquals("abc[]", Nodes.escapeFilter("abc]"));
-		assertEquals("abc[]aaa[]", Nodes.escapeFilter("abc]aaa["));
-		assertEquals("abc[]a[]a[]a[[[]]]", Nodes.escapeFilter("abc]a[]a]a[[["));
-		
-		assertEquals("abc'['[]", Nodes.escapeFilter("abc'[']"));
-		assertEquals("ab\"c]\"de", Nodes.escapeFilter("ab\"c]\"de"));
-		assertEquals("a\"bc]a'\"aa'['", Nodes.escapeFilter("a\"bc]a'\"aa'["));
-		assertEquals("ab'c]\"a['[]a[]a\"['['[\"", Nodes.escapeFilter("ab'c]\"a[']a]a\"['['["));
 	}
 }

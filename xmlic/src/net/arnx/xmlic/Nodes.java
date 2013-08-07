@@ -461,14 +461,16 @@ public class Nodes extends ArrayList<Node> {
 		}
 	}
 	
-	public boolean is(String filter) {
-		if (filter == null || isEmpty()) return false;
+	public boolean is(String pattern) {
+		if (pattern == null || isEmpty()) return false;
 		
-		Object expr = getOwner().compileXPath("self::node()[" + escapeFilter(filter) + "]");
+		Visitor<Node> visitor = getOwner().compileXPathPattern(pattern);
+		int i = 0;
 		for (Node self : this) {
-			if (getOwner().evaluate(expr, self, boolean.class)) {
+			if (visitor.visit(i, self)) {
 				return true;
 			}
+			i++;
 		}
 		return false;
 	}
@@ -509,12 +511,12 @@ public class Nodes extends ArrayList<Node> {
 		return false;
 	}
 	
-	public int index(String filter) {
-		if (filter == null || filter.isEmpty() || isEmpty()) return -1;
+	public int index(String pattern) {
+		if (pattern == null || pattern.isEmpty() || isEmpty()) return -1;
 		
-		Object expr = getOwner().compileXPath("self::node()[" + escapeFilter(filter) + "]");
+		Visitor<Node> visitor = getOwner().compileXPathPattern(pattern);
 		for (int i = 0; i < size(); i++) {
-			if (getOwner().evaluate(expr, get(i), boolean.class)) {
+			if (visitor.visit(i, get(i))) {
 				return i;
 			}
 		}
@@ -550,17 +552,23 @@ public class Nodes extends ArrayList<Node> {
 		return this;
 	}
 	
-	public Nodes has(String filter) {
-		if (filter == null || filter.isEmpty() || isEmpty()) {
+	public Nodes has(String pattern) {
+		if (pattern == null || pattern.isEmpty() || isEmpty()) {
 			return new Nodes(getOwner(), this, 0);
 		}
 		
-		Object expr = getOwner().compileXPath("child::node()[" + escapeFilter(filter) + "]");
+		Visitor<Node> visitor = getOwner().compileXPathPattern(pattern);
 		Nodes nodes = new Nodes(getOwner(), this, size());
+		int i = 0;
 		for (Node self : this) {
-			if (getOwner().evaluate(expr, self, boolean.class)) {
-				nodes.add(self);
+			NodeList children = self.getChildNodes();
+			for (int j = 0; j < children.getLength(); j++) {
+				if (visitor.visit(i, children.item(j))) {
+					nodes.add(self);
+					break;
+				}
 			}
+			i++;
 		}
 		unique(nodes);
 		return nodes;
@@ -663,19 +671,21 @@ public class Nodes extends ArrayList<Node> {
 		return results;
 	}
 	
-	public Nodes addBack(String filter) {
-		if (filter == null || back == null || back.isEmpty() || back == this) {
+	public Nodes addBack(String pattern) {
+		if (pattern == null || back == null || back.isEmpty() || back == this) {
 			return new Nodes(this, this);
 		}
 		
-		Object expr = getOwner().compileXPath("self::node()[" + escapeFilter(filter) + "]");
+		Visitor<Node> visitor = getOwner().compileXPathPattern(pattern);
 		
 		Nodes results = new Nodes(getOwner(), this, size() * 2);
 		results.addAll(this);
+		int i = 0;
 		for (Node node : back) {
-			if (getOwner().evaluate(expr, node, boolean.class)) {
+			if (visitor.visit(i, node)) {
 				results.add(node);
 			}
+			i++;
 		}
 		unique(results);
 		return results;
@@ -738,18 +748,22 @@ public class Nodes extends ArrayList<Node> {
 		return results;
 	}
 	
-	public Nodes filter(String filter) {
-		if (filter == null || filter.isEmpty() || isEmpty()) {
+	public Nodes filter(String pattern) {
+		if (pattern == null || pattern.isEmpty() || isEmpty()) {
 			return new Nodes(getOwner(), this, 0);
 		}
 		
-		Object expr = getOwner().compileXPath("self::node()[" + escapeFilter(filter) + "]");
+		Visitor<Node> visitor = getOwner().compileXPathPattern(pattern);
 		Nodes results = new Nodes(getOwner(), this, size());
+		
+		int i = 0;
 		for (Node self : this) {
-			if (getOwner().evaluate(expr, self, boolean.class)) {
+			if (visitor.visit(i, self)) {
 				results.add(self);
 			}
+			i++;
 		}
+		
 		unique(results);
 		return results;
 	}
@@ -771,20 +785,24 @@ public class Nodes extends ArrayList<Node> {
 		return results;
 	}
 	
-	public Nodes not(String filter) {
-		if (filter == null || filter.isEmpty()) {
+	public Nodes not(String pattern) {
+		if (pattern == null || pattern.isEmpty()) {
 			return new Nodes(this, this);
 		} else if (isEmpty()) {
 			return new Nodes(getOwner(), this, 0);
 		}
 		
-		Object expr = getOwner().compileXPath("self::node()[" + escapeFilter(filter) + "]");
+		Visitor<Node> visitor = getOwner().compileXPathPattern(pattern);
 		Nodes results = new Nodes(getOwner(), this, size());
+		
+		int i = 0;
 		for (Node self : this) {
-			if (!getOwner().evaluate(expr, self, boolean.class)) {
+			if (!visitor.visit(i, self)) {
 				results.add(self);
 			}
+			i++;
 		}
+		
 		unique(results);
 		return results;
 	}
@@ -793,20 +811,20 @@ public class Nodes extends ArrayList<Node> {
 		return parentsInternal(SelectMode.FIRST);
 	}
 	
-	public Nodes parent(String filter) {
-		return parentsInternal(filter, SelectMode.FIRST);
+	public Nodes parent(String pattern) {
+		return parentsInternal(pattern, SelectMode.FIRST);
 	}
 	
-	public Nodes parentsUntil(String filter) {
-		return parentsInternal(filter, SelectMode.UNTIL);
+	public Nodes parentsUntil(String pattern) {
+		return parentsInternal(pattern, SelectMode.UNTIL);
 	}
 	
 	public Nodes parents() {
 		return parentsInternal(SelectMode.ALL);
 	}
 	
-	public Nodes parents(String filter) {
-		return parentsInternal(filter, SelectMode.ALL);
+	public Nodes parents(String pattern) {
+		return parentsInternal(pattern, SelectMode.ALL);
 	}
 	
 	Nodes parentsInternal(SelectMode mode) {
@@ -828,13 +846,15 @@ public class Nodes extends ArrayList<Node> {
 		return results;
 	}
 	
-	Nodes parentsInternal(String filter, SelectMode mode) {
-		if (filter == null || filter.isEmpty() || isEmpty()) {
+	Nodes parentsInternal(String pattern, SelectMode mode) {
+		if (pattern == null || pattern.isEmpty() || isEmpty()) {
 			return new Nodes(getOwner(), this, 0);
 		}
 		
-		Object expr = getOwner().compileXPath("self::node()[" + escapeFilter(filter) + "]");
+		Visitor<Node> visitor = getOwner().compileXPathPattern(pattern);
 		Nodes results = new Nodes(getOwner(), this, size() * 2);
+		
+		int i = 0;
 		for (Node self : this) {
 			if (self == null) continue;
 			
@@ -842,7 +862,7 @@ public class Nodes extends ArrayList<Node> {
 			while ((parent = parent.getParentNode()) != null) {
 				if (parent.getNodeType() != Node.ELEMENT_NODE) break;
 				
-				if (getOwner().evaluate(expr, parent, boolean.class)) {
+				if (visitor.visit(i, parent)) {
 					results.add(parent);
 					if (mode == SelectMode.UNTIL) break;
 				} else if (mode == SelectMode.UNTIL) {
@@ -850,6 +870,8 @@ public class Nodes extends ArrayList<Node> {
 				}
 				if (mode == SelectMode.FIRST) break;
 			}
+			
+			i++;
 		}
 		if (mode != SelectMode.FIRST && results.size() > 1) {
 			unique(results);
@@ -858,13 +880,15 @@ public class Nodes extends ArrayList<Node> {
 		return results;
 	}
 	
-	public Nodes closest(String filter) {
-		if (filter == null || filter.isEmpty() || isEmpty()) {
+	public Nodes closest(String pattern) {
+		if (pattern == null || pattern.isEmpty() || isEmpty()) {
 			return new Nodes(getOwner(), this, 0);
 		}
 		
-		Object expr = getOwner().compileXPath("self::node()[" + escapeFilter(filter) + "]");
+		Visitor<Node> visitor = getOwner().compileXPathPattern(pattern);
 		Nodes results = new Nodes(getOwner(), this, size() * 2);
+		
+		int i = 0;
 		for (Node self : this) {
 			if (self == null) continue;
 			
@@ -872,11 +896,13 @@ public class Nodes extends ArrayList<Node> {
 			do {
 				if (current.getNodeType() != Node.ELEMENT_NODE) break;
 				
-				if (getOwner().evaluate(expr, current, boolean.class)) {
+				if (visitor.visit(i, current)) {
 					results.add(current);
 					break;
 				}
 			} while ((current = current.getParentNode()) != null);
+			
+			i++;
 		}
 		unique(results);
 		return results;
@@ -899,26 +925,30 @@ public class Nodes extends ArrayList<Node> {
 		return results;
 	}
 	
-	public Nodes children(String filter) {
-		if (filter == null || filter.isEmpty() || isEmpty()) {
+	public Nodes children(String pattern) {
+		if (pattern == null || pattern.isEmpty() || isEmpty()) {
 			return new Nodes(getOwner(), this, 0);
 		}
 		
-		Object expr = getOwner().compileXPath("self::node()[" + escapeFilter(filter) + "]");
+		Visitor<Node> visitor = getOwner().compileXPathPattern(pattern);
 		Nodes results = new Nodes(getOwner(), this, size() * 2);
+		
+		int i = 0;
 		for (Node self : this) {
 			if (!self.hasChildNodes()) continue;
 			
 			NodeList children = self.getChildNodes();
-			for (int i = 0; i < children.getLength(); i++) {
-				Node child = children.item(i);
+			for (int j = 0; j < children.getLength(); j++) {
+				Node child = children.item(j);
 				if (child == null) continue;
 				if (child.getNodeType() != Node.ELEMENT_NODE) continue;
 				
-				if (getOwner().evaluate(expr, child, boolean.class)) {
+				if (visitor.visit(i, child)) {
 					results.add(child);
 				}
 			}
+			
+			i++;
 		}
 		return results;
 	}
@@ -939,25 +969,29 @@ public class Nodes extends ArrayList<Node> {
 		return results;
 	}
 	
-	public Nodes contents(String filter) {
-		if (filter == null || filter.isEmpty() || isEmpty()) {
+	public Nodes contents(String pattern) {
+		if (pattern == null || pattern.isEmpty() || isEmpty()) {
 			return new Nodes(getOwner(), this, 0);
 		}
 		
-		Object expr = getOwner().compileXPath("self::node()[" + escapeFilter(filter) + "]");
+		Visitor<Node> visitor = getOwner().compileXPathPattern(pattern);
 		Nodes results = new Nodes(getOwner(), this, size() * 2);
+		
+		int i = 0;
 		for (Node self : this) {
 			if (!self.hasChildNodes()) continue;
 			
 			NodeList children = self.getChildNodes();
-			for (int i = 0; i < children.getLength(); i++) {
-				Node child = children.item(i);
+			for (int j = 0; j < children.getLength(); j++) {
+				Node child = children.item(j);
 				if (child == null) continue;
 				
-				if (getOwner().evaluate(expr, child, boolean.class)) {
+				if (visitor.visit(i, child)) {
 					results.add(child);
 				}
 			}
+			
+			i++;
 		}
 		return results;
 	}
@@ -974,20 +1008,20 @@ public class Nodes extends ArrayList<Node> {
 		return prevInternal(SelectMode.FIRST);
 	}
 	
-	public Nodes prev(String filter) {
-		return prevInternal(filter, SelectMode.FIRST);
+	public Nodes prev(String pattern) {
+		return prevInternal(pattern, SelectMode.FIRST);
 	}
 	
-	public Nodes prevUntil(String filter) {
-		return prevInternal(filter, SelectMode.UNTIL);
+	public Nodes prevUntil(String pattern) {
+		return prevInternal(pattern, SelectMode.UNTIL);
 	}
 	
 	public Nodes prevAll() {
 		return prevInternal(SelectMode.ALL);
 	}
 	
-	public Nodes prevAll(String filter) {
-		return prevInternal(filter, SelectMode.ALL);
+	public Nodes prevAll(String pattern) {
+		return prevInternal(pattern, SelectMode.ALL);
 	}
 	
 	Nodes prevInternal(SelectMode mode) {
@@ -1009,13 +1043,15 @@ public class Nodes extends ArrayList<Node> {
 		return results;
 	}
 	
-	Nodes prevInternal(String filter, SelectMode mode) {
-		if (filter == null || filter.isEmpty() || isEmpty()) {
+	Nodes prevInternal(String pattern, SelectMode mode) {
+		if (pattern == null || pattern.isEmpty() || isEmpty()) {
 			return new Nodes(getOwner(), this, 0);
 		}
 		
-		Object expr = getOwner().compileXPath("self::node()[" + escapeFilter(filter) + "]");
+		Visitor<Node> visitor = getOwner().compileXPathPattern(pattern);
 		Nodes results = new Nodes(getOwner(), this, size());
+		
+		int i = 0;
 		for (Node self : this) {
 			if (self == null) continue;
 			
@@ -1023,7 +1059,7 @@ public class Nodes extends ArrayList<Node> {
 			while ((prev = prev.getPreviousSibling()) != null) {
 				if (prev.getNodeType() != Node.ELEMENT_NODE) continue;
 				
-				if (getOwner().evaluate(expr, prev, boolean.class)) {
+				if (visitor.visit(i, prev)) {
 					results.add(prev);
 					if (mode == SelectMode.UNTIL) break;
 				} else if (mode == SelectMode.UNTIL) {
@@ -1031,6 +1067,8 @@ public class Nodes extends ArrayList<Node> {
 				}
 				if (mode == SelectMode.FIRST) break;
 			}
+			
+			i++;
 		}
 		if (mode != SelectMode.FIRST && results.size() > 1) {
 			unique(results);
@@ -1043,20 +1081,20 @@ public class Nodes extends ArrayList<Node> {
 		return nextInternal(SelectMode.FIRST);
 	}
 	
-	public Nodes next(String filter) {
-		return nextInternal(filter, SelectMode.FIRST);
+	public Nodes next(String pattern) {
+		return nextInternal(pattern, SelectMode.FIRST);
 	}
 	
-	public Nodes nextUntil(String filter) {
-		return nextInternal(filter, SelectMode.UNTIL);
+	public Nodes nextUntil(String pattern) {
+		return nextInternal(pattern, SelectMode.UNTIL);
 	}
 	
 	public Nodes nextAll() {
 		return nextInternal(SelectMode.ALL);
 	}
 	
-	public Nodes nextAll(String filter) {
-		return nextInternal(filter, SelectMode.ALL);
+	public Nodes nextAll(String pattern) {
+		return nextInternal(pattern, SelectMode.ALL);
 	}
 	
 	Nodes nextInternal(SelectMode mode) {
@@ -1078,13 +1116,15 @@ public class Nodes extends ArrayList<Node> {
 		return results;
 	}
 	
-	Nodes nextInternal(String filter, SelectMode mode) {
-		if (filter == null || filter.isEmpty() || isEmpty()) {
+	Nodes nextInternal(String pattern, SelectMode mode) {
+		if (pattern == null || pattern.isEmpty() || isEmpty()) {
 			return new Nodes(getOwner(), this, 0);
 		}
 		
-		Object expr = getOwner().compileXPath("self::node()[" + escapeFilter(filter) + "]");
+		Visitor<Node> visitor = getOwner().compileXPathPattern(pattern);
 		Nodes results = new Nodes(getOwner(), this, size() * 2);
+		
+		int i = 0;
 		for (Node self : this) {
 			if (self == null) continue;
 			
@@ -1092,7 +1132,7 @@ public class Nodes extends ArrayList<Node> {
 			while ((next = next.getNextSibling()) != null) {
 				if (next.getNodeType() != Node.ELEMENT_NODE) continue;
 				
-				if (getOwner().evaluate(expr, next, boolean.class)) {
+				if (visitor.visit(i, next)) {
 					results.add(next);
 					if (mode == SelectMode.UNTIL) break;
 				} else if (mode == SelectMode.UNTIL) {
@@ -1100,6 +1140,8 @@ public class Nodes extends ArrayList<Node> {
 				}
 				if (mode == SelectMode.FIRST) break;
 			}
+			
+			i++;
 		}
 		if (mode != SelectMode.FIRST && results.size() > 1) {
 			unique(results);
@@ -1130,13 +1172,15 @@ public class Nodes extends ArrayList<Node> {
 		return results;
 	}
 	
-	public Nodes siblings(String filter) {
-		if (filter == null || filter.isEmpty() || isEmpty()) {
+	public Nodes siblings(String pattern) {
+		if (pattern == null || pattern.isEmpty() || isEmpty()) {
 			return new Nodes(getOwner(), this, 0);
 		}
 		
-		Object expr = getOwner().compileXPath("self::node()[" + escapeFilter(filter) + "]");
+		Visitor<Node> visitor = getOwner().compileXPathPattern(pattern);
 		Nodes results = new Nodes(getOwner(), this, size());
+		
+		int i = 0;
 		for (Node self : this) {
 			if (self == null) continue;
 			
@@ -1144,7 +1188,7 @@ public class Nodes extends ArrayList<Node> {
 			while ((prev = prev.getPreviousSibling()) != null) {
 				if (prev.getNodeType() != Node.ELEMENT_NODE) continue;
 				
-				if (getOwner().evaluate(expr, prev, boolean.class)) {
+				if (visitor.visit(i, prev)) {
 					results.add(prev);
 				}
 			}
@@ -1153,10 +1197,12 @@ public class Nodes extends ArrayList<Node> {
 			while ((next = next.getNextSibling()) != null) {
 				if (next.getNodeType() != Node.ELEMENT_NODE) continue;
 
-				if (getOwner().evaluate(expr, next, boolean.class)) {
+				if (visitor.visit(i, next)) {
 					results.add(next);
 				}
 			}
+			
+			i++;
 		}
 		unique(results);
 		return results;
@@ -1772,59 +1818,5 @@ public class Nodes extends ArrayList<Node> {
 	
 	static String toFullXPath(String pattern) {
 		return pattern;
-	}
-	
-	static String escapeFilter(String filter) {
-		StringBuilder sb = new StringBuilder(filter.length());
-		int state = 0; // 0 ' 1 " 2
-		int nest = 0;
-		for (int i = 0; i < filter.length(); i++) {
-			char c = filter.charAt(i);
-			switch (c) {
-			case '\'':
-				if (state == 0) {
-					state = 1;
-				} else if (state == 1) {
-					state = 0;
-				}
-				sb.append(c);
-				break;
-			case '"':
-				if (state == 0) {
-					state = 2;
-				} else if (state == 2) {
-					state = 0;
-				}
-				sb.append(c);
-				break;
-			case '[':
-				if (state == 0) {
-					nest++;
-				}
-				sb.append(c);
-				break;
-			case ']':
-				if (state == 0) {
-					nest--;
-					for (int j = 0; j < -nest; j++) {
-						sb.append('[');
-						nest++;
-					}
-				}
-				sb.append(c);
-				break;
-			default:
-				sb.append(c);
-			}
-		}
-		if (state == 1) {
-			sb.append('\'');
-		} else if (state == 2) {
-			sb.append('"');
-		}
-		for (int i = 0; i < nest; i++) {
-			sb.append(']');
-		}
-		return sb.toString();
 	}
 }
