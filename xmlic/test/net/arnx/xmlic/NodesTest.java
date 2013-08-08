@@ -195,6 +195,7 @@ public class NodesTest {
 		XML xml = XML.load(getClass().getResource("test.xml"));
 		assertEquals(true, xml.find("//li[position()=1]").is("*[position()=1]"));
 		assertEquals(true, xml.find("//li[position()=1]").is("text()='t1'"));
+		assertEquals(true, xml.find("//ul[position()=1]").first().is("@class='s11'"));
 		assertEquals(true, xml.find("//li[position()=1]").is("ul/li"));
 		assertEquals(false, xml.find("//li[position()=1]").is("*[position()=2]"));
 		assertEquals(false, xml.find("//li[position()=1]/..").is("text()='t1'"));

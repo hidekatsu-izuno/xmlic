@@ -15,7 +15,6 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.regex.Pattern;
 
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
@@ -104,7 +103,7 @@ public class XML implements Serializable {
 		this.xmlContext = new XMLContext();
 		this.doc = doc;
 		
-		Object expr = compileXPath("//namespace::*");
+		Object expr = compileXPath("//namespace::*", false);
 		NodeList list = evaluate(expr, doc, NodeList.class);
 		for (int i = 0; i < list.getLength(); i++) {
 			Node node = list.item(i);
@@ -292,9 +291,9 @@ public class XML implements Serializable {
 	Visitor<Node> compileXPathPattern(String text) {
 		return xmlContext.compileXPathPattern(text);
 	}
-	
-	Object compileXPath(String text) {
-		return xmlContext.compileXPath(text);
+
+	Object compileXPath(String text, boolean pattern) {
+		return xmlContext.compileXPath(text, pattern);
 	}
 	
 	<T> T evaluate(Object expr, Node node, Class<T> cls) {

@@ -643,7 +643,7 @@ public class Nodes extends ArrayList<Node> {
 			return new Nodes(this, this);
 		}
 		
-		Object expr = getOwner().compileXPath(toFullXPath(xpath));
+		Object expr = getOwner().compileXPath(xpath, true);
 		
 		Nodes results = new Nodes(getOwner(), this, size() * 2);
 		results.addAll(this);
@@ -706,7 +706,7 @@ public class Nodes extends ArrayList<Node> {
 		Node self = get(0);
 		if (self == null) return null;
 		
-		Object expr = getOwner().compileXPath(xpath);
+		Object expr = getOwner().compileXPath(xpath, false);
 		return getOwner().evaluate(expr, self, cls);
 	}
 	
@@ -715,7 +715,7 @@ public class Nodes extends ArrayList<Node> {
 			return new Nodes(getOwner(), this, 0);
 		}
 		
-		Object expr = getOwner().compileXPath(xpath);
+		Object expr = getOwner().compileXPath(xpath, false);
 		
 		Nodes results = new Nodes(getOwner(), this, size());
 		for (Node self : this) {
@@ -733,7 +733,7 @@ public class Nodes extends ArrayList<Node> {
 			return new Nodes(getOwner(), this, 0);
 		}
 		
-		Object expr = getOwner().compileXPath(toFullXPath(xpath));
+		Object expr = getOwner().compileXPath(xpath, true);
 		
 		Nodes results = new Nodes(getOwner(), this, size());
 		for (Node self : this) {
@@ -1624,7 +1624,7 @@ public class Nodes extends ArrayList<Node> {
 			return this;
 		}
 		
-		Object expr = getOwner().compileXPath(toFullXPath(xpath));
+		Object expr = getOwner().compileXPath(xpath, true);
 		for (Node self : this) {
 			if (self == null) continue;
 			if (self.getNodeType() != Node.ELEMENT_NODE) continue;
@@ -1699,7 +1699,7 @@ public class Nodes extends ArrayList<Node> {
 	public Nodes normalize() {
 		if (isEmpty()) return this;
 		
-		Object expr = getOwner().compileXPath("//namespace::*");
+		Object expr = getOwner().compileXPath("//namespace::*", false);
 		for (Node self : this) {
 			NodeList list = getOwner().evaluate(expr, self, NodeList.class);
 			for (int i = 0; i < list.getLength(); i++) {
@@ -1710,7 +1710,7 @@ public class Nodes extends ArrayList<Node> {
 				Node parent = ns.getParentNode();
 				if (!(parent instanceof Element)) continue;
 				
-				expr = getOwner().compileXPath("//*[namespace-uri()='" + ns.getNodeValue() + "' or @*[namespace-uri()='" + ns.getNodeValue() + "']]");
+				expr = getOwner().compileXPath("//*[namespace-uri()='" + ns.getNodeValue() + "' or @*[namespace-uri()='" + ns.getNodeValue() + "']]", false);
 				if (!getOwner().evaluate(expr, parent, boolean.class)) {
 					if (ns.getNodeName() != null && !ns.getNodeName().isEmpty()) {
 						((Element)parent).removeAttributeNS(XMLConstants.XMLNS_ATTRIBUTE_NS_URI, ns.getNodeName());
@@ -1814,9 +1814,5 @@ public class Nodes extends ArrayList<Node> {
 		Node bup = (b != null) ? b.getParentNode() : null;
 		return (a == bup || (bup != null && bup instanceof Element 
 				&& (a.compareDocumentPosition(bup) & Node.DOCUMENT_POSITION_CONTAINED_BY) != 0));
-	}
-	
-	static String toFullXPath(String pattern) {
-		return pattern;
 	}
 }
