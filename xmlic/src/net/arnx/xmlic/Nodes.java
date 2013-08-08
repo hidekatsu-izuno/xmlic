@@ -626,6 +626,10 @@ public class Nodes extends ArrayList<Node> {
 		return super.set(index, node);
 	}
 	
+	public Nodes add(String xpath) {
+		return add(getOwner().find(xpath));
+	}
+	
 	public Nodes add(Nodes nodes) {
 		if (nodes == null|| isEmpty()) {
 			return new Nodes(this, this);
@@ -634,25 +638,6 @@ public class Nodes extends ArrayList<Node> {
 		Nodes results = new Nodes(getOwner(), this, size() + nodes.size());
 		results.addAll(this);
 		results.addAll(nodes);
-		unique(results);
-		return results;
-	}
-	
-	public Nodes add(String xpath) {
-		if (xpath == null || xpath.isEmpty() || isEmpty()) {
-			return new Nodes(this, this);
-		}
-		
-		Object expr = getOwner().compileXPath(xpath, true);
-		
-		Nodes results = new Nodes(getOwner(), this, size() * 2);
-		results.addAll(this);
-		NodeList list = getOwner().evaluate(expr, getOwner().get(), NodeList.class);
-		for (int i = 0; i < list.getLength(); i++) {
-			Node node = list.item(i);
-			if (node.getNodeType() != Node.ELEMENT_NODE) continue;
-			results.add(node);
-		}
 		unique(results);
 		return results;
 	}
