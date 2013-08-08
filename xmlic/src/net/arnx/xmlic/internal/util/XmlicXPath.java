@@ -183,7 +183,9 @@ public class XmlicXPath implements XPath, Serializable {
 			if (steps != null && steps.isEmpty()) return path;
 			
 			Step first = (Step)steps.get(0);
-			if (first.getAxis() != Axis.CHILD) {
+			if (first.getAxis() != Axis.CHILD
+					&& first.getAxis() != Axis.ATTRIBUTE
+					&& first.getAxis() != Axis.NAMESPACE) {
 				return path;
 			}
 			
