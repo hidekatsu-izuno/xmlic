@@ -189,23 +189,23 @@ xml.select("attribute::node()[1]").val();
 <tr><td>子孫要素</td><td><code>ancestor//descendant</code></td><td><code>ancestor descendant</code></td><td></td></tr>
 <tr><td>属性がある</td><td><code>*[@name]</code></td><td><code>[name]</code></td><td></td></tr>
 <tr><td>属性が一致</td><td><code>*[@name='value']</code>　あるいは <code>@name='value'</code></td><td><code>[name='value']</code></td><td></td></tr>
-<tr><td>n番目の子要素</td><td><code>*/*[n]</code> あるいは <code>*/[position()=n]</code></td><td><code>:nth-child(n)</code></td><td></td></tr>
-<tr><td>最初の子要素</td><td><code>*/*[first()]</code></td><td><code>:first-child</code></td><td></td></tr>
-<tr><td>最後の子要素</td><td><code>*/*[last()]</code></td><td><code>:last-child</code></td><td></td></tr>
+<tr><td>n番目の子要素</td><td><code>*[n]</code> あるいは <code>*[position()=n]</code></td><td><code>:nth-child(n)</code></td><td></td></tr>
+<tr><td>最初の子要素</td><td><code>*[first()]</code></td><td><code>:first-child</code></td><td></td></tr>
+<tr><td>最後の子要素</td><td><code>*[last()]</code></td><td><code>:last-child</code></td><td></td></tr>
 <tr><td>OR 条件選択</td><td><code>expr | ... | expr</code></td><td><code>expr, ..., expr</code></td><td></td></tr>
 </tbody>
 </table>
-<p>jQueryでは <code>#ID</code> の形でID指定を多用しますが、XMLではスキーマにID型が指定されない限り利用できないため、通常の属性同様 <code>//*[@id='ID']</code> と記述します
-（XPath にも ID 構文は存在しますが、スキーマを使い検証を実施し DOM 内に ID 型であるという情報が設定されている場合に限り、<code>//*[id()='ID']</code> と書くことで検索が可能です）。</p>
+<p>jQueryでは <code>#ID</code> の形でID指定を多用しますが、XMLではスキーマにID型が指定されない限り利用できないため、通常の属性同様 <code>@id='ID'</code> と記述します
+（XPath にも ID 構文は存在しますが、スキーマを使い検証を実施し DOM 内に ID 型であるという情報が設定されている場合に限り、<code>id()='ID'</code> と書くことで検索が可能です）。</p>
 
 <h3 id="children">子要素の取得<span class="sub"> - children</span></h3>
 <p>子要素の取得には、<code>children</code> メソッドを使います。引数に XPathのフィルタ条件（角カッコの中）を記載することでフィルタリングが可能です。</p>
 <pre class="source">
 <span class="comment">// ドキュメントの中から <code>div</code> 要素を検索し、それらの要素に対する子要素の一覧を取得します。</span>
-xml.find(".//div").children();
+xml.find("div").children();
 
 <span class="comment">// ドキュメントの中から <code>div</code> 要素を検索し、span という名前を持つその子要素の一覧を取得します。</span>
-xml.find(".//div").children("local-name()='span'");
+xml.find("div").children("span");
 </pre>
 
 <h3 id="parent">親要素の取得<span class="sub"> - parent, parents / parentsUntil, closest</span></h3>
@@ -213,23 +213,23 @@ xml.find(".//div").children("local-name()='span'");
 引数に XPathのフィルタ条件（角カッコの中）を記載することでフィルタリングが可能です。</p>
 <pre class="source">
 <span class="comment">// <code>div</code> 要素を検索し、それらの要素に対する親要素を取得します。</span>
-xml.find(".//div").parent();
+xml.find("div").parent();
 
 <span class="comment">// <code>div</code> 要素を検索し、それらの要素にすべての親要素を取得します。</span>
-xml.find(".//div").parents();
+xml.find("div").parents();
 
 <span class="comment">// フィルタリングも可能です。</span>
-xml.find(".//div").parent("@class='test'");
-xml.find(".//div").parents("@class='test'");
+xml.find("div").parent("@class='test'");
+xml.find("div").parents("@class='test'");
 </pre>
 <p>条件に一致する親要素までを取得できる  <code>parentsUntil</code>、自分も含むすべての親要素をから最初に条件に一致した要素を取得できる <code>closest</code> 
 も同様に用意されています。</p>
 <pre class="source">
 <span class="comment">//  <code>div</code> 要素を検索し、<code>class="test"</code> を持つ要素までの親要素を取得します。</span>
-xml.find(".//div").parentsUntil("@class='test'");
+xml.find("div").parentsUntil("@class='test'");
 
 <span class="comment">//  <code>div</code> 要素の自分も含む上位要素の中から、最初に条件に一致する要素を取得します。</span>
-xml.find(".//div").closest("@class='test'");
+xml.find("div").closest("@class='test'");
 </pre>
 
 <h3 id="sibling">兄弟要素の取得<span class="sub"> - prev / prevUntil / prevAll, next / nextUntil / nextAll, siblings</span></h3>
@@ -239,43 +239,43 @@ xml.find(".//div").closest("@class='test'");
 条件に一致するまで前にさかのぼる <code>prevUntil</code> があります。</p>
 <pre class="source">
 <span class="comment">// <code>div</code> 要素を検索し、それらの要素に対する直前の要素の一覧を取得します。</span>
-xml.find(".//div").prev();
+xml.find("div").prev();
 
 <span class="comment">// <code>div</code> 要素を検索し、それらの要素に対して前にある要素すべての一覧を取得します。</span>
-xml.find(".//div").prevAll();
+xml.find("div").prevAll();
 
 <span class="comment">// <code>div</code> 要素を検索し、それらの要素に対して条件に一致するまで前にある要素を取得します。</span>
-xml.find(".//div").prevUntil("@class='test'");
+xml.find("div").prevUntil("@class='test'");
 
 <span class="comment">// フィルタリングも可能です。</span>
-xml.find(".//div").prev("@class='test'");
-xml.find(".//div").prevAll("@class='test'");
+xml.find("div").prev("@class='test'");
+xml.find("div").prevAll("@class='test'");
 </pre>
 
 <p><code>next</code> 系メソッドも同様に、直後を取得する同名メソッドの他に、後ろに位置する兄弟要素すべてを取得する <code>nextAll</code>、
 条件に一致するまで後ろに進む <code>nextUntil</code> があります。</p>
 <pre class="source">
 <span class="comment">// <code>div</code> 要素を検索し、それらの要素に対する直後の要素の一覧を取得します。</span>
-xml.find(".//div").next();
+xml.find("div").next();
 
 <span class="comment">// <code>div</code> 要素を検索し、それらの要素に対して後ろにある要素すべての一覧を取得します。</span>
-xml.find(".//div").nextAll();
+xml.find("div").nextAll();
 
 <span class="comment">// <code>div</code> 要素を検索し、それらの要素に対して条件に一致するまで後ろにある要素を取得します。</span>
-xml.find(".//div").nextUntil("@class='test'");
+xml.find("div").nextUntil("@class='test'");
 
 <span class="comment">// フィルタリングも可能です。</span>
-xml.find(".//div").next("@class='test'");
-xml.find(".//div").nextAll("@class='test'");
+xml.find("div").next("@class='test'");
+xml.find("div").nextAll("@class='test'");
 </pre>
 
 <p><code>siblings</code>は、すべての兄弟要素を取得するメソッドで <code>prevAll</code> と <code>nextAll</code> を結合したような効果を持ちます。</p>
 <pre class="source">
 <span class="comment">// <code>div</code> 要素を検索し、それらの要素に対するすべての兄弟要素を取得します。</span>
-xml.find(".//div").siblings();
+xml.find("div").siblings();
 
 <span class="comment">// フィルタリングも可能です。</span>
-xml.find(".//div").siblings("@class='test'");
+xml.find("div").siblings("@class='test'");
 </pre>
 
 <h3 id="contents">子ノードの取得<span class="sub"> - contents</span></h3>
@@ -283,10 +283,10 @@ xml.find(".//div").siblings("@class='test'");
 <code>contents</code> メソッドを使います。</p>
 <pre class="source">
 <span class="comment">// <code>div</code> 要素を検索し、それらの要素に対するすべての子ノードを取得します。</span>
-xml.find(".//div").contents();
+xml.find("div").contents();
 
 <span class="comment">// フィルタリングも可能です。</span>
-xml.find(".//div").contents("first()");
+xml.find("div").contents("first()");
 </pre>
 
 <h3 id="filter">取得結果の操作<span class="sub"> - filter / not, eq　/ first / last　/ slice</span></h3>
@@ -295,13 +295,13 @@ xml.find(".//div").contents("first()");
 とは逆に条件にマッチしないものだけを残します。</p>
 <pre class="source">
 <span class="comment">// <code>div</code> 要素を検索した結果に対し属性でフィルタリングします。</span>
-xml.find(".//div").filter("@name='test'");
+xml.find("div").filter("@name='test'");
 
 <span class="comment">// <code>div</code> 要素を検索した結果に対し条件にマッチしないものだけ残します。</span>
-xml.find(".//div").not("@name='test'");
+xml.find("div").not("@name='test'");
 
 <span class="comment">// <code>div</code> 要素を検索した結果に対しメソッドを使って属性ででフィルタリングします。</span>
-xml.find(".//div").filter(new Visitor() {
+xml.find("div").filter(new Visitor() {
 	public boolean visit(Node node) {
 		return "test".equals(node.getAttributeNS(null, "name"));
 	}
@@ -312,10 +312,10 @@ xml.find(".//div").filter(new Visitor() {
 それぞれ <code>eq(0)</code>、<code>eq(-1)</code> のショートカットです。</p>
 <pre class="source">
 <span class="comment">// <code>div</code> 要素を検索した結果の3番目を取得します。</span>
-xml.find(".//div").eq(3);
+xml.find("div").eq(3);
 
 <span class="comment">// <code>div</code> 要素を検索した結果の2～4番目を取得します。</span>
-xml.find(".//div").slice(2, 4);
+xml.find("div").slice(2, 4);
 </pre>
 <p>jQuery の <code>:first</code>、<code>:last</code> とは異なり、XMLIC には結果集合それ自体に対して
 フィルタリングする XPath 式がないがめ、常に<code>first()</code>、<code>last()</code>を使う必要があることに注意して
@@ -326,19 +326,19 @@ xml.find(".//div").slice(2, 4);
 <code>addBack</code>　を使います。</p>
 <pre class="source">
 <span class="comment">// <code>div</code> 要素を検索した結果に <code>p</code> 要素を検索した結果を結合します。なお、次の二つの表現は等価です。</span>
-xml.find(".//div").add(".//p");
-xml.find(".//div").add(xml.find(".//p"));
+xml.find("div").add("p");
+xml.find("div").add(xml.find("p"));
 
 <span class="comment">// <code>div</code> 要素の子要素  <code>p</code> を検索した結果に 最初の <code>div</code> 要素の検索結果を結合します。フィルタリングも可能です。</span>
-xml.find(".//div").find("p").addBack();
-xml.find(".//div").find("p").addBack("@name='test'");
+xml.find("div").find("p").addBack();
+xml.find("div").find("p").addBack("@name='test'");
 </pre>
 
 <h3 id="end">取得結果の復元<span class="sub"> - end</span></h3>
 <p>一つ前の取得結果に戻したい場合は、 <code>end</code> メソッドを使います。このメソッドを使うことでメソッド連結でも入れ子表現が可能になります。</p>
 <pre class="source">
 <span class="comment">// <code>div</code> 要素を検索した結果に <code>p</code> 要素を検索した結果を結合した後、最初の検索結果を取得します。</span>
-xml.find(".//div")
+xml.find("div")
   .find("p")
 .end();
 </pre>
@@ -428,25 +428,25 @@ nodes.text("text");
 注意してください（将来的には、input など同名の要素に対して同じ動作を実装することも検討しています。現在は要素に対しては何の動作もしません）。</p>
 <pre class="source">
 <span class="comment">// <code>div</code>　要素以下の最初のノードの値を取得します。</span>
-xml.find(".//div").contents().val();
+xml.find("div").contents().val();
 
 <span class="comment">// <code>div</code>　要素以下の各種ノードの値を設定します。</span>
-xml.find(".//div").contents().val("text");
+xml.find("div").contents().val("text");
 </pre>
 
 <h3 id="is">要素の評価<span class="sub"> - is, index</span></h3>
 <p>要素が条件に一致するか調べたい場合には、<code>is</code> メソッドを使います。条件に一致するインデックス番号を取得したい場合には、<code>index</code>メソッドを使います。</p>
 <pre class="source">
 <span class="comment">// すべての <code>div</code> 要素に属性 <code>name="test"</code>が存在する場合 true になります。</span>
-boolean result = xml.find(".//div").is("@name='test'");
+boolean result = xml.find("div").is("@name='test'");
 
 <span class="comment">// <code>div</code> で最初に条件が一致したインデックス番号を返します。 見つからない場合は -1 を返します。</span>
-int index = xml.find(".//div").index("@name='test'");
+int index = xml.find("div").index("@name='test'");
 
 <span class="comment">// フィルタの代わりに、<code>Node</code> を指定することもできます。</span>
 Node node = xml.find('div').first().get(0);
-boolean result = xml.find(".//div").is(node);
-int index = xml.find(".//div").index(node);
+boolean result = xml.find("div").is(node);
+int index = xml.find("div").index(node);
 </pre>
 
 <h3 id="append">要素の追加<span class="sub"> - prepend / prependTo, append / appendTo, before / insertBefore, after / insertAfter</span></h3>
@@ -468,23 +468,23 @@ int index = xml.find(".//div").index(node);
 の違いは、前者がオブジェクトの要素群に引数で指定した要素群を加えるのに対し、後者は、引数で指定した要素群にオブジェクトの要素群を加える点にあります（対象が逆になる）。</p>
 <pre class="source">
 <span class="comment">// すべての <code>div</code> 要素に指定した要素を追加します。</span>
-xml.find(".//div").prepend("&lt;span&gt;最初の子要素として追加！&lt;/span&gt;");
-xml.find(".//div").append("&lt;span&gt;最後の子要素として追加！&lt;/span&gt;");
-xml.find(".//div").before("&lt;span&gt;直前の要素として追加！&lt;/span&gt;");
-xml.find(".//div").after("&lt;span&gt;直後の要素として追加！&lt;/span&gt;");
+xml.find("div").prepend("&lt;span&gt;最初の子要素として追加！&lt;/span&gt;");
+xml.find("div").append("&lt;span&gt;最後の子要素として追加！&lt;/span&gt;");
+xml.find("div").before("&lt;span&gt;直前の要素として追加！&lt;/span&gt;");
+xml.find("div").after("&lt;span&gt;直後の要素として追加！&lt;/span&gt;");
 
 <span class="comment">// 同じ結果になりますが記述が逆転します。</span>
-xml.parse("&lt;span&gt;最初の子要素として追加！&lt;/span&gt;").prependTo("//div");
-xml.parse("&lt;span&gt;最後の子要素として追加！&lt;/span&gt;").appendTo("//div");
-xml.parse("&lt;span&gt;直前の要素として追加！&lt;/span&gt;").insertBefore("//div");
-xml.parse("&lt;span&gt;直後の要素として追加！&lt;/span&gt;").insertAfter("//div");
+xml.parse("&lt;span&gt;最初の子要素として追加！&lt;/span&gt;").prependTo("div");
+xml.parse("&lt;span&gt;最後の子要素として追加！&lt;/span&gt;").appendTo("div");
+xml.parse("&lt;span&gt;直前の要素として追加！&lt;/span&gt;").insertBefore("div");
+xml.parse("&lt;span&gt;直後の要素として追加！&lt;/span&gt;").insertAfter("div");
 </pre>
 
 <h3 id="replace">要素の置換<span class="sub"> - replaceWith / replaceAll</span></h3>
 <p>要素の置換には、<code>replaceWith</code> メソッドと <code>replaceAll</code> メソッドを使います。ふたつのメソッドの違いは、要素の追加と同様に置換対象と置換内容の記述位置だけです。</p>
 <pre class="source">
 <span class="comment">// すべての <code>div</code> 要素を指定した要素で置換します。</span>
-xml.find(".//div").replaceWith("&lt;span&gt;最初の子要素として追加！&lt;/span&gt;");
+xml.find("div").replaceWith("&lt;span&gt;最初の子要素として追加！&lt;/span&gt;");
 
 <span class="comment">// 同じ結果になりますが記述が逆転します。</span>
 xml.parse("&lt;span&gt;最初の子要素として追加！&lt;/span&gt;").replaceAll("//div");
@@ -495,33 +495,33 @@ xml.parse("&lt;span&gt;最初の子要素として追加！&lt;/span&gt;").repla
 <code>unwrap</code> は <code>wrap</code> とは反対にラッピングを解除し、子要素で置換します。</p>
 <pre class="source">
 <span class="comment">// すべての <code>div</code> 要素を指定した要素でラップします。</span>
-xml.find(".//div").wrap("&lt;div class=".wrap"&gt;&lt;&gt;"); <span class="comment">// &gt;&lt;の間に要素が挿入されます。</span>
-xml.find(".//div").unwrap(); <span class="comment">// すべての <code>div</code> 要素のラッピングを解除します。</span>
+xml.find("div").wrap("&lt;div class=".wrap"&gt;&lt;&gt;"); <span class="comment">// &gt;&lt;の間に要素が挿入されます。</span>
+xml.find("div").unwrap(); <span class="comment">// すべての <code>div</code> 要素のラッピングを解除します。</span>
 
 <span class="comment">// すべての <code>div</code> 要素の内側を指定した要素でラップします。</span>
-xml.find(".//div").wrapInner("&lt;div class=".wrap"&gt;&lt;&gt;");
+xml.find("div").wrapInner("&lt;div class=".wrap"&gt;&lt;&gt;");
 </pre>
 <p><code>wrapAll</code> は、対象となる要素の最初の位置に対象のすべての要素を包み込むようにラッピングします。</p>
 <pre class="source">
 <span class="comment">// 最初の <code>div</code> 要素の位置にすべての <code>div</code> 要素がラッピングされるように移動されます。</span>
-xml.find(".//div").wrapInner("&lt;div class=".wrap"&gt;&lt;&gt;");
+xml.find("div").wrapInner("&lt;div class=".wrap"&gt;&lt;&gt;");
 </pre>
 
 <h3 id="remove">要素の削除<span class="sub"> - remove, empty</span></h3>
 <p>要素を削除するメソッドとしては、要素自身を含めて削除する <code>remove</code> メソッドと要素の内側を削除する <code>empty</code> メソッドがあります。</p>
 <pre class="source">
 <span class="comment">// すべての <code>div</code> 要素を削除します。</span>
-xml.find(".//div").remove();
-xml.find(".//div").remove(".//span"); <span class="comment">// マッチした要素だけを削除することも可能です。</span>
+xml.find("div").remove();
+xml.find("div").remove("span"); <span class="comment">// マッチした要素だけを削除することも可能です。</span>
 
 <span class="comment">// すべての <code>div</code> 要素を空（＝内側を削除）にします。</span>
-xml.find(".//div").empty();
+xml.find("div").empty();
 </pre>
 
 <h3 id="clone">ノードの複製<span class="sub"> - clone</span></h3>
 <p>ノードを複製したい場合は、<code>clone</code> メソッドを使用します。</p>
 <pre class="source">
-Nodes clone = xml.find(".//div").clone();
+Nodes clone = xml.find("div").clone();
 </pre>
 
 <h3 id="evaluate">ノードの評価<span class="sub"> - evaluate</span></h3>
@@ -578,6 +578,14 @@ writer.writeTo(new FileOutputStream("test.xml"), xml.getDocument());
 <p>バグや要望などは<a href="http://sourceforge.jp/projects/xmlic">XMLIC プロジェクトサイト</a>の<a href="http://sourceforge.jp/projects/xmlic/ticket/">チケット</a>に報告ください。</p>
 
 <h2 id="releasenote">リリースノート</h2>
+
+<h3>2013/8/3 version 0.9.0</h3>
+<ul>
+<li>XPath 式として XSLT 1.0 パターンを使うように変更しました。これにより .// のような記述が必要なくなり、より jQuery に近い書き方が可能になりました。
+ただし、 select/evaluate は従来通り通常の XPath として解釈します。</li>
+<li>XMLエスケープ用に XML.escape(str)/XML.unescape(str) を追加しました。</li>
+<li>XPath 関数として XSLT 同様の動作をする key() 関数を追加しました。</li>
+</ul>
 
 <h3>2013/8/3 version 0.8.2</h3>
 <ul>
