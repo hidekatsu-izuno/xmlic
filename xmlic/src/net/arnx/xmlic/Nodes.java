@@ -647,13 +647,11 @@ public class Nodes extends ArrayList<Node> {
 		
 		Nodes results = new Nodes(getOwner(), this, size() * 2);
 		results.addAll(this);
-		for (Node self : this) {
-			NodeList list = getOwner().evaluate(expr, self, NodeList.class);
-			for (int i = 0; i < list.getLength(); i++) {
-				Node node = list.item(i);
-				if (node.getNodeType() != Node.ELEMENT_NODE) continue;
-				results.add(node);
-			}
+		NodeList list = getOwner().evaluate(expr, getOwner().get(), NodeList.class);
+		for (int i = 0; i < list.getLength(); i++) {
+			Node node = list.item(i);
+			if (node.getNodeType() != Node.ELEMENT_NODE) continue;
+			results.add(node);
 		}
 		unique(results);
 		return results;

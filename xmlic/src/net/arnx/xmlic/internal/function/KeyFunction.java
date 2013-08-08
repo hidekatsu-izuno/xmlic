@@ -14,6 +14,7 @@ import net.arnx.xmlic.internal.org.jaxen.function.StringFunction;
 import net.arnx.xmlic.internal.org.jaxen.saxpath.SAXPathException;
 import net.arnx.xmlic.internal.util.XMLContext;
 import net.arnx.xmlic.internal.util.XMLContext.Key;
+import net.arnx.xmlic.internal.util.XmlicXPath;
 
 public class KeyFunction implements Function {
 	@SuppressWarnings("rawtypes")
@@ -42,8 +43,9 @@ public class KeyFunction implements Function {
 		}
 		
 		try {
-			List result = nav.parseXPath(".//" + key.match).selectNodes(doc);
-			XPath use = nav.parseXPath(key.use);
+			
+			List result = new XmlicXPath(xcontext, key.match, true).selectNodes(doc);
+			XPath use = new XmlicXPath(xcontext, key.use, false);
 			Iterator i = result.iterator();
 			while (i.hasNext()) {
 				Object node = i.next();

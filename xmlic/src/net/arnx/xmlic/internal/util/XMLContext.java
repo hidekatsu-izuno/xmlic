@@ -163,7 +163,7 @@ public class XMLContext implements Serializable {
 	}
 	
 	public XPath compileXPath(String text, boolean pattern) {
-		return  new XmlicXPath(this, text);
+		return  new XmlicXPath(this, text, pattern);
 	}
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
