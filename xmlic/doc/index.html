@@ -583,6 +583,7 @@ writer.writeTo(new FileOutputStream("test.xml"), xml.getDocument());
 <ul>
 <li>XPath 式として XSLT 1.0 パターンを使うように変更しました。これにより .// のような記述が必要なくなり、より jQuery に近い書き方が可能になりました。
 ただし、 select/evaluate は従来通り通常の XPath として解釈します。</li>
+<li>空のドキュメントに append できない不具合を修正しました。また、XMLクラスに XML文字列を指定できるコンストラクタを追加しました。</li>
 <li>XMLエスケープ用に XML.escape(str)/XML.unescape(str) を追加しました。</li>
 <li>XPath 関数として XSLT 同様の動作をする key() 関数を追加しました。</li>
 </ul>
