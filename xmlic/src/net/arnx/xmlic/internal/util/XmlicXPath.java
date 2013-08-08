@@ -13,17 +13,11 @@ import net.arnx.xmlic.internal.org.jaxen.Navigator;
 import net.arnx.xmlic.internal.org.jaxen.VariableContext;
 import net.arnx.xmlic.internal.org.jaxen.XPath;
 import net.arnx.xmlic.internal.org.jaxen.dom.DocumentNavigator;
-import net.arnx.xmlic.internal.org.jaxen.expr.AllNodeStep;
-import net.arnx.xmlic.internal.org.jaxen.expr.CommentNodeStep;
 import net.arnx.xmlic.internal.org.jaxen.expr.Expr;
 import net.arnx.xmlic.internal.org.jaxen.expr.FilterExpr;
 import net.arnx.xmlic.internal.org.jaxen.expr.FunctionCallExpr;
 import net.arnx.xmlic.internal.org.jaxen.expr.LocationPath;
-import net.arnx.xmlic.internal.org.jaxen.expr.NameStep;
-import net.arnx.xmlic.internal.org.jaxen.expr.Predicate;
-import net.arnx.xmlic.internal.org.jaxen.expr.ProcessingInstructionNodeStep;
 import net.arnx.xmlic.internal.org.jaxen.expr.Step;
-import net.arnx.xmlic.internal.org.jaxen.expr.TextNodeStep;
 import net.arnx.xmlic.internal.org.jaxen.expr.UnionExpr;
 import net.arnx.xmlic.internal.org.jaxen.expr.XPathExpr;
 import net.arnx.xmlic.internal.org.jaxen.expr.XPathFactory;
@@ -194,31 +188,9 @@ public class XmlicXPath implements XPath, Serializable {
 			}
 			
 			LocationPath path2 = factory.createRelativeLocationPath();
-			Step first2;
-			if (first instanceof AllNodeStep) {
-				first2 = factory.createAllNodeStep(Axis.DESCENDANT);
-			} else if (first instanceof NameStep) {
-				NameStep step = (NameStep)first;
-				first2 = factory.createNameStep(Axis.DESCENDANT, step.getPrefix(), step.getLocalName());
-			} else if (first instanceof TextNodeStep) {
-				first2 = factory.createTextNodeStep(Axis.DESCENDANT);
-			} else if (first instanceof CommentNodeStep) {
-				first2 = factory.createCommentNodeStep(Axis.DESCENDANT);
-			} else if (first instanceof ProcessingInstructionNodeStep) {
-				ProcessingInstructionNodeStep step = (ProcessingInstructionNodeStep)first;
-				first2 = factory.createProcessingInstructionNodeStep(Axis.DESCENDANT, step.getName());
-			} else {
-				throw new UnsupportedOperationException();
-			}
-			List<?> predicates = first.getPredicates();
-			if (predicates != null) {
-				for (Object predicate : predicates) {
-					first2.addPredicate((Predicate)predicate);
-				}
-			}			
-			path2.addStep(first2);
-			for (int i = 1; i < steps.size(); i++) {
-				path2.addStep((Step)steps.get(i));
+			path2.addStep(factory.createAllNodeStep(Axis.DESCENDANT_OR_SELF));
+			for (Object step : steps) {
+				path2.addStep((Step)step);
 			}
 			return path2;
 		} else if (expr instanceof UnionExpr) {
@@ -251,7 +223,8 @@ public class XmlicXPath implements XPath, Serializable {
 			}
 			
 			LocationPath path2 = factory.createRelativeLocationPath();
-			Step step2 = factory.createAllNodeStep(Axis.DESCENDANT);
+			path2.addStep(factory.createAllNodeStep(Axis.DESCENDANT_OR_SELF));
+			Step step2 = factory.createAllNodeStep(Axis.CHILD);
 			step2.addPredicate(factory.createPredicate(fexpr));
 			path2.addStep(step2);
 			return path2;

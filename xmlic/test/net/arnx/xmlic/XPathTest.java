@@ -15,12 +15,9 @@ public class XPathTest {
 	public void testXmlicXPath() throws Exception {
 		XMLContext xcontext = new XMLContext();
 		assertEquals(new XmlicXPath(xcontext, ".//a", false).toString(), new XmlicXPath(xcontext, ".//a", true).toString());
-		assertEquals(new XmlicXPath(xcontext, "descendant::a[@name]", false).toString(), new XmlicXPath(xcontext, "a[@name]", true).toString());
-		assertEquals(new XmlicXPath(xcontext, "descendant::node()[@name='test']", false).toString(), new XmlicXPath(xcontext, "@name='test'", true).toString());
-		System.out.println(new XmlicXPath(xcontext, ".//li[position()=2]", false));
+		assertEquals(new XmlicXPath(xcontext, "descendant-or-self::node()/a[@name]", false).toString(), new XmlicXPath(xcontext, "a[@name]", true).toString());
+		assertEquals(new XmlicXPath(xcontext, "descendant-or-self::node()/child::node()[@name='test']", false).toString(), new XmlicXPath(xcontext, "@name='test'", true).toString());
 		System.out.println(new XmlicXPath(xcontext, "li[position()=2]", true));
-		
-		XML xml = XML.load(getClass().getResource("test.xml"));
-		System.out.println(xml.select(".//li").eq(1).is("li[position()=1]"));
+		System.out.println(new XmlicXPath(xcontext, "child::li[position()=2]", true));
 	}
 }
