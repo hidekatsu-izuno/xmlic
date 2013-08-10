@@ -13,8 +13,6 @@ import java.io.Writer;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.Arrays;
-import java.util.Collection;
 
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
@@ -151,41 +149,6 @@ public class XML implements Serializable {
 	public Nodes doc() {
 		Nodes nodes = new Nodes(this, null, 1);
 		nodes.add(doc);
-		return nodes;
-	}
-	
-	public Nodes translate(Node node) {
-		if (node == null) {
-			return new Nodes(this, null, 0);
-		}
-		return new Nodes(this, null, node);
-	}
-	
-	public Nodes translate(Node... list) {
-		return translate(Arrays.asList((Node[])list));
-	}
-	
-	public Nodes translate(Collection<Node> list) {
-		if (list == null || list.isEmpty()) {
-			return new Nodes(this, null, 0);
-		}
-		
-		Nodes nodes = new Nodes(this, null, list.size());
-		nodes.addAll(list);
-		Nodes.unique(nodes);
-		return nodes;
-	}
-	
-	public Nodes translate(NodeList list) {
-		if (list == null || list.getLength() == 0) {
-			return new Nodes(this, null, 0);
-		}
-		
-		Nodes nodes = new Nodes(this, null, list.getLength());
-		for (int i = 0; i < list.getLength(); i++) {
-			nodes.add(list.item(i));
-		}
-		Nodes.unique(nodes);
 		return nodes;
 	}
 	

@@ -177,7 +177,7 @@ public class XMLContext implements Serializable {
 					&& (result == null || result.isEmpty() || (result.size() == 1 && result.get(0) == null))) {
 				if (cls.equals(Nodes.class)) {
 					List<Node> nodes = Collections.emptyList();
-					return (T)owner.translate(nodes);
+					return (T)new Nodes(owner, nodes);
 				} else if (cls.equals(List.class)) {
 					return (T)new ArrayList(0);
 				} else if (cls.equals(NodeList.class)) {
@@ -198,7 +198,7 @@ public class XMLContext implements Serializable {
 			} else if (cls.equals(Nodes.class)) {
 				if (result.size() == 1) {
 					if (result.get(0) instanceof Node) {
-						return (T)owner.translate((Node)result.get(0));
+						return (T)new Nodes(owner, (Node)result.get(0));
 					} else {
 						throw new UnsupportedOperationException("result is not Node: " + result.get(0).getClass().getName());
 					}

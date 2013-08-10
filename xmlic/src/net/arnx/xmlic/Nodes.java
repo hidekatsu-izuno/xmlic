@@ -30,27 +30,43 @@ public class Nodes extends ArrayList<Node> {
 	final XML owner;
 	final Nodes back;
 	
+	public Nodes(XML owner) {
+		this(owner, null, 4);
+	}
+	
+	public Nodes(XML owner, Node node) {
+		this(owner, null, 1);
+		if (node != null) {
+			add(node);
+		} else {
+			throw new NullPointerException("node is null.");
+		}
+	}
+	
+	public Nodes(XML owner, Node... nodes) {
+		this(owner, null, nodes.length);
+		for (int i = 0; i < nodes.length; i++) {
+			add(nodes[i]);
+		}
+	}
+	
+	public Nodes(XML owner, Collection<Node> list) {
+		this(owner, null, list.size());
+		addAll(list);
+	}
+	
+	public Nodes(XML owner, NodeList list) {
+		this(owner, null, list.getLength());
+		for (int i = 0; i < list.getLength(); i++) {
+			add(list.item(i));
+		}
+	}
+	
 	Nodes(XML owner, Nodes back, int size) {
 		super(size);
+		if (owner == null) throw new NullPointerException("owner is null.");
 		this.owner = owner;
 		this.back = back;
-	}
-	
-	Nodes(XML owner, Nodes back, Node node) {
-		this(owner, null, 1);
-		add(node);
-	}
-	
-	Nodes(Nodes back, Node node) {
-		this(back.getOwner(), back, 1);
-		add(node);
-	}
-	
-	Nodes(Nodes back, Nodes nodes) {
-		this(back.getOwner(), back, nodes.size());
-		for (Node node : nodes) {
-			add(node.cloneNode(true));
-		}
 	}
 	
 	public XML getOwner() {
@@ -457,7 +473,9 @@ public class Nodes extends ArrayList<Node> {
 	public Nodes eq(int index) {
 		Node self = get(index);
 		if (self != null) {
-			return new Nodes(this, self);
+			Nodes nodes = new Nodes(getOwner(), this, 1);
+			nodes.add(self);
+			return nodes;
 		} else {
 			return new Nodes(getOwner(), this, 0);
 		}
@@ -480,7 +498,7 @@ public class Nodes extends ArrayList<Node> {
 		
 		int i = 0;
 		for (Node self : this) {
-			if (func.accept(i, getOwner().translate(self))) {
+			if (func.accept(i, new Nodes(getOwner(), self))) {
 				return true;
 			}
 			i++;
@@ -544,7 +562,7 @@ public class Nodes extends ArrayList<Node> {
 		try {
 			int i = 0;
 			for (Node self : this) {
-				func.visit(i, getOwner().translate(self));
+				func.visit(i, new Nodes(getOwner(), self));
 			}
 		} catch (RuntimeException e) {
 			if (e != Visitor.BREAK) throw e;
@@ -629,8 +647,10 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	public Nodes add(Nodes nodes) {
-		if (nodes == null|| isEmpty()) {
-			return new Nodes(this, this);
+		if (nodes == null || nodes.isEmpty()) {
+			Nodes results = new Nodes(getOwner(), this, size());
+			results.addAll(this);
+			return results;
 		}
 		
 		Nodes results = new Nodes(getOwner(), this, size() + nodes.size());
@@ -642,7 +662,9 @@ public class Nodes extends ArrayList<Node> {
 	
 	public Nodes addBack() {
 		if (back == null || back.isEmpty() || back == this) {
-			return new Nodes(this, this);
+			Nodes results = new Nodes(getOwner(), this, size());
+			results.addAll(this);
+			return results;
 		}
 		
 		Nodes results = new Nodes(getOwner(), this, size() + back.size());
@@ -654,7 +676,9 @@ public class Nodes extends ArrayList<Node> {
 	
 	public Nodes addBack(String pattern) {
 		if (pattern == null || back == null || back.isEmpty() || back == this) {
-			return new Nodes(this, this);
+			Nodes results = new Nodes(getOwner(), this, size());
+			results.addAll(this);
+			return results;
 		}
 		
 		NodeMatcher m = getOwner().compileXPathPattern(pattern);
@@ -751,7 +775,7 @@ public class Nodes extends ArrayList<Node> {
 		Nodes results = new Nodes(getOwner(), this, size());
 		int i = 0;
 		for (Node self : this) {
-			if (func.accept(i, getOwner().translate(self))) {
+			if (func.accept(i, new Nodes(getOwner(), self))) {
 				results.add(self);
 			}
 			i++;
@@ -762,7 +786,9 @@ public class Nodes extends ArrayList<Node> {
 	
 	public Nodes not(String pattern) {
 		if (pattern == null || pattern.isEmpty()) {
-			return new Nodes(this, this);
+			Nodes results = new Nodes(getOwner(), this, size());
+			results.addAll(this);
+			return results;
 		} else if (isEmpty()) {
 			return new Nodes(getOwner(), this, 0);
 		}

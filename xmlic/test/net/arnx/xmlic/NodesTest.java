@@ -105,6 +105,16 @@ public class NodesTest {
 	}
 	
 	@Test
+	public void testEach() throws IOException {
+		XML xml = XML.load(getClass().getResource("test.xml"));
+		xml.find("ul").each(new Visitor<Nodes>() {
+			@Override
+			public void visit(int index, Nodes current) {
+			}
+		});
+	}
+	
+	@Test
 	public void testEnd() throws IOException {
 		XML xml = XML.load(getClass().getResource("test.xml"));
 		assertEquals("", xml.doc().end().toString());		
@@ -154,10 +164,10 @@ public class NodesTest {
 	@Test
 	public void testGet() throws IOException {
 		XML xml = XML.load(getClass().getResource("test.xml"));
-		assertEquals("<li>t1</li>", xml.translate(xml.find("//li[position()=1]").get(0)).toString());
-		assertEquals("<li>t1</li>", xml.translate(xml.find("//li[position()=1]").get(-3)).toString());
-		assertEquals("<li>t7</li>", xml.translate(xml.find("//li[position()=1]").get(2)).toString());
-		assertEquals("<li>t7</li>", xml.translate(xml.find("//li[position()=1]").get(-1)).toString());
+		assertEquals("<li>t1</li>", new Nodes(xml, xml.find("//li[position()=1]").get(0)).toString());
+		assertEquals("<li>t1</li>", new Nodes(xml, xml.find("//li[position()=1]").get(-3)).toString());
+		assertEquals("<li>t7</li>", new Nodes(xml, xml.find("//li[position()=1]").get(2)).toString());
+		assertEquals("<li>t7</li>", new Nodes(xml, xml.find("//li[position()=1]").get(-1)).toString());
 		assertNull(xml.find("//li[position()=1]").get(3));
 		assertNull(xml.find("//li[position()=1]").get(-4));
 	}
