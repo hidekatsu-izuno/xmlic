@@ -563,6 +563,7 @@ public class Nodes extends ArrayList<Node> {
 			int i = 0;
 			for (Node self : this) {
 				func.visit(i, new Nodes(getOwner(), self));
+				i++;
 			}
 		} catch (RuntimeException e) {
 			if (e != Visitor.BREAK) throw e;

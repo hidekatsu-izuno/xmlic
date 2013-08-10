@@ -107,11 +107,24 @@ public class NodesTest {
 	@Test
 	public void testEach() throws IOException {
 		XML xml = XML.load(getClass().getResource("test.xml"));
-		xml.find("ul").each(new Visitor<Nodes>() {
+		final StringBuilder sb = new StringBuilder();
+		xml.find("ul|li").each(new Visitor<Nodes>() {
 			@Override
-			public void visit(int index, Nodes current) {
+			public void visit(int i, Nodes current) {
+				sb.append(i).append("=").append(current.name()).append(";");
 			}
 		});
+		assertEquals("0=ul;1=li;2=li;3=li;4=ul;5=li;6=li;7=li;8=ul;9=li;10=li;11=li;", sb.toString());
+		
+		sb.setLength(0);
+		xml.find("ul|li").each(new Visitor<Nodes>() {
+			@Override
+			public void visit(int i, Nodes current) {
+				if (i == 5) throw BREAK;
+				sb.append(i).append("=").append(current.name()).append(";");
+			}
+		});
+		assertEquals("0=ul;1=li;2=li;3=li;4=ul;", sb.toString());
 	}
 	
 	@Test
