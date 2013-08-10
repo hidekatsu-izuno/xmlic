@@ -130,8 +130,8 @@ public class NodesTest {
 		assertEquals("<li>t4</li>", xml.find("//li[position()=1]").filter("text()='t4'").toString());
 		assertEquals("<li>t4</li>", xml.find("//li[position()=1]").filter(new Filter<Nodes>() {
 			@Override
-			public boolean accept(int index, Nodes node) {
-				return "t4".equals(node.text());
+			public boolean accept(int i, Nodes current) {
+				return "t4".equals(current.text());
 			};
 		}).toString());
 		assertEquals("<ul class=\"s21\">\n\t\t<li>t7</li>\n\t\t<li>t8</li>\n\t\t<li>t9</li>\n\t</ul>", xml.find("//ul[position()=1]").filter("@class='s21'").toString());

@@ -1,5 +1,7 @@
 package net.arnx.xmlic;
 
 public interface Visitor<T> {
-	public boolean visit(int index, T node);
+	public static final RuntimeException BREAK = new RuntimeException("BREAK");
+	
+	public void visit(int index, T current);
 }

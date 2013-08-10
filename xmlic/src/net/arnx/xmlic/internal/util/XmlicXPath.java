@@ -212,7 +212,10 @@ public class XmlicXPath implements XPath, Serializable {
 			if (expr instanceof FunctionCallExpr) {
 				FunctionCallExpr fcExpr = (FunctionCallExpr)expr;
 				if ("".equals(fcExpr.getPrefix()) 
-						&& ("id".equals(fcExpr.getFunctionName()) || "key".equals(fcExpr.getFunctionName()))) {
+						&& ("id".equals(fcExpr.getFunctionName()) 
+								|| "key".equals(fcExpr.getFunctionName())
+								|| "document".equals(fcExpr.getFunctionName())
+								|| "current".equals(fcExpr.getFunctionName()))) {
 					return expr;
 				}
 			}

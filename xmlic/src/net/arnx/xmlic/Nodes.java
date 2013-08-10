@@ -475,17 +475,16 @@ public class Nodes extends ArrayList<Node> {
 		return false;
 	}
 	
-	public boolean is(Visitor<Nodes> func) {
+	public boolean is(Filter<Nodes> func) {
 		if (func == null || isEmpty()) return false;
 		
 		int i = 0;
 		for (Node self : this) {
-			if (func.visit(i, getOwner().translate(self))) {
+			if (func.accept(i, getOwner().translate(self))) {
 				return true;
 			}
 			i++;
 		}
-		
 		return false;
 	}
 	
@@ -542,12 +541,13 @@ public class Nodes extends ArrayList<Node> {
 			return this;
 		}
 		
-		int i = 0;
-		for (Node self : this) {
-			if (!func.visit(i, getOwner().translate(self))) {
-				return this;
+		try {
+			int i = 0;
+			for (Node self : this) {
+				func.visit(i, getOwner().translate(self));
 			}
-			i++;
+		} catch (RuntimeException e) {
+			if (e != Visitor.BREAK) throw e;
 		}
 		return this;
 	}
