@@ -152,6 +152,12 @@ public class XML implements Serializable {
 		return nodes;
 	}
 	
+	public Nodes root() {
+		Nodes nodes = new Nodes(this, null, 1);
+		nodes.add(doc.getDocumentElement());
+		return nodes;
+	}
+	
 	public Nodes parse(String text) {
 		if (text == null || text.isEmpty()) {
 			return new Nodes(this, null, 0);
