@@ -642,8 +642,8 @@ public class Nodes extends ArrayList<Node> {
 		return super.set(index, node);
 	}
 	
-	public Nodes add(String xpath) {
-		return add(getOwner().find(xpath));
+	public Nodes add(String pattern) {
+		return add(getOwner().find(pattern));
 	}
 	
 	public Nodes add(Nodes nodes) {
@@ -731,12 +731,12 @@ public class Nodes extends ArrayList<Node> {
 		return results;
 	}
 	
-	public Nodes find(String xpath) {
-		if (xpath == null || xpath.isEmpty() || isEmpty()) {
+	public Nodes find(String pattern) {
+		if (pattern == null || pattern.isEmpty() || isEmpty()) {
 			return new Nodes(getOwner(), this, 0);
 		}
 		
-		Object expr = getOwner().compileXPath(xpath, true);
+		Object expr = getOwner().compileXPath(pattern, true);
 		
 		Nodes results = new Nodes(getOwner(), this, size());
 		for (Node self : this) {
@@ -1233,8 +1233,8 @@ public class Nodes extends ArrayList<Node> {
 		return this;
 	}
 	
-	public Nodes prependTo(String xpath) {
-		return prependTo(getOwner().find(xpath));
+	public Nodes prependTo(String pattern) {
+		return prependTo(getOwner().find(pattern));
 	}
 	
 	public Nodes prependTo(Nodes nodes) {
@@ -1286,8 +1286,8 @@ public class Nodes extends ArrayList<Node> {
 		return this;
 	}
 	
-	public Nodes appendTo(String xpath) {
-		return appendTo(getOwner().find(xpath));
+	public Nodes appendTo(String pattern) {
+		return appendTo(getOwner().find(pattern));
 	}
 	
 	public Nodes appendTo(Nodes nodes) {
@@ -1335,12 +1335,12 @@ public class Nodes extends ArrayList<Node> {
 		return this;
 	}
 	
-	public Nodes insertBefore(String xpath) {
-		if (xpath == null || xpath.isEmpty() || isEmpty()) {
+	public Nodes insertBefore(String pattern) {
+		if (pattern == null || pattern.isEmpty() || isEmpty()) {
 			return this;
 		}
 		
-		getOwner().find(xpath).before(this);
+		getOwner().find(pattern).before(this);
 		return this;
 	}
 	
@@ -1384,12 +1384,12 @@ public class Nodes extends ArrayList<Node> {
 		return this;
 	}
 	
-	public Nodes insertAfter(String xpath) {
-		if (xpath == null || xpath.isEmpty() || isEmpty()) {
+	public Nodes insertAfter(String pattern) {
+		if (pattern == null || pattern.isEmpty() || isEmpty()) {
 			return this;
 		}
 		
-		getOwner().find(xpath).after(this);
+		getOwner().find(pattern).after(this);
 		return this;
 	}
 	
@@ -1530,8 +1530,8 @@ public class Nodes extends ArrayList<Node> {
 		return this;
 	}
 	
-	public Nodes replaceAll(String xpath) {
-		return replaceAll(getOwner().find(xpath));
+	public Nodes replaceAll(String pattern) {
+		return replaceAll(getOwner().find(pattern));
 	}
 	
 	public Nodes replaceAll(Nodes nodes) {
@@ -1566,7 +1566,8 @@ public class Nodes extends ArrayList<Node> {
 	public Nodes empty() {
 		for (Node self : this) {
 			if (self == null) continue;
-			if (self.getNodeType() != Node.ELEMENT_NODE) continue;
+			if (self.getNodeType() != Node.ELEMENT_NODE 
+					&& self.getNodeType() != Node.DOCUMENT_NODE) continue;
 			
 			while (self.hasChildNodes()) {
 				self.removeChild(self.getLastChild());
@@ -1588,12 +1589,12 @@ public class Nodes extends ArrayList<Node> {
 		return this;
 	}
 	
-	public Nodes remove(String xpath) {
-		if (xpath == null || xpath.isEmpty() || isEmpty()) {
+	public Nodes remove(String pattern) {
+		if (pattern == null || pattern.isEmpty() || isEmpty()) {
 			return this;
 		}
 		
-		Object expr = getOwner().compileXPath(xpath, true);
+		Object expr = getOwner().compileXPath(pattern, true);
 		for (Node self : this) {
 			if (self == null) continue;
 			if (self.getNodeType() != Node.ELEMENT_NODE) continue;

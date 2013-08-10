@@ -12,8 +12,8 @@ import net.arnx.xmlic.internal.org.jaxen.UnresolvableException;
 import net.arnx.xmlic.internal.org.jaxen.XPath;
 import net.arnx.xmlic.internal.org.jaxen.function.StringFunction;
 import net.arnx.xmlic.internal.org.jaxen.saxpath.SAXPathException;
-import net.arnx.xmlic.internal.util.XMLContext;
-import net.arnx.xmlic.internal.util.XMLContext.Key;
+import net.arnx.xmlic.internal.util.XmlicContext;
+import net.arnx.xmlic.internal.util.XmlicContext.Key;
 import net.arnx.xmlic.internal.util.XmlicXPath;
 
 public class KeyFunction implements Function {
@@ -26,9 +26,9 @@ public class KeyFunction implements Function {
 			throw new FunctionCallException("invalid argument: key(string, node)");
 		}
 		
-		XMLContext xcontext;
+		XmlicContext xcontext;
 		try {
-			xcontext = (XMLContext)context.getVariableValue(null, null, XMLContext.VARIABLE_NAME);
+			xcontext = (XmlicContext)context.getVariableValue(null, null, XmlicContext.VARIABLE_NAME);
 		} catch (UnresolvableException e) {
 			throw new FunctionCallException(e);
 		}

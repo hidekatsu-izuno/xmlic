@@ -13,7 +13,7 @@ import net.arnx.xmlic.internal.org.jaxen.FunctionCallException;
 import net.arnx.xmlic.internal.org.jaxen.Navigator;
 import net.arnx.xmlic.internal.org.jaxen.UnresolvableException;
 import net.arnx.xmlic.internal.org.jaxen.function.StringFunction;
-import net.arnx.xmlic.internal.util.XMLContext;
+import net.arnx.xmlic.internal.util.XmlicContext;
 
 public class DocumentFunction implements Function {
 	@SuppressWarnings("rawtypes")
@@ -23,9 +23,9 @@ public class DocumentFunction implements Function {
 			throw new FunctionCallException("document() requires one argument.");
 		}
 		
-		XMLContext xcontext;
+		XmlicContext xcontext;
 		try {
-			xcontext = (XMLContext)context.getVariableValue(null, null, XMLContext.VARIABLE_NAME);
+			xcontext = (XmlicContext)context.getVariableValue(null, null, XmlicContext.VARIABLE_NAME);
 		} catch (UnresolvableException e) {
 			throw new FunctionCallException(e);
 		}
@@ -43,7 +43,7 @@ public class DocumentFunction implements Function {
 				}
 			}
 			
-			DocumentBuilder builder = XMLContext.getDocumentBuilder();
+			DocumentBuilder builder = XmlicContext.getDocumentBuilder();
 			return builder.parse(uri.toASCIIString());
 		} catch (Exception e) {
 			throw new FunctionCallException(e);

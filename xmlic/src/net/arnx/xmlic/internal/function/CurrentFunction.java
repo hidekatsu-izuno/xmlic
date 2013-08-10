@@ -6,7 +6,7 @@ import net.arnx.xmlic.internal.org.jaxen.Context;
 import net.arnx.xmlic.internal.org.jaxen.Function;
 import net.arnx.xmlic.internal.org.jaxen.FunctionCallException;
 import net.arnx.xmlic.internal.org.jaxen.UnresolvableException;
-import net.arnx.xmlic.internal.util.XMLContext;
+import net.arnx.xmlic.internal.util.XmlicContext;
 
 public class CurrentFunction implements Function {
 	@SuppressWarnings("rawtypes")
@@ -16,9 +16,9 @@ public class CurrentFunction implements Function {
 			throw new FunctionCallException("current() requires no argument.");
 		}
 		
-		XMLContext xcontext;
+		XmlicContext xcontext;
 		try {
-			xcontext = (XMLContext)context.getVariableValue(null, null, XMLContext.VARIABLE_NAME);
+			xcontext = (XmlicContext)context.getVariableValue(null, null, XmlicContext.VARIABLE_NAME);
 		} catch (UnresolvableException e) {
 			throw new FunctionCallException(e);
 		}

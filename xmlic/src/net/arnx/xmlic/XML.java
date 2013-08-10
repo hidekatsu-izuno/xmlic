@@ -26,8 +26,8 @@ import javax.xml.transform.dom.DOMSource;
 
 import net.arnx.xmlic.internal.org.jaxen.XPath;
 import net.arnx.xmlic.internal.util.NodeMatcher;
-import net.arnx.xmlic.internal.util.XMLContext;
-import net.arnx.xmlic.internal.util.XMLContext.Key;
+import net.arnx.xmlic.internal.util.XmlicContext;
+import net.arnx.xmlic.internal.util.XmlicContext.Key;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -82,24 +82,24 @@ public class XML implements Serializable {
 	}
 	
 	final Document doc;
-	final XMLContext xmlContext;
+	final XmlicContext xmlContext;
 	
 	public XML() {
-		this.xmlContext = new XMLContext();
-		this.doc = XMLContext.getDocumentBuilder().newDocument();
+		this.xmlContext = new XmlicContext();
+		this.doc = XmlicContext.getDocumentBuilder().newDocument();
 	}
 	
 	public XML(String text) {
-		this.xmlContext = new XMLContext();
+		this.xmlContext = new XmlicContext();
 		try {
-			this.doc = XMLContext.getDocumentBuilder().parse(new InputSource(new StringReader(text)));
+			this.doc = XmlicContext.getDocumentBuilder().parse(new InputSource(new StringReader(text)));
 		} catch (Exception e) {
 			throw new IllegalStateException(e.getMessage(), e);
 		}
 	}
 	
 	public XML(Document doc) {
-		this.xmlContext = new XMLContext();
+		this.xmlContext = new XmlicContext();
 		this.doc = doc;
 		
 		Object expr = compileXPath("//namespace::*", false);
@@ -117,7 +117,7 @@ public class XML implements Serializable {
 		}
 	}
 	
-	XML(Document doc, XMLContext nsContext) {
+	XML(Document doc, XmlicContext nsContext) {
 		this.doc = doc;
 		this.xmlContext = nsContext;
 	}
@@ -152,12 +152,6 @@ public class XML implements Serializable {
 		return nodes;
 	}
 	
-	public Nodes root() {
-		Nodes nodes = new Nodes(this, null, 1);
-		nodes.add(doc.getDocumentElement());
-		return nodes;
-	}
-	
 	public Nodes parse(String text) {
 		if (text == null || text.isEmpty()) {
 			return new Nodes(this, null, 0);
@@ -178,7 +172,7 @@ public class XML implements Serializable {
 		sb.append(">").append(text).append("</x>");
 		
 		try {
-			DocumentBuilder db = XMLContext.getDocumentBuilder();
+			DocumentBuilder db = XmlicContext.getDocumentBuilder();
 			InputSource src = new InputSource(new StringReader(sb.toString()));
 			src.setPublicId(doc.getBaseURI());
 			Document ndoc = db.parse(src);
@@ -205,12 +199,60 @@ public class XML implements Serializable {
 		return doc().select(xpath);
 	}
 	
-	public Nodes find(String xpath) {
-		return doc().find(xpath);
+	public Nodes children() {
+		return doc().children();
 	}
 	
-	public Nodes remove(String xpath) {
-		return doc().remove(xpath);
+	public Nodes children(String pattern) {
+		return doc().children(pattern);
+	}
+	
+	public Nodes contents() {
+		return doc().contents();
+	}
+	
+	public Nodes contents(String pattern) {
+		return doc().contents(pattern);
+	}
+	
+	public Nodes find(String pattern) {
+		return doc().find(pattern);
+	}
+	
+	public Nodes append(String xml) {
+		return doc().append(xml);
+	}
+	
+	public Nodes append(Nodes nodes) {
+		return doc().append(nodes);
+	}
+	
+	public Nodes prepend(String xml) {
+		return doc().prepend(xml);
+	}
+	
+	public Nodes empty() {
+		return doc().empty();
+	}
+	
+	public Nodes remove(String pattern) {
+		return doc().remove(pattern);
+	}
+	
+	public Nodes prepend(Nodes nodes) {
+		return doc().prepend(nodes);
+	}
+	
+	public String text() {
+		return doc().text();
+	}
+	
+	public String xml() {
+		return doc().xml();
+	}
+	
+	public Nodes xml(String xml) {
+		return doc().xml(xml);
 	}
 	
 	public Nodes normalize() {

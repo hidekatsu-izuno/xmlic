@@ -42,7 +42,7 @@ import net.arnx.xmlic.internal.org.jaxen.saxpath.SAXPathException;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-public class XMLContext implements Serializable {
+public class XmlicContext implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	public static final String VARIABLE_NAME = "__XML_CONTEXT__";
@@ -50,13 +50,15 @@ public class XMLContext implements Serializable {
 	private ThreadLocal<Node> current = new ThreadLocal<Node>();
 	
 	private Map<String, Key> keyMap = new ConcurrentHashMap<String, Key>();
+	
 	private NamespaceContextImpl nsContext = new NamespaceContextImpl();
 	private VariableContextImpl varContext = new VariableContextImpl();
 	private FunctionContextImpl fnContext = new FunctionContextImpl();
+	
 	private ContextSupport support = new ContextSupport(nsContext, fnContext, varContext, 
 			DocumentNavigator.getInstance());
 	
-	public XMLContext() {
+	public XmlicContext() {
 	}
 	
 	public static DocumentBuilder getDocumentBuilder() {
@@ -78,6 +80,10 @@ public class XMLContext implements Serializable {
 	
 	public Node getCurrentNode() {
 		return current.get();
+	}
+	
+	public void addClass(String attr) {
+		
 	}
 	
 	public void addKey(String name, Key key) {
@@ -318,7 +324,7 @@ public class XMLContext implements Serializable {
 		@Override
 		public Object getVariableValue(String namespaceURI, String prefix, String localName) throws UnresolvableException {
 			if (namespaceURI == null && VARIABLE_NAME.equals(localName)) {
-				return XMLContext.this;
+				return XmlicContext.this;
 			}
 			return varMap.get(new QName(namespaceURI, localName));
 		}

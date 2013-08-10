@@ -33,13 +33,13 @@ import net.arnx.xmlic.internal.org.jaxen.util.SingletonList;
 public class XmlicXPath implements XPath, Serializable {
 	private static final long serialVersionUID = 1L;
 	
-	private final XMLContext xcontext;
+	private final XmlicContext xcontext;
 	
 	private final XPathExpr xpath;
 
 	private Navigator navigator;
 	
-	public XmlicXPath(XMLContext xcontext, String xpathExpr, boolean pattern) {
+	public XmlicXPath(XmlicContext xcontext, String xpathExpr, boolean pattern) {
 		this.xcontext = xcontext;
 		this.navigator = new DocumentNavigator() {
 			private static final long serialVersionUID = 1L;
