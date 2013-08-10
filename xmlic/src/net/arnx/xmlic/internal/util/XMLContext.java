@@ -17,7 +17,6 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import net.arnx.xmlic.Nodes;
-import net.arnx.xmlic.Visitor;
 import net.arnx.xmlic.XML;
 import net.arnx.xmlic.XPathSyntaxException;
 import net.arnx.xmlic.internal.function.CurrentFunction;
@@ -137,7 +136,7 @@ public class XMLContext implements Serializable {
 		}
 	}
 	
-	public Visitor<Node> compileXPathPattern(String text) {
+	public NodeMatcher compileXPathPattern(String text) {
 		final Pattern pattern;
 		final Context context = new Context(support);
 		try {
@@ -150,9 +149,9 @@ public class XMLContext implements Serializable {
 			throw new IllegalArgumentException(e);
 		}
 		
-		return new Visitor<Node>() {
+		return new NodeMatcher() {
 			@Override
-			public boolean visit(int index, Node node) {
+			public boolean match(Node node) {
 				try {
 					return pattern.matches(node, context);
 				} catch (JaxenException e) {

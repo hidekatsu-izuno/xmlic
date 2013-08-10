@@ -10,6 +10,8 @@ import java.util.Map;
 
 import javax.xml.XMLConstants;
 
+import net.arnx.xmlic.internal.util.NodeMatcher;
+
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -464,13 +466,11 @@ public class Nodes extends ArrayList<Node> {
 	public boolean is(String pattern) {
 		if (pattern == null || isEmpty()) return false;
 		
-		Visitor<Node> visitor = getOwner().compileXPathPattern(pattern);
-		int i = 0;
+		NodeMatcher m = getOwner().compileXPathPattern(pattern);
 		for (Node self : this) {
-			if (visitor.visit(i, self)) {
+			if (m.match(self)) {
 				return true;
 			}
-			i++;
 		}
 		return false;
 	}
@@ -514,9 +514,9 @@ public class Nodes extends ArrayList<Node> {
 	public int index(String pattern) {
 		if (pattern == null || pattern.isEmpty() || isEmpty()) return -1;
 		
-		Visitor<Node> visitor = getOwner().compileXPathPattern(pattern);
+		NodeMatcher m = getOwner().compileXPathPattern(pattern);
 		for (int i = 0; i < size(); i++) {
-			if (visitor.visit(i, get(i))) {
+			if (m.match(get(i))) {
 				return i;
 			}
 		}
@@ -557,18 +557,16 @@ public class Nodes extends ArrayList<Node> {
 			return new Nodes(getOwner(), this, 0);
 		}
 		
-		Visitor<Node> visitor = getOwner().compileXPathPattern(pattern);
+		NodeMatcher m = getOwner().compileXPathPattern(pattern);
 		Nodes nodes = new Nodes(getOwner(), this, size());
-		int i = 0;
 		for (Node self : this) {
 			NodeList children = self.getChildNodes();
 			for (int j = 0; j < children.getLength(); j++) {
-				if (visitor.visit(i, children.item(j))) {
+				if (m.match(children.item(j))) {
 					nodes.add(self);
 					break;
 				}
 			}
-			i++;
 		}
 		unique(nodes);
 		return nodes;
@@ -659,16 +657,14 @@ public class Nodes extends ArrayList<Node> {
 			return new Nodes(this, this);
 		}
 		
-		Visitor<Node> visitor = getOwner().compileXPathPattern(pattern);
+		NodeMatcher m = getOwner().compileXPathPattern(pattern);
 		
 		Nodes results = new Nodes(getOwner(), this, size() * 2);
 		results.addAll(this);
-		int i = 0;
 		for (Node node : back) {
-			if (visitor.visit(i, node)) {
+			if (m.match(node)) {
 				results.add(node);
 			}
-			i++;
 		}
 		unique(results);
 		return results;
@@ -736,22 +732,18 @@ public class Nodes extends ArrayList<Node> {
 			return new Nodes(getOwner(), this, 0);
 		}
 		
-		Visitor<Node> visitor = getOwner().compileXPathPattern(pattern);
+		NodeMatcher m = getOwner().compileXPathPattern(pattern);
 		Nodes results = new Nodes(getOwner(), this, size());
-		
-		int i = 0;
 		for (Node self : this) {
-			if (visitor.visit(i, self)) {
+			if (m.match(self)) {
 				results.add(self);
 			}
-			i++;
 		}
-		
 		unique(results);
 		return results;
 	}
 	
-	public Nodes filter(Visitor<Nodes> func) {
+	public Nodes filter(Filter<Nodes> func) {
 		if (func == null || isEmpty()) {
 			return new Nodes(getOwner(), this, 0);
 		}
@@ -759,7 +751,7 @@ public class Nodes extends ArrayList<Node> {
 		Nodes results = new Nodes(getOwner(), this, size());
 		int i = 0;
 		for (Node self : this) {
-			if (func.visit(i, getOwner().translate(self))) {
+			if (func.accept(i, getOwner().translate(self))) {
 				results.add(self);
 			}
 			i++;
@@ -775,17 +767,13 @@ public class Nodes extends ArrayList<Node> {
 			return new Nodes(getOwner(), this, 0);
 		}
 		
-		Visitor<Node> visitor = getOwner().compileXPathPattern(pattern);
+		NodeMatcher m = getOwner().compileXPathPattern(pattern);
 		Nodes results = new Nodes(getOwner(), this, size());
-		
-		int i = 0;
 		for (Node self : this) {
-			if (!visitor.visit(i, self)) {
+			if (!m.match(self)) {
 				results.add(self);
 			}
-			i++;
 		}
-		
 		unique(results);
 		return results;
 	}
@@ -834,10 +822,8 @@ public class Nodes extends ArrayList<Node> {
 			return new Nodes(getOwner(), this, 0);
 		}
 		
-		Visitor<Node> visitor = getOwner().compileXPathPattern(pattern);
+		NodeMatcher m = getOwner().compileXPathPattern(pattern);
 		Nodes results = new Nodes(getOwner(), this, size() * 2);
-		
-		int i = 0;
 		for (Node self : this) {
 			if (self == null) continue;
 			
@@ -845,7 +831,7 @@ public class Nodes extends ArrayList<Node> {
 			while ((parent = parent.getParentNode()) != null) {
 				if (parent.getNodeType() != Node.ELEMENT_NODE) break;
 				
-				if (visitor.visit(i, parent)) {
+				if (m.match(parent)) {
 					results.add(parent);
 					if (mode == SelectMode.UNTIL) break;
 				} else if (mode == SelectMode.UNTIL) {
@@ -853,8 +839,6 @@ public class Nodes extends ArrayList<Node> {
 				}
 				if (mode == SelectMode.FIRST) break;
 			}
-			
-			i++;
 		}
 		if (mode != SelectMode.FIRST && results.size() > 1) {
 			unique(results);
@@ -868,10 +852,8 @@ public class Nodes extends ArrayList<Node> {
 			return new Nodes(getOwner(), this, 0);
 		}
 		
-		Visitor<Node> visitor = getOwner().compileXPathPattern(pattern);
+		NodeMatcher m = getOwner().compileXPathPattern(pattern);
 		Nodes results = new Nodes(getOwner(), this, size() * 2);
-		
-		int i = 0;
 		for (Node self : this) {
 			if (self == null) continue;
 			
@@ -879,13 +861,11 @@ public class Nodes extends ArrayList<Node> {
 			do {
 				if (current.getNodeType() != Node.ELEMENT_NODE) break;
 				
-				if (visitor.visit(i, current)) {
+				if (m.match(current)) {
 					results.add(current);
 					break;
 				}
 			} while ((current = current.getParentNode()) != null);
-			
-			i++;
 		}
 		unique(results);
 		return results;
@@ -913,10 +893,8 @@ public class Nodes extends ArrayList<Node> {
 			return new Nodes(getOwner(), this, 0);
 		}
 		
-		Visitor<Node> visitor = getOwner().compileXPathPattern(pattern);
+		NodeMatcher m = getOwner().compileXPathPattern(pattern);
 		Nodes results = new Nodes(getOwner(), this, size() * 2);
-		
-		int i = 0;
 		for (Node self : this) {
 			if (!self.hasChildNodes()) continue;
 			
@@ -926,12 +904,10 @@ public class Nodes extends ArrayList<Node> {
 				if (child == null) continue;
 				if (child.getNodeType() != Node.ELEMENT_NODE) continue;
 				
-				if (visitor.visit(i, child)) {
+				if (m.match(child)) {
 					results.add(child);
 				}
 			}
-			
-			i++;
 		}
 		return results;
 	}
@@ -957,10 +933,8 @@ public class Nodes extends ArrayList<Node> {
 			return new Nodes(getOwner(), this, 0);
 		}
 		
-		Visitor<Node> visitor = getOwner().compileXPathPattern(pattern);
+		NodeMatcher m = getOwner().compileXPathPattern(pattern);
 		Nodes results = new Nodes(getOwner(), this, size() * 2);
-		
-		int i = 0;
 		for (Node self : this) {
 			if (!self.hasChildNodes()) continue;
 			
@@ -969,12 +943,10 @@ public class Nodes extends ArrayList<Node> {
 				Node child = children.item(j);
 				if (child == null) continue;
 				
-				if (visitor.visit(i, child)) {
+				if (m.match(child)) {
 					results.add(child);
 				}
 			}
-			
-			i++;
 		}
 		return results;
 	}
@@ -1031,10 +1003,8 @@ public class Nodes extends ArrayList<Node> {
 			return new Nodes(getOwner(), this, 0);
 		}
 		
-		Visitor<Node> visitor = getOwner().compileXPathPattern(pattern);
+		NodeMatcher m = getOwner().compileXPathPattern(pattern);
 		Nodes results = new Nodes(getOwner(), this, size());
-		
-		int i = 0;
 		for (Node self : this) {
 			if (self == null) continue;
 			
@@ -1042,7 +1012,7 @@ public class Nodes extends ArrayList<Node> {
 			while ((prev = prev.getPreviousSibling()) != null) {
 				if (prev.getNodeType() != Node.ELEMENT_NODE) continue;
 				
-				if (visitor.visit(i, prev)) {
+				if (m.match(prev)) {
 					results.add(prev);
 					if (mode == SelectMode.UNTIL) break;
 				} else if (mode == SelectMode.UNTIL) {
@@ -1050,8 +1020,6 @@ public class Nodes extends ArrayList<Node> {
 				}
 				if (mode == SelectMode.FIRST) break;
 			}
-			
-			i++;
 		}
 		if (mode != SelectMode.FIRST && results.size() > 1) {
 			unique(results);
@@ -1104,10 +1072,8 @@ public class Nodes extends ArrayList<Node> {
 			return new Nodes(getOwner(), this, 0);
 		}
 		
-		Visitor<Node> visitor = getOwner().compileXPathPattern(pattern);
+		NodeMatcher m = getOwner().compileXPathPattern(pattern);
 		Nodes results = new Nodes(getOwner(), this, size() * 2);
-		
-		int i = 0;
 		for (Node self : this) {
 			if (self == null) continue;
 			
@@ -1115,7 +1081,7 @@ public class Nodes extends ArrayList<Node> {
 			while ((next = next.getNextSibling()) != null) {
 				if (next.getNodeType() != Node.ELEMENT_NODE) continue;
 				
-				if (visitor.visit(i, next)) {
+				if (m.match(next)) {
 					results.add(next);
 					if (mode == SelectMode.UNTIL) break;
 				} else if (mode == SelectMode.UNTIL) {
@@ -1123,8 +1089,6 @@ public class Nodes extends ArrayList<Node> {
 				}
 				if (mode == SelectMode.FIRST) break;
 			}
-			
-			i++;
 		}
 		if (mode != SelectMode.FIRST && results.size() > 1) {
 			unique(results);
@@ -1160,10 +1124,8 @@ public class Nodes extends ArrayList<Node> {
 			return new Nodes(getOwner(), this, 0);
 		}
 		
-		Visitor<Node> visitor = getOwner().compileXPathPattern(pattern);
+		NodeMatcher m = getOwner().compileXPathPattern(pattern);
 		Nodes results = new Nodes(getOwner(), this, size());
-		
-		int i = 0;
 		for (Node self : this) {
 			if (self == null) continue;
 			
@@ -1171,7 +1133,7 @@ public class Nodes extends ArrayList<Node> {
 			while ((prev = prev.getPreviousSibling()) != null) {
 				if (prev.getNodeType() != Node.ELEMENT_NODE) continue;
 				
-				if (visitor.visit(i, prev)) {
+				if (m.match(prev)) {
 					results.add(prev);
 				}
 			}
@@ -1180,12 +1142,10 @@ public class Nodes extends ArrayList<Node> {
 			while ((next = next.getNextSibling()) != null) {
 				if (next.getNodeType() != Node.ELEMENT_NODE) continue;
 
-				if (visitor.visit(i, next)) {
+				if (m.match(next)) {
 					results.add(next);
 				}
 			}
-			
-			i++;
 		}
 		unique(results);
 		return results;
@@ -1624,6 +1584,7 @@ public class Nodes extends ArrayList<Node> {
 		return this;
 	}
 	
+	@Override
 	public Nodes clone() {
 		Nodes clone = new Nodes(getOwner(), back, size());
 		for (Node self : this) {

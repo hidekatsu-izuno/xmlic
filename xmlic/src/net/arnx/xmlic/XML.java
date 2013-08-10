@@ -27,6 +27,7 @@ import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.dom.DOMSource;
 
 import net.arnx.xmlic.internal.org.jaxen.XPath;
+import net.arnx.xmlic.internal.util.NodeMatcher;
 import net.arnx.xmlic.internal.util.XMLContext;
 import net.arnx.xmlic.internal.util.XMLContext.Key;
 
@@ -288,7 +289,7 @@ public class XML implements Serializable {
 		}
 	}
 	
-	Visitor<Node> compileXPathPattern(String text) {
+	NodeMatcher compileXPathPattern(String text) {
 		return xmlContext.compileXPathPattern(text);
 	}
 

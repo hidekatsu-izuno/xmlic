@@ -4,7 +4,6 @@ import static org.junit.Assert.*;
 
 import java.io.IOException;
 
-import net.arnx.xmlic.Visitor;
 import net.arnx.xmlic.XML;
 
 import org.junit.Test;
@@ -129,9 +128,9 @@ public class NodesTest {
 	public void testFilter() throws IOException {
 		XML xml = XML.load(getClass().getResource("test.xml"));
 		assertEquals("<li>t4</li>", xml.find("//li[position()=1]").filter("text()='t4'").toString());
-		assertEquals("<li>t4</li>", xml.find("//li[position()=1]").filter(new Visitor<Nodes>() {
+		assertEquals("<li>t4</li>", xml.find("//li[position()=1]").filter(new Filter<Nodes>() {
 			@Override
-			public boolean visit(int index, Nodes node) {
+			public boolean accept(int index, Nodes node) {
 				return "t4".equals(node.text());
 			};
 		}).toString());

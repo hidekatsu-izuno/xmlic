@@ -34,7 +34,7 @@ public class XmlicXPath implements XPath, Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	private final XMLContext xcontext;
-
+	
 	private final XPathExpr xpath;
 
 	private Navigator navigator;
