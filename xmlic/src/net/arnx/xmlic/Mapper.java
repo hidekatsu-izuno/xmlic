@@ -1,5 +1,5 @@
 package net.arnx.xmlic;
 
 public interface Mapper<T> {
-	public T map(int i, T current);
+	public T map(Context<T> context);
 }

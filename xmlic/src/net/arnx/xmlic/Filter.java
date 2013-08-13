@@ -1,5 +1,5 @@
 package net.arnx.xmlic;
 
 public interface Filter<T> {
-	public boolean accept(int index, T current);
+	public boolean accept(Context<T> current);
 }

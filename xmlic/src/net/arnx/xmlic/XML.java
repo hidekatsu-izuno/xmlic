@@ -126,6 +126,14 @@ public class XML implements Serializable {
 		return doc;
 	}
 	
+	public String encoding() {
+		String encoding = doc.getXmlEncoding();
+		if (encoding == null) {
+			encoding = doc.getInputEncoding();
+		}
+		return encoding;
+	}
+	
 	public void addNamespaceMapping(String prefix, String uri) {
 		xmlContext.addNamespace(prefix, uri);
 	}
@@ -150,6 +158,20 @@ public class XML implements Serializable {
 		Nodes nodes = new Nodes(this, null, 1);
 		nodes.add(doc);
 		return nodes;
+	}
+	
+	public Nodes root() {
+		Nodes nodes = new Nodes(this, doc(), 1);
+		nodes.add(doc.getDocumentElement());
+		return nodes;
+	}
+	
+	public Nodes root(Nodes nodes) {
+		if (nodes == null || nodes.isEmpty()) {
+			return doc().empty();
+		} else {
+			return doc().append(nodes);
+		}
 	}
 	
 	public Nodes parse(String text) {
@@ -199,14 +221,6 @@ public class XML implements Serializable {
 		return doc().select(xpath);
 	}
 	
-	public Nodes children() {
-		return doc().children();
-	}
-	
-	public Nodes children(String pattern) {
-		return doc().children(pattern);
-	}
-	
 	public Nodes contents() {
 		return doc().contents();
 	}
@@ -219,28 +233,12 @@ public class XML implements Serializable {
 		return doc().find(pattern);
 	}
 	
-	public Nodes append(String xml) {
-		return doc().append(xml);
-	}
-	
-	public Nodes append(Nodes nodes) {
-		return doc().append(nodes);
-	}
-	
-	public Nodes prepend(String xml) {
-		return doc().prepend(xml);
-	}
-	
 	public Nodes empty() {
 		return doc().empty();
 	}
 	
 	public Nodes remove(String pattern) {
 		return doc().remove(pattern);
-	}
-	
-	public Nodes prepend(Nodes nodes) {
-		return doc().prepend(nodes);
 	}
 	
 	public String text() {

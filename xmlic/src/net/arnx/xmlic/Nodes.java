@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 
 import javax.xml.XMLConstants;
@@ -378,35 +379,42 @@ public class Nodes extends ArrayList<Node> {
 		if (localName.isEmpty()) return null;
 		if (uri == null) uri = XMLConstants.NULL_NS_URI;
 		
-		int i = 0;
-		for (Node self : this) {
-			if (self == null) continue;
-			if (!(self instanceof Element))  continue;
-			
-			Element elem = (Element)self;
-			String oval = elem.getAttributeNS(uri, localName);
-			
-			String nval = func.map(i, oval);
-			if (nval == null) {
-				elem.removeAttributeNS(uri, localName);
-			} else if (!nval.equals(oval)) {
-				String euri = elem.getNamespaceURI();
-				if (euri == null) euri = XMLConstants.NULL_NS_URI;
-				
-				String luri = uri;
-				String lname = name;
-				String lprefix = self.lookupPrefix(uri);
-				if (lprefix == null && prefix != null && !prefix.isEmpty()) {
-					lname = prefix + ":" + localName;
-				} else if (uri.equals(euri)) {
-					luri = null;
-					lname = localName;
+		StringCallbackContext context = new StringCallbackContext(this);
+		try {
+			for (Node self : this) {
+				if (self == null || !(self instanceof Element)) {
+					context.next(null);
+					continue;
 				}
 				
-				elem.setAttributeNS(luri, lname, nval);
+				Element elem = (Element)self;
+				String oval = elem.getAttributeNS(uri, localName);
+				context.next(oval);
+				String nval = func.map(context);
+				if (nval == null) {
+					elem.removeAttributeNS(uri, localName);
+				} else if (!nval.equals(oval)) {
+					String euri = elem.getNamespaceURI();
+					if (euri == null) euri = XMLConstants.NULL_NS_URI;
+					
+					String luri = uri;
+					String lname = name;
+					String lprefix = self.lookupPrefix(uri);
+					if (lprefix == null && prefix != null && !prefix.isEmpty()) {
+						lname = prefix + ":" + localName;
+					} else if (uri.equals(euri)) {
+						luri = null;
+						lname = localName;
+					}
+					
+					elem.setAttributeNS(luri, lname, nval);
+				}
+				if (context.cancel) break;
 			}
-			
-			i++;
+		} catch (RuntimeException e) {
+			if (e != CANCEL && e.getCause() != CANCEL) {
+				throw e;
+			}
 		}
 		
 		return this;
@@ -496,12 +504,19 @@ public class Nodes extends ArrayList<Node> {
 	public boolean is(Filter<Nodes> func) {
 		if (func == null || isEmpty()) return false;
 		
-		int i = 0;
-		for (Node self : this) {
-			if (func.accept(i, new Nodes(getOwner(), self))) {
-				return true;
+		NodesCallbackContext context = new NodesCallbackContext(this);
+		try {
+			for (Node self : this) {
+				context.next(self);
+				if (func.accept(context)) {
+					return true;
+				}
+				if (context.cancel) break;
 			}
-			i++;
+		} catch (RuntimeException e) {
+			if (e != CANCEL && e.getCause() != CANCEL) {
+				throw e;
+			}
 		}
 		return false;
 	}
@@ -559,14 +574,17 @@ public class Nodes extends ArrayList<Node> {
 			return this;
 		}
 		
+		NodesCallbackContext context = new NodesCallbackContext(this);
 		try {
-			int i = 0;
 			for (Node self : this) {
-				func.visit(i, new Nodes(getOwner(), self));
-				i++;
+				context.next(self);
+				func.visit(context);
+				if (context.cancel) break;
 			}
 		} catch (RuntimeException e) {
-			if (e != Visitor.BREAK) throw e;
+			if (e != CANCEL && e.getCause() != CANCEL) {
+				throw e;
+			}
 		}
 		return this;
 	}
@@ -774,12 +792,19 @@ public class Nodes extends ArrayList<Node> {
 		}
 		
 		Nodes results = new Nodes(getOwner(), this, size());
-		int i = 0;
-		for (Node self : this) {
-			if (func.accept(i, new Nodes(getOwner(), self))) {
-				results.add(self);
+		NodesCallbackContext context = new NodesCallbackContext(this);
+		try {
+			for (Node self : this) {
+				context.next(self);
+				if (func.accept(context)) {
+					results.add(self);
+				}
+				if (context.cancel) break;
 			}
-			i++;
+		} catch (RuntimeException e) {
+			if (e != CANCEL && e.getCause() != CANCEL) {
+				throw e;
+			}
 		}
 		unique(results);
 		return results;
@@ -1668,6 +1693,26 @@ public class Nodes extends ArrayList<Node> {
 		return this;
 	}
 	
+	public String xpath() {
+		if (isEmpty() || get(0) == null) {
+			return "";
+		}
+		
+		List<Node> list = new ArrayList<Node>();
+		Node current = get(0);
+		while (current != null && current instanceof Element) {
+			list.add(current);
+			current = current.getParentNode();
+		}
+		
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < list.size(); i++) {
+			Node node = list.get(list.size()-i-1);
+			sb.append("/").append(node.getNodeName());
+		}
+		return sb.toString();
+	}
+	
 	public Nodes normalize() {
 		if (isEmpty()) return this;
 		
@@ -1786,5 +1831,116 @@ public class Nodes extends ArrayList<Node> {
 		Node bup = (b != null) ? b.getParentNode() : null;
 		return (a == bup || (bup != null && bup instanceof Element 
 				&& (a.compareDocumentPosition(bup) & Node.DOCUMENT_POSITION_CONTAINED_BY) != 0));
+	}
+	
+	static final RuntimeException CANCEL = new RuntimeException();
+	
+	class StringCallbackContext implements Context<String> {
+		Nodes source;
+		String value;
+		boolean first;
+		boolean last;
+		int index = -1;
+		
+		boolean cancel = false;
+		
+		public StringCallbackContext(Nodes source) {
+			this.source = source;
+		}
+		
+		void next(String value) {
+			this.value = value;
+			index++;
+			first = (index == 0);
+			last = (index == source.size()-1);
+		}
+		
+		@Override
+		public boolean isFirst() {
+			return first;
+		}
+
+		@Override
+		public boolean isLast() {
+			return last;
+		}
+		
+		@Override
+		public Nodes getSource() {
+			return source;
+		}
+
+		@Override
+		public int getIndex() {
+			return index;
+		}
+		
+		@Override
+		public String getItem() {
+			return value;
+		}
+
+		@Override
+		public RuntimeException cancel() {
+			cancel = true;
+			return CANCEL;
+		}
+	}
+	
+	class NodesCallbackContext implements Context<Nodes> {
+		Nodes source;
+		Node node;
+		Nodes nodes;
+		boolean first;
+		boolean last;
+		int index = -1;
+		
+		boolean cancel = false;
+		
+		public NodesCallbackContext(Nodes source) {
+			this.source = source;
+		}
+		
+		void next(Node node) {
+			this.node = node;
+			this.nodes = null;
+			index++;
+			first = (index == 0);
+			last = (index == source.size()-1);
+		}
+		
+		@Override
+		public boolean isFirst() {
+			return first;
+		}
+
+		@Override
+		public boolean isLast() {
+			return last;
+		}
+		
+		@Override
+		public Nodes getSource() {
+			return source;
+		}
+
+		@Override
+		public int getIndex() {
+			return index;
+		}
+
+		@Override
+		public Nodes getItem() {
+			if (nodes == null) {
+				nodes = new Nodes(getOwner(), node);
+			}
+			return nodes;
+		}
+
+		@Override
+		public RuntimeException cancel() {
+			cancel = true;
+			return CANCEL;
+		}
 	}
 }
