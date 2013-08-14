@@ -360,7 +360,7 @@ public class Nodes extends ArrayList<Node> {
 		return this;
 	}
 	
-	public Nodes attr(String name, Mapper<String> func) {
+	public Nodes attr(String name, Filter<String> func) {
 		if (name == null) throw new IllegalArgumentException("name is null");
 		if (func == null) return this;
 		
@@ -379,18 +379,17 @@ public class Nodes extends ArrayList<Node> {
 		if (localName.isEmpty()) return null;
 		if (uri == null) uri = XMLConstants.NULL_NS_URI;
 		
-		StringCallbackContext context = new StringCallbackContext(this);
+		ContextImpl context = new ContextImpl(this);
 		try {
 			for (Node self : this) {
+				context.next();
 				if (self == null || !(self instanceof Element)) {
-					context.next(null);
 					continue;
 				}
 				
 				Element elem = (Element)self;
 				String oval = elem.getAttributeNS(uri, localName);
-				context.next(oval);
-				String nval = func.map(context);
+				String nval = func.filter(oval, context);
 				if (nval == null) {
 					elem.removeAttributeNS(uri, localName);
 				} else if (!nval.equals(oval)) {
@@ -412,9 +411,7 @@ public class Nodes extends ArrayList<Node> {
 				if (context.cancel) break;
 			}
 		} catch (RuntimeException e) {
-			if (e != CANCEL && e.getCause() != CANCEL) {
-				throw e;
-			}
+			if (e != CANCEL) throw e;
 		}
 		
 		return this;
@@ -501,22 +498,20 @@ public class Nodes extends ArrayList<Node> {
 		return false;
 	}
 	
-	public boolean is(Filter<Nodes> func) {
+	public boolean is(Judge<Nodes> func) {
 		if (func == null || isEmpty()) return false;
 		
-		NodesCallbackContext context = new NodesCallbackContext(this);
+		ContextImpl context = new ContextImpl(this);
 		try {
 			for (Node self : this) {
-				context.next(self);
-				if (func.accept(context)) {
+				context.next();
+				if (func.accept(new Nodes(getOwner(), self), context)) {
 					return true;
 				}
 				if (context.cancel) break;
 			}
 		} catch (RuntimeException e) {
-			if (e != CANCEL && e.getCause() != CANCEL) {
-				throw e;
-			}
+			if (e != CANCEL) throw e;
 		}
 		return false;
 	}
@@ -574,17 +569,15 @@ public class Nodes extends ArrayList<Node> {
 			return this;
 		}
 		
-		NodesCallbackContext context = new NodesCallbackContext(this);
+		ContextImpl context = new ContextImpl(this);
 		try {
 			for (Node self : this) {
-				context.next(self);
-				func.visit(context);
+				context.next();
+				func.visit(new Nodes(getOwner(), self), context);
 				if (context.cancel) break;
 			}
 		} catch (RuntimeException e) {
-			if (e != CANCEL && e.getCause() != CANCEL) {
-				throw e;
-			}
+			if (e != CANCEL) throw e;
 		}
 		return this;
 	}
@@ -786,25 +779,23 @@ public class Nodes extends ArrayList<Node> {
 		return results;
 	}
 	
-	public Nodes filter(Filter<Nodes> func) {
+	public Nodes filter(Judge<Nodes> func) {
 		if (func == null || isEmpty()) {
 			return new Nodes(getOwner(), this, 0);
 		}
 		
 		Nodes results = new Nodes(getOwner(), this, size());
-		NodesCallbackContext context = new NodesCallbackContext(this);
+		ContextImpl context = new ContextImpl(this);
 		try {
 			for (Node self : this) {
-				context.next(self);
-				if (func.accept(context)) {
+				context.next();
+				if (func.accept(new Nodes(getOwner(), self), context)) {
 					results.add(self);
 				}
 				if (context.cancel) break;
 			}
 		} catch (RuntimeException e) {
-			if (e != CANCEL && e.getCause() != CANCEL) {
-				throw e;
-			}
+			if (e != CANCEL) throw e;
 		}
 		unique(results);
 		return results;
@@ -1835,21 +1826,19 @@ public class Nodes extends ArrayList<Node> {
 	
 	static final RuntimeException CANCEL = new RuntimeException();
 	
-	class StringCallbackContext implements Context<String> {
+	class ContextImpl implements Context {
 		Nodes source;
-		String value;
 		boolean first;
 		boolean last;
 		int index = -1;
 		
 		boolean cancel = false;
 		
-		public StringCallbackContext(Nodes source) {
+		public ContextImpl(Nodes source) {
 			this.source = source;
 		}
 		
-		void next(String value) {
-			this.value = value;
+		void next() {
 			index++;
 			first = (index == 0);
 			last = (index == source.size()-1);
@@ -1873,68 +1862,6 @@ public class Nodes extends ArrayList<Node> {
 		@Override
 		public int getIndex() {
 			return index;
-		}
-		
-		@Override
-		public String getItem() {
-			return value;
-		}
-
-		@Override
-		public RuntimeException cancel() {
-			cancel = true;
-			return CANCEL;
-		}
-	}
-	
-	class NodesCallbackContext implements Context<Nodes> {
-		Nodes source;
-		Node node;
-		Nodes nodes;
-		boolean first;
-		boolean last;
-		int index = -1;
-		
-		boolean cancel = false;
-		
-		public NodesCallbackContext(Nodes source) {
-			this.source = source;
-		}
-		
-		void next(Node node) {
-			this.node = node;
-			this.nodes = null;
-			index++;
-			first = (index == 0);
-			last = (index == source.size()-1);
-		}
-		
-		@Override
-		public boolean isFirst() {
-			return first;
-		}
-
-		@Override
-		public boolean isLast() {
-			return last;
-		}
-		
-		@Override
-		public Nodes getSource() {
-			return source;
-		}
-
-		@Override
-		public int getIndex() {
-			return index;
-		}
-
-		@Override
-		public Nodes getItem() {
-			if (nodes == null) {
-				nodes = new Nodes(getOwner(), node);
-			}
-			return nodes;
 		}
 
 		@Override

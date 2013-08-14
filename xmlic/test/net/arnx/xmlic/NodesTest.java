@@ -110,8 +110,8 @@ public class NodesTest {
 		final StringBuilder sb = new StringBuilder();
 		xml.find("ul|li").each(new Visitor<Nodes>() {
 			@Override
-			public void visit(Context<Nodes> context) {
-				sb.append(context.getIndex()).append("=").append(context.getItem().name()).append(";");
+			public void visit(Nodes current, Context context) {
+				sb.append(context.getIndex()).append("=").append(current.name()).append(";");
 			}
 		});
 		assertEquals("0=ul;1=li;2=li;3=li;4=ul;5=li;6=li;7=li;8=ul;9=li;10=li;11=li;", sb.toString());
@@ -119,9 +119,9 @@ public class NodesTest {
 		sb.setLength(0);
 		xml.find("ul|li").each(new Visitor<Nodes>() {
 			@Override
-			public void visit(Context<Nodes> context) {
+			public void visit(Nodes current, Context context) {
 				if (context.getIndex() == 5) throw context.cancel();
-				sb.append(context.getIndex()).append("=").append(context.getItem().name()).append(";");
+				sb.append(context.getIndex()).append("=").append(current.name()).append(";");
 			}
 		});
 		assertEquals("0=ul;1=li;2=li;3=li;4=ul;", sb.toString());
@@ -151,10 +151,10 @@ public class NodesTest {
 	public void testFilter() throws IOException {
 		XML xml = XML.load(getClass().getResource("test.xml"));
 		assertEquals("<li>t4</li>", xml.find("//li[position()=1]").filter("text()='t4'").toString());
-		assertEquals("<li>t4</li>", xml.find("//li[position()=1]").filter(new Filter<Nodes>() {
+		assertEquals("<li>t4</li>", xml.find("//li[position()=1]").filter(new Judge<Nodes>() {
 			@Override
-			public boolean accept(Context<Nodes> context) {
-				return "t4".equals(context.getItem().text());
+			public boolean accept(Nodes current, Context context) {
+				return "t4".equals(current.text());
 			};
 		}).toString());
 		assertEquals("<ul class=\"s21\">\n\t\t<li>t7</li>\n\t\t<li>t8</li>\n\t\t<li>t9</li>\n\t</ul>", xml.find("//ul[position()=1]").filter("@class='s21'").toString());
