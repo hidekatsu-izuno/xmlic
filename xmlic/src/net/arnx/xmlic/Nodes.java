@@ -379,17 +379,17 @@ public class Nodes extends ArrayList<Node> {
 		if (localName.isEmpty()) return null;
 		if (uri == null) uri = XMLConstants.NULL_NS_URI;
 		
-		ContextImpl context = new ContextImpl(this);
+		StateImpl state = new StateImpl(this);
 		try {
 			for (Node self : this) {
-				context.next();
+				state.next();
 				if (self == null || !(self instanceof Element)) {
 					continue;
 				}
 				
 				Element elem = (Element)self;
 				String oval = elem.getAttributeNS(uri, localName);
-				String nval = func.filter(oval, context);
+				String nval = func.filter(oval, state);
 				if (nval == null) {
 					elem.removeAttributeNS(uri, localName);
 				} else if (!nval.equals(oval)) {
@@ -408,7 +408,7 @@ public class Nodes extends ArrayList<Node> {
 					
 					elem.setAttributeNS(luri, lname, nval);
 				}
-				if (context.cancel) break;
+				if (state.cancel) break;
 			}
 		} catch (RuntimeException e) {
 			if (e != CANCEL) throw e;
@@ -501,14 +501,14 @@ public class Nodes extends ArrayList<Node> {
 	public boolean is(Judge<Nodes> func) {
 		if (func == null || isEmpty()) return false;
 		
-		ContextImpl context = new ContextImpl(this);
+		StateImpl state = new StateImpl(this);
 		try {
 			for (Node self : this) {
-				context.next();
-				if (func.accept(new Nodes(getOwner(), self), context)) {
+				state.next();
+				if (func.accept(new Nodes(getOwner(), self), state)) {
 					return true;
 				}
-				if (context.cancel) break;
+				if (state.cancel) break;
 			}
 		} catch (RuntimeException e) {
 			if (e != CANCEL) throw e;
@@ -569,7 +569,7 @@ public class Nodes extends ArrayList<Node> {
 			return this;
 		}
 		
-		ContextImpl context = new ContextImpl(this);
+		StateImpl context = new StateImpl(this);
 		try {
 			for (Node self : this) {
 				context.next();
@@ -785,14 +785,14 @@ public class Nodes extends ArrayList<Node> {
 		}
 		
 		Nodes results = new Nodes(getOwner(), this, size());
-		ContextImpl context = new ContextImpl(this);
+		StateImpl state = new StateImpl(this);
 		try {
 			for (Node self : this) {
-				context.next();
-				if (func.accept(new Nodes(getOwner(), self), context)) {
+				state.next();
+				if (func.accept(new Nodes(getOwner(), self), state)) {
 					results.add(self);
 				}
-				if (context.cancel) break;
+				if (state.cancel) break;
 			}
 		} catch (RuntimeException e) {
 			if (e != CANCEL) throw e;
@@ -1826,7 +1826,7 @@ public class Nodes extends ArrayList<Node> {
 	
 	static final RuntimeException CANCEL = new RuntimeException();
 	
-	class ContextImpl implements Context {
+	class StateImpl implements State {
 		Nodes source;
 		boolean first;
 		boolean last;
@@ -1834,7 +1834,7 @@ public class Nodes extends ArrayList<Node> {
 		
 		boolean cancel = false;
 		
-		public ContextImpl(Nodes source) {
+		public StateImpl(Nodes source) {
 			this.source = source;
 		}
 		

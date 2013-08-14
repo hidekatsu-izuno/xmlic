@@ -1,6 +1,6 @@
 package net.arnx.xmlic;
 
-public interface Context {
+public interface State {
 	public boolean isFirst();
 	public boolean isLast();
 	public Nodes getSource();
