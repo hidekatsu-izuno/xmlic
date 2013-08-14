@@ -2,6 +2,7 @@ package net.arnx.xmlic;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -21,6 +22,41 @@ import org.w3c.dom.NodeList;
 
 public class Nodes extends ArrayList<Node> {
 	private static final long serialVersionUID = 1L;
+	
+	private static final Class<?> RHINO_WRAPPED_EXCEPTION;
+	private static final Method RHINO_UNWRAP;
+	
+	static {
+		ClassLoader cl = Thread.currentThread().getContextClassLoader();
+		Class<?> cls = null;
+		Method m = null;
+		try {
+			cls = Class.forName("org.mozilla.javascript.WrappedException", true, cl);
+			m = cls.getMethod("unwrap");
+		} catch (Throwable t) {
+		}
+		RHINO_WRAPPED_EXCEPTION = cls;
+		RHINO_UNWRAP = m;
+	}
+	
+	static RuntimeException unwrap(RuntimeException e) {
+		if (RHINO_WRAPPED_EXCEPTION != null 
+				&& RHINO_UNWRAP != null
+				&& RHINO_WRAPPED_EXCEPTION.isAssignableFrom(e.getClass())) {
+			
+			try {
+				Object o = RHINO_UNWRAP.invoke(e);
+				if (o instanceof Error) {
+					throw (Error)o;
+				} else if (o instanceof RuntimeException) {
+					return (RuntimeException)o;
+				}
+			} catch (Exception e1) {
+				// no handle
+			}
+		}
+		return e;
+	}
 	
 	static enum SelectMode {
 		FIRST,
@@ -411,6 +447,7 @@ public class Nodes extends ArrayList<Node> {
 				if (state.cancel) break;
 			}
 		} catch (RuntimeException e) {
+			e = unwrap(e);
 			if (e != CANCEL) throw e;
 		}
 		
@@ -511,6 +548,7 @@ public class Nodes extends ArrayList<Node> {
 				if (state.cancel) break;
 			}
 		} catch (RuntimeException e) {
+			e = unwrap(e);
 			if (e != CANCEL) throw e;
 		}
 		return false;
@@ -577,6 +615,7 @@ public class Nodes extends ArrayList<Node> {
 				if (context.cancel) break;
 			}
 		} catch (RuntimeException e) {
+			e = unwrap(e);
 			if (e != CANCEL) throw e;
 		}
 		return this;
@@ -795,6 +834,7 @@ public class Nodes extends ArrayList<Node> {
 				if (state.cancel) break;
 			}
 		} catch (RuntimeException e) {
+			e = unwrap(e);
 			if (e != CANCEL) throw e;
 		}
 		unique(results);
