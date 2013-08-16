@@ -1866,7 +1866,7 @@ public class Nodes extends ArrayList<Node> {
 	
 	static final RuntimeException CANCEL = new RuntimeException();
 	
-	class StateImpl implements State {
+	class StateImpl implements Status {
 		Nodes source;
 		boolean first;
 		boolean last;

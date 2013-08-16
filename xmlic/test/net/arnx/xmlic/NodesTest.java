@@ -110,7 +110,7 @@ public class NodesTest {
 		final StringBuilder sb = new StringBuilder();
 		xml.find("ul|li").each(new Visitor<Nodes>() {
 			@Override
-			public void visit(Nodes current, State context) {
+			public void visit(Nodes current, Status context) {
 				sb.append(context.getIndex()).append("=").append(current.name()).append(";");
 			}
 		});
@@ -119,7 +119,7 @@ public class NodesTest {
 		sb.setLength(0);
 		xml.find("ul|li").each(new Visitor<Nodes>() {
 			@Override
-			public void visit(Nodes current, State context) {
+			public void visit(Nodes current, Status context) {
 				if (context.getIndex() == 5) throw context.cancel();
 				sb.append(context.getIndex()).append("=").append(current.name()).append(";");
 			}
@@ -153,7 +153,7 @@ public class NodesTest {
 		assertEquals("<li>t4</li>", xml.find("//li[position()=1]").filter("text()='t4'").toString());
 		assertEquals("<li>t4</li>", xml.find("//li[position()=1]").filter(new Judge<Nodes>() {
 			@Override
-			public boolean accept(Nodes current, State state) {
+			public boolean accept(Nodes current, Status state) {
 				return "t4".equals(current.text());
 			};
 		}).toString());
