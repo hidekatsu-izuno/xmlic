@@ -11,7 +11,7 @@
 <body>
 <div class="nav">
 <h1 class="logo"><a href="#"><img src="img/xmlic.jpg" alt="XMLIC" width="115" height="34" /></a></h1>
-<div class="bar">version 0.9.0</div>
+<div class="bar">version 0.9.1</div>
 <ul class="menu">
 	<li><a href="#introduction">XMLICとは</a></li>
 	<li><a href="#download">ダウンロード</a></li>
@@ -126,17 +126,17 @@ loader.setIgnoringComments(true);
 XML xml = new XML(loader.load(new FileInputStream(new File("test.xml"))));
 </pre>
 
-<p>外部にあるドキュメントではなく、部分的な XML をインラインで読み込む場合には、<code>parse</code> メソッドを使います。すでに DOM ノード値して構築されている場合は、 <code>translate</code>　メソッドを使って取り込みます。</p>
+<p>外部にあるドキュメントではなく、部分的な XML をインラインで読み込む場合には、<code>parse</code> メソッドを使います。すでに DOM ノード値して構築されている場合は、 <code>Nodes</code>　コンストラクタを使って取り込みます。</p>
 <pre class="source">
 <span class="comment">// 部分的な XML をインラインで読み込みます。</span>
 Nodes nodes = xml.parse("&lt;div&gt;部分的なXML&lt;/div&gt;&lt;div&gt;部分的なXML&lt;/div&gt;");
 
 <span class="comment">// 構築済みのノードを <code>Nodes</code> オブジェクトに変換します。</span>
 Node node = ...;
-Nodes nodes = xml.translate(node);
+Nodes nodes = new Nodes(xml, node);
 
 NodeList list = ...;
-Nodes nodes = xml.translate(list);
+Nodes nodes = new Nodes(xml, list);
 </pre>
 
 <h2 id="traversal">DOM の検索<span class="sub"> - Traversal</span></h2>
@@ -572,12 +572,18 @@ writer.writeTo(new FileOutputStream("test.xml"), xml.getDocument());
 <h2 id="license">ライセンス</h2>
 <p>XMLIC は、<a href="http://www.apache.org/licenses/LICENSE-2.0">Apache License, Version 2.0</a>下で配布します。</p>
 <p><b>自分のライブラリへの組み込んでいただいたり、その際にパッケージ名の変更や処理の変更など行っていただいても何ら構いません。</b>ライセンスの範囲内でご自由にお使いください。</p>
-<p>なお、 XMLIC はパッケージを変更した <a href="http://jaxen.codehaus.org/">jaxen</a> を同梱しています。その部分に関しては jaxen のライセンスに従ってください（Apache ライセンスに準じた緩いライセンスとなっていますので、特別な考慮は必要はありません）。</p>
+<p>なお、 XMLIC は <a href="http://jaxen.codehaus.org/">jaxen</a> をパッケージを変更し同梱しています。その部分に関しては jaxen のライセンスに従ってください（Apache ライセンスに準じた緩いライセンスとなっていますので、特別な考慮は必要はありません）。</p>
 
 <h2 id="report">バグ・要望の報告先</h2>
 <p>バグや要望などは<a href="http://sourceforge.jp/projects/xmlic">XMLIC プロジェクトサイト</a>の<a href="http://sourceforge.jp/projects/xmlic/ticket/">チケット</a>に報告ください。</p>
 
 <h2 id="releasenote">リリースノート</h2>
+
+<h3>2013/8/17 version 0.9.1</h3>
+<ul>
+<li>each、filter など繰り返し処理の引数インターフェイスを Java で利用しやすいように見直しました。</li>
+<li>DOM2 Traversal API に対応した traverse メソッドを追加しました。</li>
+</ul>
 
 <h3>2013/8/8 version 0.9.0</h3>
 <ul>

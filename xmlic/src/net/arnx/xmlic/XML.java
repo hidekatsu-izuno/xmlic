@@ -15,7 +15,10 @@ import java.net.URISyntaxException;
 import java.net.URL;
 
 import javax.xml.XMLConstants;
-import javax.xml.parsers.DocumentBuilder;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamConstants;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
@@ -30,10 +33,10 @@ import net.arnx.xmlic.internal.util.XmlicContext;
 import net.arnx.xmlic.internal.util.XmlicContext.Key;
 
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 
 public class XML implements Serializable {
 	private static final long serialVersionUID = 1L;
@@ -194,21 +197,77 @@ public class XML implements Serializable {
 		sb.append(">").append(text).append("</x>");
 		
 		try {
-			DocumentBuilder db = XmlicContext.getDocumentBuilder();
-			InputSource src = new InputSource(new StringReader(sb.toString()));
-			src.setPublicId(doc.getBaseURI());
-			Document ndoc = db.parse(src);
+			XMLInputFactory factory = XMLInputFactory.newInstance();
+			factory.setProperty(XMLInputFactory.IS_NAMESPACE_AWARE, true);
+			factory.setProperty(XMLInputFactory.IS_COALESCING, false);
+			factory.setProperty(XMLInputFactory.IS_VALIDATING, false);
+			factory.setProperty(XMLInputFactory.SUPPORT_DTD, false);
+			factory.setProperty(XMLInputFactory.IS_REPLACING_ENTITY_REFERENCES, true);
+			factory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false);
+			XMLStreamReader reader = factory.createXMLStreamReader(doc.getBaseURI(), new StringReader(sb.toString()));
 			
-			NodeList list = ndoc.getDocumentElement().getChildNodes();
+			Element root = null;
+			Element current = null;
+			while (reader.hasNext()) {
+				switch (reader.next()) {
+				case XMLStreamConstants.START_ELEMENT: {
+
+					Element elem = doc.createElementNS(
+							reader.getNamespaceURI(), 
+							reader.getLocalName());
+					
+					for (int i = 0; i < reader.getAttributeCount(); i++) {
+						elem.setAttributeNS(
+								reader.getAttributeNamespace(i), 
+								reader.getAttributeLocalName(i), 
+								reader.getAttributeValue(i));
+					}
+					
+					if (root == null) {
+						root = elem;
+					} else {
+						current.appendChild(elem);
+					}
+					current = elem;
+					break;
+				}
+				case XMLStreamConstants.END_ELEMENT: {
+					current = (Element)current.getParentNode();						
+					break;
+				}
+				case XMLStreamConstants.PROCESSING_INSTRUCTION: {
+					String target = reader.getPITarget();
+					String data = reader.getPIData();
+					current.appendChild(doc.createProcessingInstruction(target, data));
+					break;
+				}
+				case XMLStreamConstants.COMMENT: {
+					String data = reader.getText();
+					current.appendChild(doc.createComment(data));
+					break;
+				}
+				case XMLStreamConstants.CDATA: {
+					String data = reader.getText();
+					current.appendChild(doc.createCDATASection(data));
+					break;
+				}
+				case XMLStreamConstants.CHARACTERS:
+				case XMLStreamConstants.SPACE: {
+					String data = reader.getText();
+					current.appendChild(doc.createTextNode(data));
+					break;
+				}
+				}
+			}
+			
+			NodeList list = root.getChildNodes();
 			Nodes nodes = new Nodes(this, null, list.getLength());
 			for (int i = 0; i < list.getLength(); i++) {
 				Node node = list.item(i);
 				nodes.add(node);
 			}
 			return nodes;
-		} catch (IOException e) {
-			throw new IllegalStateException(e);
-		} catch (SAXException e) {
+		} catch (XMLStreamException e) {
 			throw new IllegalArgumentException(e);
 		}
 	}

@@ -16,7 +16,7 @@ import org.xml.sax.SAXException;
 public class XMLLoader {
 	boolean validating = false;
 	boolean ignoringComments = false;
-	boolean coalescing = true;
+	boolean coalescing = false;
 	boolean expandEntityReferences = true;
 	boolean xincludeAware = true;
 	
