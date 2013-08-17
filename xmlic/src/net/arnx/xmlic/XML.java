@@ -263,8 +263,10 @@ public class XML implements Serializable {
 			NodeList list = root.getChildNodes();
 			Nodes nodes = new Nodes(this, null, list.getLength());
 			for (int i = 0; i < list.getLength(); i++) {
-				Node node = list.item(i);
-				nodes.add(node);
+				nodes.add(list.item(i));
+			}
+			while (root.hasChildNodes()) {
+				root.removeChild(root.getLastChild());
 			}
 			return nodes;
 		} catch (XMLStreamException e) {
