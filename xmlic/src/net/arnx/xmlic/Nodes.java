@@ -417,8 +417,9 @@ public class Nodes extends ArrayList<Node> {
 				}
 			}
 		} catch (RuntimeException e) {
-			e = StatusImpl.unwrap(e);
-			if (e != StatusImpl.CANCEL) throw e;
+			if (!StatusImpl.isCancelException(e)) {
+				throw e;
+			}
 		}
 		
 		return this;
@@ -517,8 +518,9 @@ public class Nodes extends ArrayList<Node> {
 				}
 			}
 		} catch (RuntimeException e) {
-			e = StatusImpl.unwrap(e);
-			if (e != StatusImpl.CANCEL) throw e;
+			if (!StatusImpl.isCancelException(e)) {
+				throw e;
+			}
 		}
 		return false;
 	}
@@ -588,8 +590,9 @@ public class Nodes extends ArrayList<Node> {
 				func.visit(new Nodes(getOwner(), reverse ? i.previous() : i.next()), context);
 			}
 		} catch (RuntimeException e) {
-			e = StatusImpl.unwrap(e);
-			if (e != StatusImpl.CANCEL) throw e;
+			if (!StatusImpl.isCancelException(e)) {
+				throw e;
+			}
 		}
 		return this;
 	}
@@ -806,8 +809,9 @@ public class Nodes extends ArrayList<Node> {
 				}
 			}
 		} catch (RuntimeException e) {
-			e = StatusImpl.unwrap(e);
-			if (e != StatusImpl.CANCEL) throw e;
+			if (!StatusImpl.isCancelException(e)) {
+				throw e;
+			}
 		}
 		unique(results);
 		return results;
@@ -900,8 +904,9 @@ public class Nodes extends ArrayList<Node> {
 				}
 			}
 		} catch (RuntimeException e) {
-			e = StatusImpl.unwrap(e);
-			if (e != StatusImpl.CANCEL) throw e;
+			if (!StatusImpl.isCancelException(e)) {
+				throw e;
+			}
 		}
 		
 		return this;

@@ -4,6 +4,7 @@
 	<xmlproperty file="pom.xml" />
 	<property name="debug" value="true" />
 	
+	<property name="javac.bootclasspath" location="C:/Program Files/Java/jdk1.6.0_43/jre/lib/rt.jar" />
 	<property name="tmp" location="${java.io.tmpdir}/${ant.project.name}" />
 	<property name="src" location="src" />
 	<property name="dist" location="." />
@@ -16,6 +17,7 @@
 		<mkdir dir="${tmp}/build" />
 		<javac srcdir="${src}" destdir="${tmp}/build" source="1.6" target="1.6"
 			debug="${debug}" includeantruntime="false">
+			<bootclasspath location="${javac.bootclasspath}" />
 		</javac>
 		<jar destfile="${tmp}/${project.name}-${project.version}.jar">
 			<fileset dir="${tmp}/build" includes="**/*.class" />
