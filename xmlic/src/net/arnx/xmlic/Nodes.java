@@ -27,7 +27,7 @@ import org.w3c.dom.traversal.NodeFilter;
 import org.w3c.dom.traversal.NodeIterator;
 
 /**
- * A list of org.w3c.dom.Node, that have manipulation and traversing API (like jQuery).
+ * A list of org.w3c.dom.Node, have traversal and manipulation API (like jQuery).
  */
 public class Nodes extends ArrayList<Node> {
 	private static final long serialVersionUID = 1L;
