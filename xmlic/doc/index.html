@@ -29,6 +29,7 @@
 			<li><a href="#filter">取得結果の操作</a></li>
 			<li><a href="#add">取得結果の結合</a></li>
 			<li><a href="#end">取得結果の復元</a></li>
+			<li><a href="#each">取得結果の列挙</a></li>
 		</ul>
 	</li>
 	<li><a href="#manipulation">DOMの操作</a>
@@ -169,6 +170,24 @@ xml.select("attribute::node()[1]").val();
 </pre>
 <p>jQuery では <code>val</code> メソッドは、入力タグに対する値を取得するメソッドとして用意されていますが、 XMLIC では、<code>Node</code> クラスの
 <code>get/setNodeValue()</code> に対するアクセッサとして機能します。</p>
+
+<h3 id="traverse">ノードの横断 <span class="sub"> - traverse</span></h3>
+<p>DOM Level2 では、ノードを横断し列挙する機能が追加されましたが、XMLIC　にも対応する機能が用意されています。</p>
+<pre class="source">
+<span class="comment">// ドキュメントからすべての要素にマッチするノードを順番に訪問します。</span>
+xml.traverse("*", new Visitor&lt;Nodes&gt;() {
+  public void visit(Nodes current, Status status) {
+  	System.out.println(current.name());
+  }
+});
+
+<span class="comment">// 第2引数を true にすることで逆順にたどることもできます</span>
+xml.traverse("*", true, new Visitor&lt;Nodes&gt;() {
+  public void visit(Nodes current, Status status) {
+  	System.out.println(current.name());
+  }
+});
+</pre>
 
 <h3 id="xpath">XPath と CSS セレクタとの比較</h3>
 <p>主要な XPath 式と CSS セレクタの対比表を次に示します。参考にしてください。</p>
@@ -341,6 +360,41 @@ xml.find("div").find("p").addBack("@name='test'");
 xml.find("div")
   .find("p")
 .end();
+</pre>
+
+<h3 id="each">取得結果の列挙<span class="sub"> - each</span></h3>
+<p><code>Nodes</code> クラスは、<code>ArrayList&lt;Node&gt;</code> を継承しているため、通常のリストと同様、<code>for</code> 
+文による列挙が可能です。</p>
+<pre class="source">
+<span class="comment">// 取得結果を列挙します。</span>
+for (Node node : xml.find("div")) {
+  Nodes current = new Nodes(xml, node);
+  System.out.println(current.name());
+}
+</pre>
+<p>jQuery 同様に <code>each</code> メソッドによる列挙も可能です。ただし、 jQuery とはシンタックスが異なる点に注意が必要です。</p>
+<pre class="source">
+<span class="comment">// 取得結果を列挙します。</span>
+xml.find("div").each(new Visitor&lt;Nodes&gt;() {
+  public void visit(Nodes current, Status status) {
+    System.out.println("" + status.getIndex() + ": " + current.name());
+  }
+});
+
+<span class="comment">// 第一引数に true を設定することで、逆順の列挙も可能です。</span>
+xml.find("div").each(true, new Visitor&lt;Nodes&gt;() {
+  public void visit(Nodes current, Status status) {
+    System.out.println("" + status.getIndex() + ": " + current.name());
+  }
+});
+
+<span class="comment">// 途中で break したい場合は <code>cancel</code> メソッドを使ってください。キャンセル例外が発生して処理を中断します。</span>
+xml.find("div").each(new Visitor&lt;Nodes&gt;() {
+  public void visit(Nodes current, Status status) {
+    if (status.getIndex() == 3) status.cancel();
+    System.out.println("" + status.getIndex() + ": " + current.name());
+  }
+});
 </pre>
 
 <h2 id="manipulation">DOM の操作<span class="sub"> - Manipulation</span></h2>

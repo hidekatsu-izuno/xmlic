@@ -415,7 +415,6 @@ public class Nodes extends ArrayList<Node> {
 					
 					elem.setAttributeNS(luri, lname, nval);
 				}
-				if (state.cancel) break;
 			}
 		} catch (RuntimeException e) {
 			e = StatusImpl.unwrap(e);
@@ -516,7 +515,6 @@ public class Nodes extends ArrayList<Node> {
 				if (func.accept(new Nodes(getOwner(), self), state)) {
 					return true;
 				}
-				if (state.cancel) break;
 			}
 		} catch (RuntimeException e) {
 			e = StatusImpl.unwrap(e);
@@ -588,7 +586,6 @@ public class Nodes extends ArrayList<Node> {
 			while (reverse ? i.hasPrevious() : i.hasNext()) {
 				context.next(size()-1);
 				func.visit(new Nodes(getOwner(), reverse ? i.previous() : i.next()), context);
-				if (context.cancel) break;
 			}
 		} catch (RuntimeException e) {
 			e = StatusImpl.unwrap(e);
@@ -807,7 +804,6 @@ public class Nodes extends ArrayList<Node> {
 				if (func.accept(new Nodes(getOwner(), self), state)) {
 					results.add(self);
 				}
-				if (state.cancel) break;
 			}
 		} catch (RuntimeException e) {
 			e = StatusImpl.unwrap(e);
@@ -863,7 +859,11 @@ public class Nodes extends ArrayList<Node> {
 					Node prev = null;
 					Node node;
 					while ((node = (reverse) ? ite.previousNode() : ite.nextNode()) != null) {
-						if (m != null && m.getMatchType() == MatchType.ATTRIBUTE_NODE) {
+						if (m.getMatchType() == MatchType.ATTRIBUTE_NODE
+								|| m.getMatchType() == MatchType.NAMESPACE_NODE
+								|| m.getMatchType() == MatchType.ANY_NODE
+								|| m.getMatchType() == MatchType.UNKNOWN_NODE) {
+							
 							NamedNodeMap attrs = node.getAttributes();
 							for (int pos = 0; pos < attrs.getLength(); pos++) {
 								Node attr = attrs.item(pos);
@@ -872,17 +872,20 @@ public class Nodes extends ArrayList<Node> {
 									func.visit(new Nodes(getOwner(), prev), status);
 									prev = null;
 								}
-								if (m == null || m.match(attr)) {
+								if (m.match(attr)) {
 									prev = attr;
 								}
 							}
-						} else {
+						}
+						
+						if (m.getMatchType() != MatchType.ATTRIBUTE_NODE
+								&& m.getMatchType() != MatchType.NAMESPACE_NODE) {
 							if (prev != null) {
 								status.next(-1);
 								func.visit(new Nodes(getOwner(), prev), status);
 								prev = null;
 							}
-							if (m == null || m.match(node)) {
+							if (m.match(node)) {
 								prev = node;
 							}
 						}

@@ -6,8 +6,7 @@ public interface Status {
 	public boolean isFirst();
 	public boolean isLast();
 	public int getIndex();
-	public RuntimeException cancel();
-	
+	public void cancel() throws RuntimeException;
 	
 	static class StatusImpl implements Status {
 		static final RuntimeException CANCEL = new RuntimeException();
@@ -32,8 +31,6 @@ public interface Status {
 		boolean last;
 		int index = -1;
 		
-		boolean cancel = false;
-		
 		void next(int last) {
 			this.index++;
 			this.first = (index == 0);
@@ -56,9 +53,8 @@ public interface Status {
 		}
 
 		@Override
-		public RuntimeException cancel() {
-			cancel = true;
-			return CANCEL;
+		public void cancel() throws RuntimeException {
+			throw CANCEL;
 		}
 		
 		static RuntimeException unwrap(RuntimeException e) {
