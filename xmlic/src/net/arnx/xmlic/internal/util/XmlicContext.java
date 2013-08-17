@@ -157,6 +157,34 @@ public class XmlicContext implements Serializable {
 		
 		return new NodeMatcher() {
 			@Override
+			public MatchType getMatchType() {
+				switch (pattern.getMatchType()) {
+				case Pattern.ANY_NODE:
+					return MatchType.ANY_NODE;
+				case Pattern.DOCUMENT_NODE:
+					return MatchType.DOCUMENT_NODE;
+				case Pattern.DOCUMENT_TYPE_NODE:
+					return MatchType.DOCUMENT_TYPE_NODE;
+				case Pattern.NAMESPACE_NODE:
+					return MatchType.NAMESPACE_NODE;
+				case Pattern.ELEMENT_NODE:
+					return MatchType.ELEMENT_NODE;
+				case Pattern.ATTRIBUTE_NODE:
+					return MatchType.ATTRIBUTE_NODE;
+				case Pattern.TEXT_NODE:
+					return MatchType.TEXT_NODE;
+				case Pattern.PROCESSING_INSTRUCTION_NODE:
+					return MatchType.PROCESSING_INSTRUCTION_NODE;
+				case Pattern.COMMENT_NODE:
+					return MatchType.COMMENT_NODE;
+				case Pattern.NO_NODE:
+					return MatchType.NO_NODE;
+				default:
+					return MatchType.UNKNOWN_NODE;
+				}
+			}
+			
+			@Override
 			public boolean match(Node node) {
 				try {
 					return pattern.matches(node, context);

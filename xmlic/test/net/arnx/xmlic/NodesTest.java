@@ -125,6 +125,16 @@ public class NodesTest {
 			}
 		});
 		assertEquals("0=ul;1=li;2=li;3=li;4=ul;", sb.toString());
+		
+		sb.setLength(0);
+		xml.find("ul|li").each(true, new Visitor<Nodes>() {
+			@Override
+			public void visit(Nodes current, Status context) {
+				if (context.getIndex() == 5) throw context.cancel();
+				sb.append(context.getIndex()).append("=").append(current.name()).append(";");
+			}
+		});
+		assertEquals("0=li;1=li;2=li;3=ul;4=li;", sb.toString());
 	}
 	
 	@Test
@@ -222,6 +232,38 @@ public class NodesTest {
 		assertEquals(false, xml.find("//li[position()=1]").is("*[position()=2]"));
 		assertEquals(false, xml.find("//li[position()=1]/..").is("text()='t1'"));
 		assertEquals(false, xml.find("//li[position()=1]").is("ol/li"));
+	}
+	
+	@Test
+	public void testTraverse() throws IOException {
+		XML xml = XML.load(getClass().getResource("test.xml"));
+		final StringBuilder sb = new StringBuilder();
+		xml.traverse("*", new Visitor<Nodes>() {
+			@Override
+			public void visit(Nodes value, Status status) {
+				if (status.getIndex() > 0) sb.append(",");
+				sb.append("" + status.getIndex() + "(" + status.isFirst() + "," + status.isLast() + "):" + value.localName());
+			}
+		});
+		assertEquals("0(true,false):body,1(false,false):div,2(false,false):ul,3(false,false):li,4(false,false):li,5(false,false):li,6(false,false):ul,7(false,false):li,8(false,false):li,9(false,false):li,10(false,false):div,11(false,false):ul,12(false,false):li,13(false,false):li,14(false,true):li", sb.toString());
+		sb.setLength(0);
+		xml.traverse("ul", new Visitor<Nodes>() {
+			@Override
+			public void visit(Nodes value, Status status) {
+				if (status.getIndex() > 0) sb.append(",");
+				sb.append("" + status.getIndex() + "(" + status.isFirst() + "," + status.isLast() + "):" + value.localName());
+			}
+		});
+		assertEquals("0(true,false):ul,1(false,false):ul,2(false,false):ul", sb.toString());
+		sb.setLength(0);
+		xml.traverse("@*", new Visitor<Nodes>() {
+			@Override
+			public void visit(Nodes value, Status status) {
+				if (status.getIndex() > 0) sb.append(",");
+				sb.append("" + status.getIndex() + "(" + status.isFirst() + "," + status.isLast() + "):" + value.localName());
+			}
+		});
+		assertEquals("0(true,false):class,1(false,false):class,2(false,false):class,3(false,false):class,4(false,true):class", sb.toString());
 	}
 	
 	@Test

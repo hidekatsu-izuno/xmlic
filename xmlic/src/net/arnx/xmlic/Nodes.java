@@ -2,62 +2,33 @@ package net.arnx.xmlic;
 
 import java.io.IOException;
 import java.io.StringWriter;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 
 import javax.xml.XMLConstants;
 
+import net.arnx.xmlic.Status.StatusImpl;
 import net.arnx.xmlic.internal.util.NodeMatcher;
+import net.arnx.xmlic.internal.util.NodeMatcher.MatchType;
 
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.w3c.dom.traversal.DocumentTraversal;
+import org.w3c.dom.traversal.NodeFilter;
+import org.w3c.dom.traversal.NodeIterator;
 
 public class Nodes extends ArrayList<Node> {
 	private static final long serialVersionUID = 1L;
-	
-	private static final Class<?> RHINO_WRAPPED_EXCEPTION;
-	private static final Method RHINO_UNWRAP;
-	
-	static {
-		ClassLoader cl = Thread.currentThread().getContextClassLoader();
-		Class<?> cls = null;
-		Method m = null;
-		try {
-			cls = Class.forName("org.mozilla.javascript.WrappedException", true, cl);
-			m = cls.getMethod("unwrap");
-		} catch (Throwable t) {
-		}
-		RHINO_WRAPPED_EXCEPTION = cls;
-		RHINO_UNWRAP = m;
-	}
-	
-	static RuntimeException unwrap(RuntimeException e) {
-		if (RHINO_WRAPPED_EXCEPTION != null 
-				&& RHINO_UNWRAP != null
-				&& RHINO_WRAPPED_EXCEPTION.isAssignableFrom(e.getClass())) {
-			
-			try {
-				Object o = RHINO_UNWRAP.invoke(e);
-				if (o instanceof Error) {
-					throw (Error)o;
-				} else if (o instanceof RuntimeException) {
-					return (RuntimeException)o;
-				}
-			} catch (Exception e1) {
-				// no handle
-			}
-		}
-		return e;
-	}
-	
+		
 	static enum SelectMode {
 		FIRST,
 		UNTIL,
@@ -415,10 +386,10 @@ public class Nodes extends ArrayList<Node> {
 		if (localName.isEmpty()) return null;
 		if (uri == null) uri = XMLConstants.NULL_NS_URI;
 		
-		StateImpl state = new StateImpl(this);
+		StatusImpl state = new StatusImpl();
 		try {
 			for (Node self : this) {
-				state.next();
+				state.next(size()-1);
 				if (self == null || !(self instanceof Element)) {
 					continue;
 				}
@@ -447,8 +418,8 @@ public class Nodes extends ArrayList<Node> {
 				if (state.cancel) break;
 			}
 		} catch (RuntimeException e) {
-			e = unwrap(e);
-			if (e != CANCEL) throw e;
+			e = StatusImpl.unwrap(e);
+			if (e != StatusImpl.CANCEL) throw e;
 		}
 		
 		return this;
@@ -538,18 +509,18 @@ public class Nodes extends ArrayList<Node> {
 	public boolean is(Judge<Nodes> func) {
 		if (func == null || isEmpty()) return false;
 		
-		StateImpl state = new StateImpl(this);
+		StatusImpl state = new StatusImpl();
 		try {
 			for (Node self : this) {
-				state.next();
+				state.next(size()-1);
 				if (func.accept(new Nodes(getOwner(), self), state)) {
 					return true;
 				}
 				if (state.cancel) break;
 			}
 		} catch (RuntimeException e) {
-			e = unwrap(e);
-			if (e != CANCEL) throw e;
+			e = StatusImpl.unwrap(e);
+			if (e != StatusImpl.CANCEL) throw e;
 		}
 		return false;
 	}
@@ -603,20 +574,25 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	public Nodes each(Visitor<Nodes> func) {
+		return each(false, func);
+	}
+	
+	public Nodes each(boolean reverse, Visitor<Nodes> func) {
 		if (func == null || isEmpty()) {
 			return this;
 		}
 		
-		StateImpl context = new StateImpl(this);
+		StatusImpl context = new StatusImpl();
 		try {
-			for (Node self : this) {
-				context.next();
-				func.visit(new Nodes(getOwner(), self), context);
+			ListIterator<Node> i = listIterator(reverse ? size() : 0);
+			while (reverse ? i.hasPrevious() : i.hasNext()) {
+				context.next(size()-1);
+				func.visit(new Nodes(getOwner(), reverse ? i.previous() : i.next()), context);
 				if (context.cancel) break;
 			}
 		} catch (RuntimeException e) {
-			e = unwrap(e);
-			if (e != CANCEL) throw e;
+			e = StatusImpl.unwrap(e);
+			if (e != StatusImpl.CANCEL) throw e;
 		}
 		return this;
 	}
@@ -824,18 +800,18 @@ public class Nodes extends ArrayList<Node> {
 		}
 		
 		Nodes results = new Nodes(getOwner(), this, size());
-		StateImpl state = new StateImpl(this);
+		StatusImpl state = new StatusImpl();
 		try {
 			for (Node self : this) {
-				state.next();
+				state.next(size()-1);
 				if (func.accept(new Nodes(getOwner(), self), state)) {
 					results.add(self);
 				}
 				if (state.cancel) break;
 			}
 		} catch (RuntimeException e) {
-			e = unwrap(e);
-			if (e != CANCEL) throw e;
+			e = StatusImpl.unwrap(e);
+			if (e != StatusImpl.CANCEL) throw e;
 		}
 		unique(results);
 		return results;
@@ -859,6 +835,73 @@ public class Nodes extends ArrayList<Node> {
 		}
 		unique(results);
 		return results;
+	}
+	
+	public Nodes traverse(String pattern, Visitor<Nodes> func) {
+		return traverse(pattern, false, func);
+	}
+	
+	public Nodes traverse(String pattern, boolean reverse, Visitor<Nodes> func) {
+		if (pattern == null || func == null) {
+			return this;
+		}
+		
+		NodeMatcher m = getOwner().compileXPathPattern(pattern);
+		if (m.getMatchType() == MatchType.NO_NODE) {
+			return this;
+		}
+		
+		int filter = toFilter(m.getMatchType());
+		
+		DocumentTraversal dt = (DocumentTraversal)getOwner().get();
+		StatusImpl status = new StatusImpl();
+		try {
+			int i = 0;
+			for (Node self : this) {
+				NodeIterator ite = dt.createNodeIterator(self, filter, null, true);
+				try {
+					Node prev = null;
+					Node node;
+					while ((node = (reverse) ? ite.previousNode() : ite.nextNode()) != null) {
+						if (m != null && m.getMatchType() == MatchType.ATTRIBUTE_NODE) {
+							NamedNodeMap attrs = node.getAttributes();
+							for (int pos = 0; pos < attrs.getLength(); pos++) {
+								Node attr = attrs.item(pos);
+								if (prev != null) {
+									status.next(-1);
+									func.visit(new Nodes(getOwner(), prev), status);
+									prev = null;
+								}
+								if (m == null || m.match(attr)) {
+									prev = attr;
+								}
+							}
+						} else {
+							if (prev != null) {
+								status.next(-1);
+								func.visit(new Nodes(getOwner(), prev), status);
+								prev = null;
+							}
+							if (m == null || m.match(node)) {
+								prev = node;
+							}
+						}
+					}
+					if (prev != null) {
+						status.next((i == size()-1) ? status.index + 1 : -1);
+						func.visit(new Nodes(getOwner(), prev), status);
+					}
+				} finally {
+					i++;
+					ite.detach();
+				}
+			}
+		} catch (RuntimeException e) {
+			e = StatusImpl.unwrap(e);
+			if (e != StatusImpl.CANCEL) throw e;
+		}
+		
+		return this;
 	}
 	
 	public Nodes parent() {
@@ -1864,50 +1907,23 @@ public class Nodes extends ArrayList<Node> {
 				&& (a.compareDocumentPosition(bup) & Node.DOCUMENT_POSITION_CONTAINED_BY) != 0));
 	}
 	
-	static final RuntimeException CANCEL = new RuntimeException();
-	
-	class StateImpl implements Status {
-		Nodes source;
-		boolean first;
-		boolean last;
-		int index = -1;
-		
-		boolean cancel = false;
-		
-		public StateImpl(Nodes source) {
-			this.source = source;
-		}
-		
-		void next() {
-			index++;
-			first = (index == 0);
-			last = (index == source.size()-1);
-		}
-		
-		@Override
-		public boolean isFirst() {
-			return first;
-		}
-
-		@Override
-		public boolean isLast() {
-			return last;
-		}
-		
-		@Override
-		public Nodes getSource() {
-			return source;
-		}
-
-		@Override
-		public int getIndex() {
-			return index;
-		}
-
-		@Override
-		public RuntimeException cancel() {
-			cancel = true;
-			return CANCEL;
-		}
+	static int toFilter(MatchType type) {
+		switch (type) {
+		case DOCUMENT_NODE:
+			return NodeFilter.SHOW_DOCUMENT;
+		case DOCUMENT_TYPE_NODE:
+			return NodeFilter.SHOW_DOCUMENT_TYPE;
+		case ELEMENT_NODE:
+		case ATTRIBUTE_NODE:
+			return NodeFilter.SHOW_ELEMENT;
+		case TEXT_NODE:
+			return NodeFilter.SHOW_TEXT;
+		case COMMENT_NODE:
+			return NodeFilter.SHOW_COMMENT;
+		case PROCESSING_INSTRUCTION_NODE:
+			return NodeFilter.SHOW_PROCESSING_INSTRUCTION;
+		default:
+			return NodeFilter.SHOW_ALL;
+		}		
 	}
 }

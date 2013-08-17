@@ -233,6 +233,10 @@ public class XML implements Serializable {
 		return doc().find(pattern);
 	}
 	
+	public Nodes traverse(String pattern, Visitor<Nodes> func) {
+		return doc().traverse(pattern, func);
+	}
+	
 	public Nodes empty() {
 		return doc().empty();
 	}
