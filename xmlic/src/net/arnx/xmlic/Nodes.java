@@ -12,9 +12,9 @@ import java.util.Map;
 
 import javax.xml.XMLConstants;
 
-import net.arnx.xmlic.Status.StatusImpl;
 import net.arnx.xmlic.internal.util.NodeMatcher;
 import net.arnx.xmlic.internal.util.NodeMatcher.MatchType;
+import net.arnx.xmlic.internal.util.StatusImpl;
 
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
@@ -895,7 +895,7 @@ public class Nodes extends ArrayList<Node> {
 						}
 					}
 					if (prev != null) {
-						status.next((i == size()-1) ? status.index + 1 : -1);
+						status.next((i == size()-1) ? status.getIndex() + 1 : -1);
 						func.visit(new Nodes(getOwner(), prev), status);
 					}
 				} finally {
