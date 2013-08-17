@@ -11,6 +11,9 @@ import org.w3c.dom.ls.DOMImplementationLS;
 import org.w3c.dom.ls.LSOutput;
 import org.w3c.dom.ls.LSSerializer;
 
+/**
+ * XMLWriter is for converting DOM to XML Text file or stream.
+ */
 public class XMLWriter {
 	private boolean prittyPrinting = false;
 	private boolean showXmlDeclaration = true;

@@ -38,6 +38,9 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
+/**
+ * XML class is for managing XML Document and namespace settings.
+ */
 public class XML implements Serializable {
 	private static final long serialVersionUID = 1L;
 	

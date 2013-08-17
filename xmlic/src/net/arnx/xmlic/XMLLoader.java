@@ -13,6 +13,9 @@ import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+/**
+ * XMLLoader is for loading XML file and building DOM.
+ */
 public class XMLLoader {
 	boolean validating = false;
 	boolean ignoringComments = false;
