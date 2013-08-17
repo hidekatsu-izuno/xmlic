@@ -72,7 +72,7 @@ public class Nodes extends ArrayList<Node> {
 	
 	Nodes(XML owner, Nodes back, int size) {
 		super(size);
-		if (owner == null) throw new NullPointerException("owner is null.");
+		if (owner == null) throw new NullPointerException("owner must not be null.");
 		this.owner = owner;
 		this.back = back;
 	}
@@ -258,7 +258,7 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	public Nodes name(String name) {
-		if (name == null) throw new IllegalArgumentException("name is null");
+		if (name == null) throw new NullPointerException("name must not be null");
 		if (isEmpty()) return this;
 		
 		String uri = null;
@@ -297,7 +297,7 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	public String attr(String name) {
-		if (name == null) throw new IllegalArgumentException("name is null");
+		if (name == null) throw new NullPointerException("name must not be null.");
 		if (isEmpty() || !(get(0) instanceof Element)) return null;
 		
 		String uri = null;
@@ -316,7 +316,7 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	public Nodes attr(String name, String value) {
-		if (name == null) throw new IllegalArgumentException("name is null");
+		if (name == null) throw new NullPointerException("name must not be null.");
 		if (value == null) value = "";
 		if (isEmpty()) return this;
 		
