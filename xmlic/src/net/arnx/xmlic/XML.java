@@ -13,6 +13,8 @@ import java.io.Writer;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.xml.XMLConstants;
 import javax.xml.stream.XMLInputFactory;
@@ -32,8 +34,10 @@ import net.arnx.xmlic.internal.util.NodeMatcher;
 import net.arnx.xmlic.internal.util.XmlicContext;
 import net.arnx.xmlic.internal.util.XmlicContext.Key;
 
+import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
@@ -108,24 +112,29 @@ public class XML implements Serializable {
 		this.xmlContext = new XmlicContext();
 		this.doc = doc;
 		
-		Object expr = compileXPath("//namespace::*", false);
-		NodeList list = evaluate(expr, doc, NodeList.class);
-		for (int i = 0; i < list.getLength(); i++) {
-			Node node = list.item(i);
-			String prefix = node.getLocalName();
-			if (XMLConstants.XMLNS_ATTRIBUTE.equals(prefix)) {
-				prefix = XMLConstants.DEFAULT_NS_PREFIX;
-			}
-			
-			if (xmlContext.getNamespaceURI(prefix) == null) {
-				xmlContext.addNamespace(prefix, node.getNodeValue());
+		Element root = doc.getDocumentElement();
+		if (root != null) {
+			NamedNodeMap attrs = root.getAttributes();
+			for (int i = 0; i < attrs.getLength(); i++) {
+				Node node = attrs.item(i);
+				if (!(node instanceof Attr)) continue;
+				
+				if (XMLConstants.XMLNS_ATTRIBUTE_NS_URI.equals(node.getNamespaceURI())) {
+					String prefix = node.getPrefix();
+					if (prefix == null || prefix.isEmpty()) {
+						prefix = XMLConstants.DEFAULT_NS_PREFIX;
+					} else {
+						prefix = node.getLocalName();
+					}
+					xmlContext.addNamespace(prefix, node.getNodeValue());
+				}
 			}
 		}
 	}
 	
-	XML(Document doc, XmlicContext nsContext) {
-		this.doc = doc;
+	XML(XmlicContext nsContext, Document doc) {
 		this.xmlContext = nsContext;
+		this.doc = doc;
 	}
 	
 	public Document get() {
@@ -146,6 +155,14 @@ public class XML implements Serializable {
 	
 	public String getNamespaceMapping(String prefix) {
 		return xmlContext.getNamespaceURI(prefix);
+	}
+	
+	public Map<String, String> getNamespaceMappings() {
+		Map<String, String> map = new HashMap<String, String>();
+		for (String prefix : xmlContext.getPrefixes()) {
+			map.put(prefix, xmlContext.getNamespaceURI(prefix));
+		}
+		return map;
 	}
 	
 	public void removeNamespaceMapping(String prefix) {
@@ -326,7 +343,7 @@ public class XML implements Serializable {
 	}
 	
 	public XML clone() {
-		return new XML((Document)doc.cloneNode(true), xmlContext);
+		return new XML(xmlContext, (Document)doc.cloneNode(true));
 	}
 	
 	public Transformer stylesheet() throws TransformerConfigurationException {
@@ -338,7 +355,7 @@ public class XML implements Serializable {
 	public XML transform(Transformer t) throws TransformerException {
 		DOMResult result = new DOMResult();
 		t.transform(new DOMSource(doc), result);
-		return new XML((Document)result.getNode(), xmlContext);
+		return new XML(xmlContext, (Document)result.getNode());
 	}
 	
 	public void writeTo(File file) throws IOException {

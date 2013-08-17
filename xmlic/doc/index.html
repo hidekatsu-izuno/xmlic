@@ -124,8 +124,9 @@ XML xml = XML.load(new URI("http://..."));
 XMLLoader loader = new XMLLoader();
 loader.setValidation(true);
 loader.setIgnoringComments(true);
+Document doc = loader.load(new FileInputStream(new File("test.xml")));
 
-XML xml = new XML(loader.load(new FileInputStream(new File("test.xml"))));
+XML xml = new XML(doc);
 </pre>
 
 <p>外部にあるドキュメントではなく、部分的な XML をインラインで読み込む場合には、<code>parse</code> メソッドを使います。すでに DOM ノード値して構築されている場合は、 <code>Nodes</code>　コンストラクタを使って取り込みます。</p>
@@ -149,13 +150,11 @@ Nodes nodes = new Nodes(xml, list);
 <span class="comment">// ドキュメントから div 要素を探し、さらに href 属性をもつ a 子要素を検索します。</span>
 xml.find("div").find("a[@href]");
 </pre>
-<p>ネームペースに対して検索する場合は、プレフィックスを付与します。
-プレフィックスは、原則としてロード時に指定したものを使用します（未指定の場合は、ドキュメントからネームペースを取得しますが、読み込んだ XML に依存してしまいますので、お勧めできません）。</p>
+<p>名前空間に対して検索する場合は、プレフィックスを付与します。デフォルトでルート要素に付与された名前空間情報は収集しますが、読み込んだドキュメントに依存するため、明示的に指定する方がよいでしょう。</p>
 <pre class="source">
-<span class="comment">// ネームスペースを指定して XML インスタンスを構築します。</span>
-Map&lt;String, String&gt; namespaces = new HashMap&lt;String, String&gt;();
-namespaces.put("h", "http://www.w3.org/1999/xhtml")
-XML xml = XML.load(new File("test.xml"), namespaces);
+<span class="comment">// XML インスタンスを構築し、利用する名前空間を指定します。</span>
+XML xml = XML.load(new File("test.xml"));
+xml.addNamespaceMapping("h", "http://www.w3.org/1999/xhtml");
 
 <span class="comment">// ドキュメントから xhtml の div 要素を探し、さらに href 属性をもつ xhtml の a 子要素を検索します。</span>
 <span class="comment">// 指定するプレフィックスは、ドキュメント内に実際に付与されたプレフィックスには依存しません。</span>

@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.URISyntaxException;
+import java.util.Map;
 
 import org.junit.Test;
 
@@ -38,6 +39,21 @@ public class XMLTest {
 
 		xml.addKey("class-id", "*[@class]", "@class");
 		assertEquals("<html:ul xmlns:html=\"http://www.w3.org/1999/xhtml\" class=\"s11\">\n\t\t<html:li>t1</html:li>\n\t\t<html:li>t2</html:li>\n\t\t<html:li>t3</html:li>\n\t</html:ul>", xml.find("key('class-id', 's11')").toString());
+	}
+	
+	@Test
+	public void testNamespaceMapping() throws IOException {
+		XML xml = XML.load(getClass().getResource("test_ns2.xml"));
+		
+		Map<String, String> map = xml.getNamespaceMappings();
+		assertEquals(3, map.size());
+		assertEquals("http://test", map.get(""));
+		assertEquals("http://www.w3.org/1999/xhtml", map.get("html"));
+		assertEquals("http://www.w3.org/2000/svg", map.get("svg"));
+		
+		assertEquals("", xml.find("li").toString());
+		assertEquals("<html:li xmlns:html=\"http://www.w3.org/1999/xhtml\">t1</html:li><html:li xmlns:html=\"http://www.w3.org/1999/xhtml\">t2</html:li><html:li xmlns:html=\"http://www.w3.org/1999/xhtml\">t3</html:li>", xml.find("html:li").toString());
+		assertEquals("<svg:li xmlns:svg=\"http://www.w3.org/2000/svg\">t4</svg:li><svg:li xmlns:svg=\"http://www.w3.org/2000/svg\">t5</svg:li><svg:li xmlns:svg=\"http://www.w3.org/2000/svg\">t6</svg:li>", xml.find("svg:li").toString());
 	}
 	
 	@Test
