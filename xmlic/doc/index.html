@@ -640,6 +640,12 @@ writer.writeTo(new FileOutputStream("test.xml"), xml.getDocument());
 
 <h2 id="releasenote">リリースノート</h2>
 
+<h3>2013/8/XX version 0.9.2</h3>
+<ul>
+<li>ロード時の名前空間走査処理をルートノードだけに限定しました。</li>
+<li>デフォルト名前空間が指定された場合の XPath 式の取り扱いを XSLT2.0 の xpath-default-namespace 属性設定時に合わせました。</li>
+</ul>
+
 <h3>2013/8/17 version 0.9.1</h3>
 <ul>
 <li>each、filter など繰り返し処理の引数インターフェイスを Java で利用しやすいように見直しました。</li>
