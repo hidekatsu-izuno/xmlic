@@ -51,9 +51,15 @@ public class XMLTest {
 		assertEquals("http://www.w3.org/1999/xhtml", map.get("html"));
 		assertEquals("http://www.w3.org/2000/svg", map.get("svg"));
 		
-		assertEquals("", xml.find("li").toString());
+		assertEquals("<li xmlns=\"http://test\">t7</li><li xmlns=\"http://test\">t8</li><li xmlns=\"http://test\">t9</li>", xml.find("li").toString());
+		assertTrue(xml.find("li").is("li"));
+		assertEquals(15, xml.find("*").size());
 		assertEquals("<html:li xmlns:html=\"http://www.w3.org/1999/xhtml\">t1</html:li><html:li xmlns:html=\"http://www.w3.org/1999/xhtml\">t2</html:li><html:li xmlns:html=\"http://www.w3.org/1999/xhtml\">t3</html:li>", xml.find("html:li").toString());
 		assertEquals("<svg:li xmlns:svg=\"http://www.w3.org/2000/svg\">t4</svg:li><svg:li xmlns:svg=\"http://www.w3.org/2000/svg\">t5</svg:li><svg:li xmlns:svg=\"http://www.w3.org/2000/svg\">t6</svg:li>", xml.find("svg:li").toString());
+
+		xml.removeNamespaceMapping("");
+		assertEquals("", xml.find("li").toString());
+		assertEquals(15, xml.find("*").size());
 	}
 	
 	@Test

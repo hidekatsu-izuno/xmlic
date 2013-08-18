@@ -295,6 +295,8 @@ public class XmlicContext implements Serializable {
 		private Map<String, String> nsMap = new ConcurrentHashMap<String, String>();
 		
 		public void addNamespace(String prefix, String namespaceURI) {
+			if (prefix == null) throw new NullPointerException("prefix must not be null.");
+			if (namespaceURI == null) throw new NullPointerException("namespaceURI must not be null.");
 			nsMap.put(prefix, namespaceURI);
 		}
 		
@@ -304,7 +306,7 @@ public class XmlicContext implements Serializable {
 		
 		public String getPrefix(String namespaceURI) {
 			if (namespaceURI == null) {
-				throw new IllegalArgumentException("namespaceURI is null.");
+				throw new NullPointerException("namespaceURI must not be null.");
 			} else if (XMLConstants.NULL_NS_URI.equals(namespaceURI)) {
 				return XMLConstants.DEFAULT_NS_PREFIX;
 			} else if (XMLConstants.XML_NS_URI.equals(namespaceURI)) {
@@ -328,16 +330,17 @@ public class XmlicContext implements Serializable {
 		@Override
 		public String translateNamespacePrefixToUri(String prefix) {
 			if (prefix == null) {
-				throw new IllegalArgumentException("prefix is null.");
+				throw new NullPointerException("prefix must not be null.");
 			} else if (XMLConstants.DEFAULT_NS_PREFIX.equals(prefix)) {
 				String uri= nsMap.get(prefix);
-				return (uri != null) ? uri : XMLConstants.NULL_NS_URI;
+				return (uri != null && !uri.isEmpty()) ? uri : null;
 			} else if (XMLConstants.XML_NS_PREFIX.equals(prefix)) {
 				return XMLConstants.XML_NS_URI;
 			} else if (XMLConstants.XMLNS_ATTRIBUTE.equals(prefix)) {
 				return XMLConstants.XMLNS_ATTRIBUTE_NS_URI;
 			} else {
-				return nsMap.get(prefix);
+				String uri = nsMap.get(prefix);
+				return (uri != null && !uri.isEmpty()) ? uri : null;
 			}
 		}
 	}

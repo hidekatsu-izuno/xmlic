@@ -1,0 +1,28 @@
+<html:body xmlns="http://test" 
+	xmlns:html="http://www.w3.org/1999/xhtml"
+	xmlns:svg="http://www.w3.org/2000/svg">
+top
+<html:div class="s1">
+	<html:ul class="s11">
+		<html:li>t1</html:li>
+		<html:li>t2</html:li>
+		<html:li>t3</html:li>
+	</html:ul>
+	<html:ul class="s12">
+		<svg:li>t4</svg:li>
+		<svg:li>t5</svg:li>
+		<svg:li>t6</svg:li>
+	</html:ul>
+</html:div>
+middle
+<html:div class="s2">
+	prefix
+	<html:ul svg:class="s21">
+		<li>t7</li>
+		<li>t8</li>
+		<li>t9</li>
+	</html:ul>
+	suffix
+</html:div>
+bottom
+</html:body>

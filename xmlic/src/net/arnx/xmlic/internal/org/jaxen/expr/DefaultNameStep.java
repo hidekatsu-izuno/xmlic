@@ -176,6 +176,8 @@ public class DefaultNameStep extends DefaultStep implements NameStep {
                     if (uri == null) {
                         throw new UnresolvableException("XPath expression uses unbound namespace prefix " + prefix);
                     }
+                } else {
+                	uri = support.translateNamespacePrefixToUri("");
                 }
                 Iterator axisNodeIter = iterableAxis.namedAccessIterator(
                                 contextNode, support, localName, prefix, uri);
@@ -228,6 +230,8 @@ public class DefaultNameStep extends DefaultStep implements NameStep {
                 if (uri == null) {
                     throw new UnresolvableException("XPath expression uses unbound namespace prefix " + prefix);
                 }
+            } else {
+                uri = support.translateNamespacePrefixToUri("");
             }
             for (int i = 0; i < contextSize; ++i) {
                 Object eachContextNode = contextNodeSet.get(i);
@@ -357,9 +361,10 @@ public class DefaultNameStep extends DefaultStep implements NameStep {
             if (myUri == null) {
             	throw new UnresolvableException("Cannot resolve namespace prefix '"+this.prefix+"'");
             }
-        } 
-        else if (matchesAnyName) {
-            return true;
+        } else if (!matchesAnyName) {
+        	myUri = contextSupport.translateNamespacePrefixToUri("");
+        } else {
+        	return true;
         }
 
         // If we map to a non-empty namespace and the node does not
