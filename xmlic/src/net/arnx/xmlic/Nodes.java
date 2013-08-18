@@ -6,11 +6,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.xml.XMLConstants;
 
@@ -33,6 +36,7 @@ import org.w3c.dom.traversal.NodeIterator;
  */
 public class Nodes extends ArrayList<Node> {
 	private static final long serialVersionUID = 1L;
+	private static final Pattern STYLE_PATTERN = Pattern.compile("(?=\\G|;)\\s*([^:]+)\\s*:\\s*([^;]+)\\s*(?:;|$)");
 		
 	static enum SelectMode {
 		FIRST,
@@ -1927,6 +1931,112 @@ public class Nodes extends ArrayList<Node> {
 			}
 			attr("class", sb.substring(1));
 		}
+		return this;
+	}
+	
+	public String css(String name) {
+		if (name == null) throw new NullPointerException("name must not be null.");
+		
+		String style = attr("style");
+		if (style == null || style.isEmpty()) return null;
+		
+		Matcher m = STYLE_PATTERN.matcher(style);
+		while (m.find()) {
+			if (name.equalsIgnoreCase(m.group(1))) {
+				return m.group(2);
+			}
+		}
+		return null;
+	}
+	
+	public Nodes css(String name, String value) {
+		if (name == null) throw new NullPointerException("name must not be null.");
+		
+		String style = attr("style");
+		if (style != null && !style.isEmpty()) {
+			Map<String, String> map = new LinkedHashMap<String, String>();
+			
+			Matcher m = STYLE_PATTERN.matcher(style);
+			while (m.find()) {
+				if (m.group(1) == null || m.group(1).isEmpty()) continue;
+				
+				String cname = m.group(1).toLowerCase();
+				String cvalue = (m.group(2) != null && !m.group(2).isEmpty()) ? m.group(2) : null;
+				map.put(cname, cvalue);
+			}
+			
+			name = name.toLowerCase();
+			value = (value != null && !value.isEmpty()) ? value : null;
+			map.put(name, value);
+			
+			StringBuilder sb = new StringBuilder();
+			for (Map.Entry<String, String> entry : map.entrySet()) {
+				if (entry.getValue() == null) continue;
+				sb.append(entry.getKey()).append(':').append(entry.getValue()).append(';');
+			}
+			if (sb.length() > 0) {
+				attr("style", sb.toString());
+			} else {
+				removeAttr("style");
+			}
+		} else {
+			name = name.toLowerCase();
+			value = (value != null && !value.isEmpty()) ? value : null;
+			if (value != null) {
+				attr("style", name + ":" + value + ";");
+			} else {
+				removeAttr("style");
+			}
+		}
+		return this;
+	}
+
+	public Nodes css(Map<String, String> props) {
+		if (props == null || props.isEmpty()) return this;
+
+		String style = attr("style");
+		if (style != null && !style.isEmpty()) {
+			Map<String, String> map = new LinkedHashMap<String, String>();
+			Matcher m = STYLE_PATTERN.matcher(style);
+			while (m.find()) {
+				if (m.group(1) == null || m.group(1).isEmpty()) continue;
+				
+				String cname = m.group(1).toLowerCase();
+				String cvalue = (m.group(2) != null && !m.group(2).isEmpty()) ? m.group(2) : null;
+				map.put(cname, cvalue);
+			}
+			
+			for (Map.Entry<String, String> entry : props.entrySet()) {
+				if (entry.getKey() == null || entry.getKey().isEmpty()) continue;
+				
+				String name = entry.getKey().toLowerCase();
+				String value = (entry.getValue() != null && !entry.getValue().isEmpty()) ? entry.getValue() : null;
+				map.put(name, value);
+			}
+
+			
+			StringBuilder sb = new StringBuilder();
+			for (Map.Entry<String, String> entry : map.entrySet()) {
+				if (entry.getValue() == null) continue;
+				sb.append(entry.getKey()).append(':');
+				sb.append(entry.getValue()).append(';');
+			}
+			if (sb.length() > 0) {
+				attr("style", sb.toString());
+			} else {
+				removeAttr("style");
+			}
+		} else {
+			StringBuilder sb = new StringBuilder();
+			for (Map.Entry<String, String> entry : props.entrySet()) {
+				if (entry.getKey() == null || entry.getKey().isEmpty()) continue;
+				if (entry.getValue() == null || entry.getValue().isEmpty()) continue;
+				sb.append(entry.getKey().toLowerCase()).append(':');
+				sb.append(entry.getValue()).append(';');
+			}
+			attr("style", sb.toString());
+		}
+		
 		return this;
 	}
 	

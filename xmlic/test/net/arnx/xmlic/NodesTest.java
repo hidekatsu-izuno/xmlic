@@ -564,4 +564,15 @@ public class NodesTest {
 		assertEquals("<li class=\"bbb\">t1</li>", xml.find("li").first().addClass("aaa bbb").removeClass(" aaa ").toString());
 		assertEquals("<li>t1</li>", xml.find("li").first().addClass("aaa bbb").removeClass("  bbb  ccc aaa ").toString());
 	}
+	
+	@Test
+	public void testCSS() throws IOException {
+		XML xml = XML.load(getClass().getResource("test.xml"));
+		assertNull(xml.find("li").first().css("foo"));
+		assertEquals("<li style=\"font-size:10px;\">t1</li>", xml.find("li").first().css("font-size", "10px").toString());
+		assertEquals("<li style=\"font-size:10px;font-weight:normal;\">t1</li>", xml.find("li").first().css("font-weight", "normal").toString());
+		assertEquals("<li style=\"font-size:8px;font-weight:normal;\">t1</li>", xml.find("li").first().css("font-size", "8px").toString());
+		assertEquals("<li style=\"font-weight:normal;\">t1</li>", xml.find("li").first().css("font-size", null).toString());
+		assertEquals("<li>t1</li>", xml.find("li").first().css("font-weight", null).toString());
+	}
 }
