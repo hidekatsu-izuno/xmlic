@@ -36,7 +36,7 @@ import org.w3c.dom.traversal.NodeIterator;
  */
 public class Nodes extends ArrayList<Node> {
 	private static final long serialVersionUID = 1L;
-	private static final Pattern STYLE_PATTERN = Pattern.compile("(?=\\G|;)\\s*([^:]+)\\s*:\\s*([^;]+)\\s*(?:;|$)");
+	private static final Pattern STYLE_PATTERN = Pattern.compile("\\G\\s*([^:]+)\\s*:\\s*([^;]+)\\s*(?:;+|$)");
 		
 	static enum SelectMode {
 		FIRST,
