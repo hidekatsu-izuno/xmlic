@@ -6,9 +6,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
+import java.util.Set;
 
 import javax.xml.XMLConstants;
 
@@ -1821,6 +1823,109 @@ public class Nodes extends ArrayList<Node> {
 					}
 				}
 			}
+		}
+		return this;
+	}
+	
+	public boolean hasClass(String classes) {
+		if (classes == null || classes.isEmpty()) return false;
+		
+		String target = attr("class");
+		if (target == null || target.isEmpty()) return false;
+		
+		int start = 0;
+		for (int i = 0; i < classes.length(); i++) {
+			char c = classes.charAt(i);
+			if (c == ' ' || i == classes.length()-1) {
+				int end = (c == ' ') ? i : i+1;
+				if (start < end) {
+					boolean match = false;
+					int pos = 0;
+					for (int j = 0; j < target.length() + 2; j++) {
+						char s = (j == 0 || j > target.length()) ? ' ' : target.charAt(j-1);
+						char d = (pos == 0 || pos > end-start) ? ' ' : classes.charAt(start+pos-1);
+						if (s == d) {
+							pos++;
+							if (pos == end-start+2) {
+								match = true;
+								break;
+							}
+						} else {
+							pos = 0;
+						}
+					}
+					if (!match) return false;
+				}
+				start = end + 1;
+			}
+		}
+		return true;
+	}
+	
+	public Nodes addClass(String classes) {
+		return toggleClassInternal(classes, true);
+	}
+	
+	public Nodes removeClass(String classes) {
+		return toggleClassInternal(classes, false);
+	}
+	
+	public Nodes toggleClass(String classes, boolean toggle) {
+		return toggleClassInternal(classes, toggle);
+	}
+	
+	private Nodes toggleClassInternal(String classes, Boolean toggle) {
+		if (classes == null || classes.isEmpty()) return this;
+		
+		Set<String> set = new LinkedHashSet<String>();
+		
+		String target = attr("class");
+		int start = 0;
+		if (target != null) {
+			for (int i = 0; i < target.length(); i++) {
+				char c = target.charAt(i);
+				if (c == ' ' || i == target.length()-1) {
+					int end = (c == ' ') ? i : i+1;
+					if (start < end) {
+						set.add(target.substring(start, end));
+					}
+					start = end + 1;
+				}
+			}
+		}
+		
+		start = 0;
+		for (int i = 0; i < classes.length(); i++) {
+			char c = classes.charAt(i);
+			if (c == ' ' || i == classes.length()-1) {
+				int end = (c == ' ') ? i : i+1;
+				if (start < end) {
+					String cls = classes.substring(start, end);
+					if (toggle == null) {
+						if (set.contains(cls)) {
+							set.remove(cls);
+						} else {
+							set.add(cls);
+						}
+					} else if (toggle) {
+						if (!set.contains(cls)) set.add(cls);
+					} else {
+						if (set.contains(cls)) set.remove(cls);
+					}
+				}
+				start = end + 1;
+			}
+		}
+		if (set.size() == 0) {
+			removeAttr("class");
+		} else if (set.size() == 1) {
+			attr("class", set.iterator().next());
+		} else {
+			StringBuilder sb = new StringBuilder();
+			for (String cls : set) {
+				sb.append(' ').append(cls);
+			}
+			attr("class", sb.substring(1));
 		}
 		return this;
 	}

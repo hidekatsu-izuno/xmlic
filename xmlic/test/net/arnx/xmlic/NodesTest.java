@@ -528,10 +528,40 @@ public class NodesTest {
 		assertEquals("<li>xml</li><li>xml</li><li>xml</li><li>xml</li><li>xml</li><li>xml</li><li>xml</li><li>xml</li><li>xml</li>", xml.find("//li").xml("xml").toString());
 	}
 	
-	
 	@Test
 	public void testXpath() throws IOException {
 		XML xml = XML.load(getClass().getResource("test.xml"));
 		assertEquals("/body/div/ul/li", xml.find("//li").xpath());
 	}	
+	
+	@Test
+	public void testHasClass() throws IOException {
+		XML xml = XML.load(getClass().getResource("test.xml"));
+		assertTrue(xml.find("li").first().addClass("aaa").hasClass("aaa"));
+		assertFalse(xml.find("li").first().addClass("aaa").hasClass("bbb"));
+		assertTrue(xml.find("li").first().addClass("aaa bbb").hasClass("aaa"));
+		assertTrue(xml.find("li").first().addClass("aaa bbb").hasClass("bbb aaa"));
+		assertFalse(xml.find("li").first().addClass("aaa bbb").hasClass("bbb ccc aaa"));
+		assertTrue(xml.find("li").first().addClass("aaa bbb").hasClass("  aaa "));
+		assertTrue(xml.find("li").first().addClass("aaa bbb").hasClass("  bbb  aaa  "));
+	}
+	
+	@Test
+	public void testAddClass() throws IOException {
+		XML xml = XML.load(getClass().getResource("test.xml"));
+		assertEquals("<li class=\"aaa\">t1</li>", xml.find("li").first().addClass("aaa").toString());
+		assertEquals("<li class=\"aaa bbb\">t1</li>", xml.find("li").first().addClass("aaa bbb").toString());
+		assertEquals("<li class=\"aaa bbb\">t1</li>", xml.find("li").first().addClass("  aaa  bbb ").toString());
+		assertEquals("<li class=\"aaa bbb ccc\">t1</li>", xml.find("li").first().addClass("ccc bbb ").toString());
+		assertEquals("<li class=\"aaa bbb\">t1</li>", xml.find("li").first().attr("class", " aaa  bbb ").addClass("aaa").toString());
+	}
+	
+	@Test
+	public void testRemoveClass() throws IOException {
+		XML xml = XML.load(getClass().getResource("test.xml"));
+		assertEquals("<li class=\"bbb\">t1</li>", xml.find("li").first().addClass("aaa bbb").removeClass("aaa").toString());
+		assertEquals("<li>t1</li>", xml.find("li").first().addClass("aaa bbb").removeClass("bbb aaa").toString());
+		assertEquals("<li class=\"bbb\">t1</li>", xml.find("li").first().addClass("aaa bbb").removeClass(" aaa ").toString());
+		assertEquals("<li>t1</li>", xml.find("li").first().addClass("aaa bbb").removeClass("  bbb  ccc aaa ").toString());
+	}
 }
