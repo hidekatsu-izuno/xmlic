@@ -462,6 +462,7 @@ public class Nodes extends ArrayList<Node> {
 	 * Set a node value of the every node.
 	 * Note that this method differs from jQuery <code>val</code> method.
 	 * 
+	 * @see org.w3c.dom.Node#setNodeValue(String)
 	 * @param value a new node value.
 	 * @return a reference to this object. 
 	 */
@@ -488,6 +489,7 @@ public class Nodes extends ArrayList<Node> {
 	 * Get a node value of the first node.
 	 * Note that this method differs from jQuery <code>val</code> method.
 	 * 
+	 * @see org.w3c.dom.Node#getNodeValue()
 	 * @return a node value of the first node.
 	 */
 	public String val() {
