@@ -458,6 +458,13 @@ public class Nodes extends ArrayList<Node> {
 		return this;
 	}
 	
+	/**
+	 * Set a node value of the every node.
+	 * Note that this method differs from jQuery <code>val</code> method.
+	 * 
+	 * @param value a new node value.
+	 * @return a reference to this object. 
+	 */
 	public Nodes val(String value) {
 		if (isEmpty() || get(0) == null) return null;
 		
@@ -477,19 +484,16 @@ public class Nodes extends ArrayList<Node> {
 		return this;
 	}
 	
+	/**
+	 * Get a node value of the first node.
+	 * Note that this method differs from jQuery <code>val</code> method.
+	 * 
+	 * @return a node value of the first node.
+	 */
 	public String val() {
 		if (isEmpty() || get(0) == null) return null;
 		
-		Node self = get(0);
-		switch (self.getNodeType()) {
-		case Node.ATTRIBUTE_NODE:
-		case Node.CDATA_SECTION_NODE:
-		case Node.COMMENT_NODE:
-		case Node.PROCESSING_INSTRUCTION_NODE:
-		case Node.TEXT_NODE:
-			return self.getNodeValue();
-		}
-		return null;
+		return get(0).getNodeValue();
 	}
 	
 	public Nodes eq(int index) {
@@ -582,6 +586,29 @@ public class Nodes extends ArrayList<Node> {
 		return -1;
 	}
 	
+	public List<String> map(Mapper<Nodes, String> func) {
+		if (func == null || isEmpty()) {
+			return new ArrayList<String>(0);
+		}
+		
+		StatusImpl status = new StatusImpl();
+		List<String> result = new ArrayList<String>();
+		try {
+			for (Node self : this) {
+				status.next(size()-1);
+				String value = func.map(new Nodes(getOwner(), self), status);
+				if (value != null) {
+					result.add(value);
+				}
+			}
+		} catch (RuntimeException e) {
+			if (!StatusImpl.isCancelException(e)) {
+				throw e;
+			}
+		} 
+		return result;
+	}
+	
 	public Nodes each(Visitor<Nodes> func) {
 		return each(false, func);
 	}
@@ -591,12 +618,12 @@ public class Nodes extends ArrayList<Node> {
 			return this;
 		}
 		
-		StatusImpl context = new StatusImpl();
+		StatusImpl status = new StatusImpl();
 		try {
 			ListIterator<Node> i = listIterator(reverse ? size() : 0);
 			while (reverse ? i.hasPrevious() : i.hasNext()) {
-				context.next(size()-1);
-				func.visit(new Nodes(getOwner(), reverse ? i.previous() : i.next()), context);
+				status.next(size()-1);
+				func.visit(new Nodes(getOwner(), reverse ? i.previous() : i.next()), status);
 			}
 		} catch (RuntimeException e) {
 			if (!StatusImpl.isCancelException(e)) {
