@@ -3,6 +3,8 @@ package net.arnx.xmlic;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import net.arnx.xmlic.XML;
 
@@ -284,6 +286,24 @@ public class NodesTest {
 		XML xml = XML.load(getClass().getResource("test_ns.xml"));
 		assertEquals("li", xml.find("//html:li[position()=1]").localName());
 		assertEquals("<html:body xmlns:html=\"http://www.w3.org/1999/xhtml\" xmlns:svg=\"http://www.w3.org/2000/svg\">\ntop\n<html:div class=\"s1\">\n\t<html:ul class=\"s11\">\n\t\t<html:span>t1</html:span>\n\t\t<html:li>t2</html:li>\n\t\t<html:li>t3</html:li>\n\t</html:ul>\n\t<html:ul class=\"s12\">\n\t\t<html:span>t4</html:span>\n\t\t<html:li>t5</html:li>\n\t\t<html:li>t6</html:li>\n\t</html:ul>\n</html:div>\nmiddle\n<html:div class=\"s2\">\n\tprefix\n\t<html:ul svg:class=\"s21\">\n\t\t<html:span>t7</html:span>\n\t\t<html:li>t8</html:li>\n\t\t<html:li>t9</html:li>\n\t</html:ul>\n\tsuffix\n</html:div>\nbottom\n</html:body>", xml.find("//html:li[position()=1]").localName("span").getOwner().toString());
+	}
+	
+	@Test
+	public void testMap() throws IOException {
+		XML xml = XML.load(getClass().getResource("test.xml"));
+		List<String> result = xml.find("li").map(new Mapper<Nodes, String>() {
+			@Override
+			public String map(Nodes value, Status status) {
+				return (status.getIndex() % 3 == 0) ? value.text() : null;
+			}
+		});
+		
+		List<String> expected = new ArrayList<String>();
+		expected.add("t1");
+		expected.add("t4");
+		expected.add("t7");
+		
+		assertEquals(expected, result);
 	}
 	
 	@Test
