@@ -61,17 +61,38 @@ public class XML implements Serializable {
 		ESCAPE_CHARS['"'] = "&quot;";
 		ESCAPE_CHARS[0x7F] = "&#";
 	}
-
+	
+	/**
+	 * Load an XML document from a input file.
+	 * 
+	 * @param file a input file.
+	 * @return a new XML instance.
+	 * @throws IOException if I/O error occurred.
+	 */
 	public static XML load(File file) throws IOException {
 		XMLLoader loader = new XMLLoader();
 		return new XML(loader.load(file.toURI()));
 	}
 	
+	/**
+	 * Load an XML document from a URI.
+	 * 
+	 * @param uri a URI.
+	 * @return a new XML instance.
+	 * @throws IOException if I/O error occurred.
+	 */
 	public static XML load(URI uri) throws IOException {
 		XMLLoader loader = new XMLLoader();
 		return new XML(loader.load(uri));
 	}
 	
+	/**
+	 * Load an XML document from a URL.
+	 * 
+	 * @param url a URL.
+	 * @return a new XML instance.
+	 * @throws IOException if I/O error occurred.
+	 */
 	public static XML load(URL url) throws IOException {
 		try {
 			XMLLoader loader = new XMLLoader();
@@ -81,11 +102,25 @@ public class XML implements Serializable {
 		}
 	}
 	
+	/**
+	 * Load an XML document from a binary input stream.
+	 * 
+	 * @param in a binary input stream.
+	 * @return a new XML instance.
+	 * @throws IOException if I/O error occurred.
+	 */
 	public static XML load(InputStream in) throws IOException {
 		XMLLoader loader = new XMLLoader();
 		return new XML(loader.load(in));
 	}
 	
+	/**
+	 * Load an XML document from a character input stream.
+	 * 
+	 * @param reader a character input stream.
+	 * @return a new XML instance.
+	 * @throws IOException if I/O error occurred.
+	 */
 	public static XML load(Reader reader) throws IOException {
 		XMLLoader loader = new XMLLoader();
 		return new XML(loader.load(reader));
@@ -94,11 +129,19 @@ public class XML implements Serializable {
 	final Document doc;
 	final XmlicContext xmlContext;
 	
+	/**
+	 * Construct a new XML instance by the empty Document.
+	 */
 	public XML() {
 		this.xmlContext = new XmlicContext();
 		this.doc = XmlicContext.getDocumentBuilder().newDocument();
 	}
 	
+	/**
+	 * Construct a new XML instance by parsing the specified text.
+	 * 
+	 * @param text an XML text.
+	 */
 	public XML(String text) {
 		this.xmlContext = new XmlicContext();
 		try {
@@ -108,6 +151,11 @@ public class XML implements Serializable {
 		}
 	}
 	
+	/**
+	 * Construct a new XML instance by the specified {@link org.w3c.dom.Document} instance.
+	 * 
+	 * @param doc an instance of Document.
+	 */
 	public XML(Document doc) {
 		this.xmlContext = new XmlicContext();
 		this.doc = doc;
@@ -137,6 +185,11 @@ public class XML implements Serializable {
 		this.doc = doc;
 	}
 	
+	/**
+	 * Get the current {@link org.w3c.dom.Document}.
+	 * 
+	 * @return the current Document.
+	 */
 	public Document get() {
 		return doc;
 	}
