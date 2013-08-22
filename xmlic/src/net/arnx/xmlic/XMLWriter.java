@@ -12,7 +12,7 @@ import org.w3c.dom.ls.LSOutput;
 import org.w3c.dom.ls.LSSerializer;
 
 /**
- * XMLWriter is for converting DOM to XML Text file or stream.
+ * XMLWriter is for converting DOM to XML stream.
  */
 public class XMLWriter {
 	private boolean prittyPrinting = false;

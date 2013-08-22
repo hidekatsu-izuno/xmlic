@@ -47,10 +47,21 @@ public class Nodes extends ArrayList<Node> {
 	final XML owner;
 	final Nodes back;
 	
+	/**
+	 * Constructs empty Nodes instance.
+	 * 
+	 * @param owner Owner Document
+	 */
 	public Nodes(XML owner) {
 		this(owner, null, 4);
 	}
 	
+	/**
+	 * Constructs a Nodes instance that has a specified DOM node.
+	 * 
+	 * @param owner Owner Document
+	 * @param node DOM node
+	 */
 	public Nodes(XML owner, Node node) {
 		this(owner, null, 1);
 		if (node != null) {
@@ -60,6 +71,12 @@ public class Nodes extends ArrayList<Node> {
 		}
 	}
 	
+	/**
+	 * Constructs a Nodes instance that has specified DOM nodes.
+	 * 
+	 * @param owner Owner Document
+	 * @param nodes DOM nodes
+	 */
 	public Nodes(XML owner, Node... nodes) {
 		this(owner, null, nodes.length);
 		for (int i = 0; i < nodes.length; i++) {
@@ -67,11 +84,23 @@ public class Nodes extends ArrayList<Node> {
 		}
 	}
 	
+	/**
+	 * Constructs a Nodes instance that has nodes of DOM node collection.
+	 * 
+	 * @param owner Owner Document
+	 * @param list DOM node collection
+	 */
 	public Nodes(XML owner, Collection<Node> list) {
 		this(owner, null, list.size());
 		addAll(list);
 	}
 	
+	/**
+	 * Constructs a Nodes instance that has nodes of DOM NodeList.
+	 * 
+	 * @param owner Owner Document
+	 * @param list DOM NodeList
+	 */
 	public Nodes(XML owner, NodeList list) {
 		this(owner, null, list.getLength());
 		for (int i = 0; i < list.getLength(); i++) {
@@ -86,6 +115,11 @@ public class Nodes extends ArrayList<Node> {
 		this.back = back;
 	}
 	
+	/**
+	 * Gets Owner Document.
+	 * 
+	 * @return Owner Document
+	 */
 	public XML getOwner() {
 		return owner;
 	}
@@ -98,6 +132,11 @@ public class Nodes extends ArrayList<Node> {
 		return super.get((index < 0) ? size() + index : index);
 	}
 	
+	/**
+	 * Gets a namespace URI of the first element.
+	 * 
+	 * @return a namespace URI of the first element
+	 */
 	public String namespace() {
 		if (isEmpty()) return null;
 		
@@ -122,6 +161,12 @@ public class Nodes extends ArrayList<Node> {
 		return null;
 	}
 	
+	/**
+	 * Sets namespace URI of the first element.
+	 * 
+	 * @param uri namespace URI
+	 * @return a reference to this object
+	 */
 	public Nodes namespace(String uri) {
 		if (uri == null) uri = "";
 		
@@ -150,10 +195,21 @@ public class Nodes extends ArrayList<Node> {
 		return this;
 	}
 	
+	/**
+	 * Removes all namespace of the current elements.
+	 * 
+	 * @return a reference to this object
+	 */
 	public Nodes removeNamespace() {
 		return namespace(null);
 	}
 	
+	/**
+	 * Removes the specified namespace of the current elements.
+	 * 
+	 * @param uri namespace URI
+	 * @return a reference to this object
+	 */
 	public Nodes removeNamespace(String uri) {
 		if (uri == null) uri = XMLConstants.DEFAULT_NS_PREFIX;
 		if (XMLConstants.XML_NS_URI.equals(uri)) {
@@ -179,6 +235,11 @@ public class Nodes extends ArrayList<Node> {
 		return this;
 	}
 	
+	/**
+	 * Gets a prefix of the first element.
+	 * 
+	 * @return a prefix of the first element
+	 */
 	public String prefix() {
 		if (isEmpty()) return null;
 		
