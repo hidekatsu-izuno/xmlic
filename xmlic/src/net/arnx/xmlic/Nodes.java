@@ -254,6 +254,12 @@ public class Nodes extends ArrayList<Node> {
 		return null;
 	}
 	
+	/**
+	 * Sets a prefix of the current elements.
+	 * 
+	 * @param prefix a prefix
+	 * @return a reference to this object
+	 */
 	public Nodes prefix(String prefix) {
 		for (Node self : this) {
 			if (self == null) continue;
@@ -275,6 +281,11 @@ public class Nodes extends ArrayList<Node> {
 		return this;
 	}
 	
+	/**
+	 * Gets a local name of the first element. 
+	 * 
+	 * @return a local name of the first element
+	 */
 	public String localName() {
 		if (isEmpty()) return null;
 		
@@ -289,6 +300,12 @@ public class Nodes extends ArrayList<Node> {
 		return null;
 	}
 	
+	/**
+	 * Sets a local name of the current elements.
+	 * 
+	 * @param localName a local name
+	 * @return a reference to this object
+	 */
 	public Nodes localName(String localName) {
 		for (Node self : this) {
 			if (self == null) continue;
@@ -308,6 +325,11 @@ public class Nodes extends ArrayList<Node> {
 		return this;
 	}
 	
+	/**
+	 * Gets a name of the first element. 
+	 * 
+	 * @return a name of the first element
+	 */
 	public String name() {
 		if (isEmpty()) return null;
 		
@@ -327,6 +349,12 @@ public class Nodes extends ArrayList<Node> {
 		return null;
 	}
 	
+	/**
+	 * Sets a name of the current elements. 
+	 * 
+	 * @param name a attribute name
+	 * @return a reference to this object
+	 */
 	public Nodes name(String name) {
 		if (name == null) throw new NullPointerException("name must not be null");
 		if (isEmpty()) return this;
@@ -366,6 +394,12 @@ public class Nodes extends ArrayList<Node> {
 		return this;
 	}
 	
+	/**
+	 * Sets a attribute value of the current elements. 
+	 * 
+	 * @param name a attribute name
+	 * @return a reference to this object
+	 */
 	public String attr(String name) {
 		if (name == null) throw new NullPointerException("name must not be null.");
 		if (isEmpty() || !(get(0) instanceof Element)) return null;
@@ -385,6 +419,12 @@ public class Nodes extends ArrayList<Node> {
 		return ((Element)get(0)).getAttributeNS(uri, localName);
 	}
 	
+	/**
+	 * Gets a attribute value of the first element. 
+	 * 
+	 * @param name a name
+	 * @return a attribute value of the first element
+	 */
 	public Nodes attr(String name, String value) {
 		if (name == null) throw new NullPointerException("name must not be null.");
 		if (value == null) value = "";
@@ -427,6 +467,12 @@ public class Nodes extends ArrayList<Node> {
 		return this;
 	}
 	
+	/**
+	 * Sets attributes of the current elements.
+	 * 
+	 * @param attrs attributes pairs
+	 * @return a reference to this object
+	 */
 	public Nodes attr(Map<String, String> attrs) {
 		if (attrs == null) return this;
 		
