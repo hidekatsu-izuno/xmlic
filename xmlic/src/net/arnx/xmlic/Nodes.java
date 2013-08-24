@@ -1767,12 +1767,24 @@ public class Nodes extends ArrayList<Node> {
 		return results;
 	}
 	
+	/**
+	 * Inserts specified XML contents to the beginning of each element in the set of the elements.
+	 * 
+	 * @param xml XML contents
+	 * @return a reference of this object
+	 */
 	public Nodes prepend(String xml) {
 		if (xml == null || xml.isEmpty()) return this;
 		
 		return prepend(getOwner().parse(xml));
 	}
 	
+	/**
+	 * Inserts specified nodes to the beginning of each element in the set of the elements.
+	 * 
+	 * @param nodes inserting nodes
+	 * @return a reference of this object
+	 */
 	public Nodes prepend(Nodes nodes) {
 		if (nodes == null) return this;
 		
@@ -1798,10 +1810,22 @@ public class Nodes extends ArrayList<Node> {
 		return this;
 	}
 	
+	/**
+	 * Insert every element in the set of nodes to the beginning of the target.
+	 * 
+	 * @param pattern a pattern
+	 * @return the inserted nodes
+	 */
 	public Nodes prependTo(String pattern) {
 		return prependTo(getOwner().find(pattern));
 	}
 	
+	/**
+	 * Insert every element in the set of nodes to the beginning of the target.
+	 * 
+	 * @param nodes target nodes
+	 * @return the inserted nodes
+	 */
 	public Nodes prependTo(Nodes nodes) {
 		if (nodes == null) return new Nodes(getOwner(), this, 0);
 		
@@ -1826,12 +1850,24 @@ public class Nodes extends ArrayList<Node> {
 		return results;
 	}
 	
+	/**
+	 * Inserts specified XML contents to the end of each element in the set of the elements.
+	 * 
+	 * @param xml XML contents
+	 * @return a reference of this object
+	 */
 	public Nodes append(String xml) {
 		if (xml == null || xml.isEmpty()) return this;
 		
 		return append(getOwner().parse(xml));
 	}
 	
+	/**
+	 * Inserts specified nodes to the end of each element in the set of the elements.
+	 * 
+	 * @param nodes inserting nodes
+	 * @return a reference of this object
+	 */
 	public Nodes append(Nodes nodes) {
 		if (nodes.isEmpty()) return this;
 		
@@ -1851,10 +1887,22 @@ public class Nodes extends ArrayList<Node> {
 		return this;
 	}
 	
+	/**
+	 * Insert every element in the set of nodes to the end of the target.
+	 * 
+	 * @param pattern a pattern
+	 * @return the inserted nodes
+	 */
 	public Nodes appendTo(String pattern) {
 		return appendTo(getOwner().find(pattern));
 	}
 	
+	/**
+	 * Insert every element in the set of nodes to the end of the target.
+	 * 
+	 * @param nodes target nodes
+	 * @return the inserted nodes
+	 */
 	public Nodes appendTo(Nodes nodes) {
 		if (nodes == null) return new Nodes(getOwner(), this, 0);
 		
@@ -1874,10 +1922,22 @@ public class Nodes extends ArrayList<Node> {
 		return result;
 	}
 	
+	/**
+	 * Inserts specified XML contents before each element in the set of the elements.
+	 * 
+	 * @param xml XML contents
+	 * @return a reference of this object
+	 */
 	public Nodes before(String xml) {
 		return before(getOwner().parse(xml));
 	}
 	
+	/**
+	 * Inserts specified nodes before each element in the set of the elements.
+	 * 
+	 * @param nodes inserting nodes
+	 * @return a reference of this object
+	 */
 	public Nodes before(Nodes nodes) {
 		if (nodes == null) return this;
 		
@@ -1900,6 +1960,12 @@ public class Nodes extends ArrayList<Node> {
 		return this;
 	}
 	
+	/**
+	 * Insert every element in the set of nodes before the target.
+	 * 
+	 * @param pattern a pattern
+	 * @return the inserted nodes
+	 */
 	public Nodes insertBefore(String pattern) {
 		if (pattern == null || pattern.isEmpty() || isEmpty()) {
 			return this;
@@ -1909,6 +1975,12 @@ public class Nodes extends ArrayList<Node> {
 		return this;
 	}
 	
+	/**
+	 * Insert every element in the set of nodes before the target.
+	 * 
+	 * @param nodes target nodes
+	 * @return the inserted nodes
+	 */
 	public Nodes insertBefore(Nodes nodes) {
 		if (nodes == null || nodes.isEmpty() || isEmpty()) {
 			return this;
@@ -1918,10 +1990,22 @@ public class Nodes extends ArrayList<Node> {
 		return this;
 	}
 	
+	/**
+	 * Inserts specified XML contents after each element in the set of the elements.
+	 * 
+	 * @param xml XML contents
+	 * @return a reference of this object
+	 */
 	public Nodes after(String xml) {
 		return after(getOwner().parse(xml));
 	}
 	
+	/**
+	 * Inserts specified nodes after each element in the set of the elements.
+	 * 
+	 * @param nodes inserting nodes
+	 * @return a reference of this object
+	 */
 	public Nodes after(Nodes nodes) {
 		if (nodes == null) return this;
 		
@@ -1949,6 +2033,12 @@ public class Nodes extends ArrayList<Node> {
 		return this;
 	}
 	
+	/**
+	 * Insert every element in the set of nodes after the target.
+	 * 
+	 * @param pattern a pattern
+	 * @return the inserted nodes
+	 */
 	public Nodes insertAfter(String pattern) {
 		if (pattern == null || pattern.isEmpty() || isEmpty()) {
 			return this;
@@ -1958,6 +2048,12 @@ public class Nodes extends ArrayList<Node> {
 		return this;
 	}
 	
+	/**
+	 * Insert every element in the set of nodes after the target.
+	 * 
+	 * @param nodes target nodes
+	 * @return the inserted nodes
+	 */
 	public Nodes insertAfter(Nodes nodes) {
 		if (nodes == null || nodes.isEmpty() || isEmpty()) {
 			return this;
