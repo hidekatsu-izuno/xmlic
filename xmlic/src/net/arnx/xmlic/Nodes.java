@@ -718,7 +718,7 @@ public class Nodes extends ArrayList<Node> {
 	 * Gets a index number of the first element matched a specified pattern.
 	 * 
 	 * @param pattern a XPath pattern
-	 * @return a index number if a matched node exists. else -1
+	 * @return the 0-based position if a matched node exists. else -1
 	 */
 	public int index(String pattern) {
 		if (pattern == null || pattern.isEmpty() || isEmpty()) return -1;
@@ -736,7 +736,7 @@ public class Nodes extends ArrayList<Node> {
 	 * Gets a index number of the first element matched the first node of a specified Nodes.
 	 * 
 	 * @param nodes a Nodes object
-	 * @return a index number if a matched node exists. else -1
+	 * @return the 0-based position if a matched node exists. else -1
 	 */
 	public int index(Nodes nodes) {
 		if (nodes == null || nodes.isEmpty()) return -1;
@@ -1729,10 +1729,23 @@ public class Nodes extends ArrayList<Node> {
 		return results;
 	}
 	
+	/**
+	 * Reduces the set of nodes to a subset specified by a range of indices.
+	 * 
+	 * @param start the 0-based start position. If negative, it indicates an offset from the end
+	 * @return the sliced set of nodes
+	 */
 	public Nodes slice(int start) {
 		return slice(start, size());
 	}
 	
+	/**
+	 * Reduces the set of nodes to a subset specified by a range of indices.
+	 * 
+	 * @param start the 0-based start position. If negative, it indicates an offset from the end
+	 * @param end the 0-based end position. If negative, it indicates an offset from the end
+	 * @return the sliced set of nodes
+	 */
 	public Nodes slice(int start, int end) {
 		if (start < 0) start = size() + start;
 		if (end < 0) end = size() + end;
