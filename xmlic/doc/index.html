@@ -182,12 +182,12 @@ xml.traverse("*", new Visitor&lt;Nodes&gt;() {
   }
 });
 
-<span class="comment">// 第2引数を true にすることで逆順にたどることもできます</span>
-xml.traverse("*", true, new Visitor&lt;Nodes&gt;() {
+<span class="comment">// 第3引数を true にすることで逆順にたどることもできます</span>
+xml.traverse("*", new Visitor&lt;Nodes&gt;() {
   public void visit(Nodes current, Status status) {
   	System.out.println(current.name());
   }
-});
+}, true);
 </pre>
 
 <h3 id="xpath">XPath と CSS セレクタとの比較</h3>
@@ -382,12 +382,12 @@ xml.find("div").each(new Visitor&lt;Nodes&gt;() {
   }
 });
 
-<span class="comment">// 第一引数に true を設定することで、逆順の列挙も可能です。</span>
-xml.find("div").each(true, new Visitor&lt;Nodes&gt;() {
+<span class="comment">// 第ニ引数に true を設定することで、逆順の列挙も可能です。</span>
+xml.find("div").each(new Visitor&lt;Nodes&gt;() {
   public void visit(Nodes current, Status status) {
     System.out.println("" + status.getIndex() + ": " + current.name());
   }
-});
+}, true);
 
 <span class="comment">// 途中で break したい場合は <code>cancel</code> メソッドを使ってください。キャンセル例外が発生して処理を中断します。</span>
 xml.find("div").each(new Visitor&lt;Nodes&gt;() {

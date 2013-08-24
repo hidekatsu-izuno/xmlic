@@ -129,13 +129,13 @@ public class NodesTest {
 		assertEquals("0=ul;1=li;2=li;3=li;4=ul;", sb.toString());
 		
 		sb.setLength(0);
-		xml.find("ul|li").each(true, new Visitor<Nodes>() {
+		xml.find("ul|li").each(new Visitor<Nodes>() {
 			@Override
 			public void visit(Nodes current, Status status) {
 				if (status.getIndex() == 5) status.cancel();
 				sb.append(status.getIndex()).append("=").append(current.name()).append(";");
 			}
-		});
+		}, true);
 		assertEquals("0=li;1=li;2=li;3=ul;4=li;", sb.toString());
 	}
 	

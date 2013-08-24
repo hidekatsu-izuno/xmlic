@@ -715,7 +715,7 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	/**
-	 * Get a index number of the first element matched a specified pattern.
+	 * Gets a index number of the first element matched a specified pattern.
 	 * 
 	 * @param pattern a XPath pattern
 	 * @return a index number if a matched node exists. else -1
@@ -733,7 +733,7 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	/**
-	 * Get a index number of the first element matched the first node of a specified Nodes.
+	 * Gets a index number of the first element matched the first node of a specified Nodes.
 	 * 
 	 * @param nodes a Nodes object
 	 * @return a index number if a matched node exists. else -1
@@ -746,7 +746,7 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	/**
-	 * Get a index number of the first element matched a specified node.
+	 * Gets a index number of the first element matched a specified node.
 	 * 
 	 * @param nodes a node
 	 * @return a index number if a matched node exists. else -1
@@ -758,6 +758,12 @@ public class Nodes extends ArrayList<Node> {
 		return -1;
 	}
 	
+	/**
+	 * Gets a mapped value's list from the current nodes.
+	 * 
+	 * @param func a mapper function
+	 * @return a mapped value's list
+	 */
 	public List<String> map(Mapper<Nodes, String> func) {
 		if (func == null || isEmpty()) {
 			return new ArrayList<String>(0);
@@ -782,10 +788,10 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	public Nodes each(Visitor<Nodes> func) {
-		return each(false, func);
+		return each(func, false);
 	}
 	
-	public Nodes each(boolean reverse, Visitor<Nodes> func) {
+	public Nodes each(Visitor<Nodes> func, boolean reverse) {
 		if (func == null || isEmpty()) {
 			return this;
 		}
@@ -1046,10 +1052,10 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	public Nodes traverse(String pattern, Visitor<Nodes> func) {
-		return traverse(pattern, false, func);
+		return traverse(pattern, func, false);
 	}
 	
-	public Nodes traverse(String pattern, boolean reverse, Visitor<Nodes> func) {
+	public Nodes traverse(String pattern, Visitor<Nodes> func, boolean reverse) {
 		if (pattern == null || func == null) {
 			return this;
 		}
