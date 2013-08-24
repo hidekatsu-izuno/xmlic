@@ -2034,7 +2034,7 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	/**
-	 * Insert every element in the set of nodes after the target.
+	 * Inserts every element in the set of nodes after the target.
 	 * 
 	 * @param pattern a pattern
 	 * @return the inserted nodes
@@ -2049,7 +2049,7 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	/**
-	 * Insert every element in the set of nodes after the target.
+	 * Inserts every element in the set of nodes after the target.
 	 * 
 	 * @param nodes target nodes
 	 * @return the inserted nodes
@@ -2063,10 +2063,22 @@ public class Nodes extends ArrayList<Node> {
 		return this;
 	}
 	
+	/**
+	 * Wraps an XML structure around each element in the set of current elements.
+	 * 
+	 * @param xml wrapping XML contents
+	 * @return a reference to this object
+	 */
 	public Nodes wrap(String xml) {
 		return wrap(getOwner().parse(xml));
 	}
 	
+	/**
+	 * Wraps an XML structure around each element in the set of current elements.
+	 * 
+	 * @param nodes wrapping nodes
+	 * @return a reference to this object
+	 */
 	public Nodes wrap(Nodes nodes) {
 		if (nodes == null || nodes.isEmpty()) return this;
 		if (nodes.get(0) == null || nodes.get(0).getNodeType() != Node.ELEMENT_NODE) return this;
@@ -2085,10 +2097,22 @@ public class Nodes extends ArrayList<Node> {
 		return this;
 	}
 	
+	/**
+	 * Wraps an XML structure around the content of each element in the set of current elements.
+	 * 
+	 * @param xml wrapping XML contents
+	 * @return a reference to this object
+	 */
 	public Nodes wrapInner(String xml) {
 		return wrapInner(getOwner().parse(xml));
 	}
 	
+	/**
+	 * Wraps an XML structure around the content of each element in the set of current elements.
+	 * 
+	 * @param nodes wrapping nodes
+	 * @return a reference to this object
+	 */
 	public Nodes wrapInner(Nodes nodes) {
 		if (nodes == null || nodes.isEmpty()) return this;
 		if (nodes.get(0) == null || nodes.get(0).getNodeType() != Node.ELEMENT_NODE) return this;
@@ -2107,10 +2131,22 @@ public class Nodes extends ArrayList<Node> {
 		return this;
 	}
 	
+	/**
+	 * Wraps an XML structure around all elements in the set of current elements
+	 * 
+	 * @param xml wrapping XML contents
+	 * @return a reference to this object.
+	 */
 	public Nodes wrapAll(String xml) {
 		return wrapAll(getOwner().parse(xml));
 	}
 	
+	/**
+	 * Wraps an XML structure around all elements in the set of current elements
+	 * 
+	 * @param nodes wrapping nodes
+	 * @return a reference to this object.
+	 */
 	public Nodes wrapAll(Nodes nodes) {
 		if (nodes == null || nodes.isEmpty()) return this;
 		if (nodes.get(0) == null || nodes.get(0).getNodeType() != Node.ELEMENT_NODE) return this;
@@ -2138,6 +2174,11 @@ public class Nodes extends ArrayList<Node> {
 		return this;
 	}
 	
+	/**
+	 * Removes the parents of the set of current elements, leaving the elements in their place.
+	 * 
+	 * @return a reference to this object
+	 */
 	public Nodes unwrap() {
 		for (Node self : this) {
 			if (self == null) continue;
