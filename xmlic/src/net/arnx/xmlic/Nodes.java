@@ -2209,13 +2209,19 @@ public class Nodes extends ArrayList<Node> {
 		return writer.toString();
 	}
 	
+	/**
+	 * Sets the XML contents of each element in the set of current nodes.
+	 * 
+	 * @param xml a XML contents
+	 * @return a reference of this object
+	 */
 	public Nodes xml(String xml) {
 		empty().append(xml);
 		return this;
 	}
 	
 	/**
-	 * Get a concatenated text of the current nodes.
+	 * Gets a concatenated text of the current nodes.
 	 * 
 	 * @return a concatenated text of the current nodes
 	 */
@@ -2235,6 +2241,12 @@ public class Nodes extends ArrayList<Node> {
 		return sb.toString();
 	}
 	
+	/**
+	 * Sets the text contents of each element in the set of current nodes.
+	 * 
+	 * @param text a text contents
+	 * @return a reference of this object
+	 */
 	public Nodes text(String text) {
 		for (Node self : this) {
 			self.setTextContent(text);
@@ -2242,6 +2254,11 @@ public class Nodes extends ArrayList<Node> {
 		return this;
 	}
 	
+	/**
+	 * Gets the XPath full path.
+	 * 
+	 * @return the XPath full path
+	 */
 	public String xpath() {
 		if (isEmpty() || get(0) == null) {
 			return "";
@@ -2448,7 +2465,7 @@ public class Nodes extends ArrayList<Node> {
 		}
 		return this;
 	}
-
+	
 	public Nodes css(Map<String, String> props) {
 		if (props == null || props.isEmpty()) return this;
 
@@ -2498,6 +2515,11 @@ public class Nodes extends ArrayList<Node> {
 		return this;
 	}
 	
+	/**
+	 * Gets the current nodes count.
+	 * 
+	 * @return the current nodes count
+	 */
 	public int getLength() {
 		return size();
 	}
