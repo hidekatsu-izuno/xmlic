@@ -195,7 +195,7 @@ public class XML implements Serializable {
 	}
 	
 	/**
-	 * Get the encoding of this document.
+	 * Gets the encoding of this document.
 	 * 
 	 * @return the encoding
 	 */
@@ -207,10 +207,24 @@ public class XML implements Serializable {
 		return encoding;
 	}
 	
-	public void addNamespaceMapping(String prefix, String uri) {
+	/**
+	 * Adds a namespace mapping for using XPath expression.
+	 * 
+	 * @param prefix a namespace prefix
+	 * @param uri a namespace URI
+	 * @return a reference to this object
+	 */
+	public XML addNamespaceMapping(String prefix, String uri) {
 		xmlContext.addNamespace(prefix, uri);
+		return this;
 	}
 	
+	/**
+	 * Gets the namespace mapping for a namespace prefix
+	 * 
+	 * @param prefix a namespace prefix
+	 * @return the namespace URI for a sprcified prefix 
+	 */
 	public String getNamespaceMapping(String prefix) {
 		return xmlContext.getNamespaceURI(prefix);
 	}
@@ -223,24 +237,43 @@ public class XML implements Serializable {
 		return map;
 	}
 	
-	public void removeNamespaceMapping(String prefix) {
+	/**
+	 * Removes a namespace mapping for using XPath expression.
+	 * 
+	 * @param prefix a namespace prefix
+	 * @return a reference to this object
+	 */
+	public XML removeNamespaceMapping(String prefix) {
 		xmlContext.removeNamespace(prefix);
+		return this;
 	}
 	
-	public void addKey(String name, String match, String use) {
+	public XML addKey(String name, String match, String use) {
 		xmlContext.addKey(name, new Key(match, use));
+		return this;
 	}
 	
-	public void removeKey(String name) {
+	public XML removeKey(String name) {
 		xmlContext.removeKey(name);
+		return this;
 	}
 	
+	/**
+	 * Gets a Nodes instance that has Document.
+	 * 
+	 * @return a Nodes instance that has Document
+	 */
 	public Nodes doc() {
 		Nodes nodes = new Nodes(this, null, 1);
 		nodes.add(doc);
 		return nodes;
 	}
 	
+	/**
+	 * Gets a Nodes instance that has the root Element of this document.
+	 * 
+	 * @return a Nodes instance that has the root Element of this document
+	 */
 	public Nodes root() {
 		Nodes nodes = new Nodes(this, doc(), 1);
 		nodes.add(doc.getDocumentElement());
