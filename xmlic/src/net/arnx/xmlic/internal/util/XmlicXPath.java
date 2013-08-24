@@ -184,6 +184,7 @@ public class XmlicXPath implements XPath, Serializable {
 			
 			Step first = (Step)steps.get(0);
 			if (first.getAxis() == Axis.SELF
+					|| first.getAxis() == Axis.ANCESTOR_OR_SELF
 					|| first.getAxis() == Axis.DESCENDANT_OR_SELF) {
 				return path;
 			}
