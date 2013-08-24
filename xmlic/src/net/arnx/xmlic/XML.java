@@ -194,6 +194,11 @@ public class XML implements Serializable {
 		return doc;
 	}
 	
+	/**
+	 * Get the encoding of this document.
+	 * 
+	 * @return the encoding
+	 */
 	public String encoding() {
 		String encoding = doc.getXmlEncoding();
 		if (encoding == null) {

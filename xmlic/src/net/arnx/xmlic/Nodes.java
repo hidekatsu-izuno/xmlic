@@ -902,10 +902,22 @@ public class Nodes extends ArrayList<Node> {
 		return super.set(index, node);
 	}
 	
+	/**
+	 * Adds elements that matched pattern.
+	 * 
+	 * @param pattern a pattern
+	 * @return a reference to this object
+	 */
 	public Nodes add(String pattern) {
 		return add(getOwner().find(pattern));
 	}
 	
+	/**
+	 * Adds a set of specified nodes.
+	 * 
+	 * @param nodes a set of nodes
+	 * @return a reference to this object
+	 */
 	public Nodes add(Nodes nodes) {
 		if (nodes == null || nodes.isEmpty()) {
 			Nodes results = new Nodes(getOwner(), this, size());
@@ -920,6 +932,11 @@ public class Nodes extends ArrayList<Node> {
 		return results;
 	}
 	
+	/**
+	 * Adds the previous set of nodes.
+	 * 
+	 * @return a reference to this object
+	 */
 	public Nodes addBack() {
 		if (back == null || back.isEmpty() || back == this) {
 			Nodes results = new Nodes(getOwner(), this, size());
@@ -934,6 +951,11 @@ public class Nodes extends ArrayList<Node> {
 		return results;
 	}
 	
+	/**
+	 * Adds the previous set of nodes that filtered by a specified pattern.
+	 * 
+	 * @return a reference to this object
+	 */
 	public Nodes addBack(String pattern) {
 		if (pattern == null || back == null || back.isEmpty() || back == this) {
 			Nodes results = new Nodes(getOwner(), this, size());
@@ -954,6 +976,11 @@ public class Nodes extends ArrayList<Node> {
 		return results;
 	}
 	
+	/**
+	 * Gets the previous set of nodes.
+	 * 
+	 * @return a reference to this object
+	 */
 	public Nodes end() {
 		if (back == null) {
 			return new Nodes(getOwner(), null, 0);
@@ -961,6 +988,14 @@ public class Nodes extends ArrayList<Node> {
 		return back;
 	}
 	
+	/**
+	 * Evaluate a specified XPath expression at a first node of the current nodes.
+	 * And gets as a specified type.
+	 * 
+	 * @param xpath a XPath expression
+	 * @param cls a result type
+	 * @return a result value.
+	 */
 	public <T> T evaluate(String xpath, Class<T> cls) {
 		if (xpath == null || xpath.isEmpty() || isEmpty()) {
 			return null;
@@ -973,6 +1008,12 @@ public class Nodes extends ArrayList<Node> {
 		return getOwner().evaluate(expr, self, cls);
 	}
 	
+	/**
+	 * Find nodes by a specified XPath expression.
+	 * 
+	 * @param xpath a XPath expression
+	 * @return a set of nodes
+	 */
 	public Nodes select(String xpath) {
 		if (xpath == null || xpath.isEmpty() || isEmpty()) {
 			return new Nodes(getOwner(), this, 0);
@@ -991,6 +1032,12 @@ public class Nodes extends ArrayList<Node> {
 		return results;
 	}
 	
+	/**
+	 * Find elements by a specified XPath pattern.
+	 * 
+	 * @param pattern a XPath pattern
+	 * @return a set of elements
+	 */
 	public Nodes find(String pattern) {
 		if (pattern == null || pattern.isEmpty() || isEmpty()) {
 			return new Nodes(getOwner(), this, 0);
@@ -1011,6 +1058,12 @@ public class Nodes extends ArrayList<Node> {
 		return results;
 	}
 	
+	/**
+	 * Filters a set of current nodes with a specified pattern.
+	 * 
+	 * @param pattern a pattern
+	 * @return a filtered set of nodes.
+	 */
 	public Nodes filter(String pattern) {
 		if (pattern == null || pattern.isEmpty() || isEmpty()) {
 			return new Nodes(getOwner(), this, 0);
