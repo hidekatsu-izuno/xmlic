@@ -682,7 +682,7 @@ public class Nodes extends ArrayList<Node> {
 	/**
 	 * Checks the current nodes matched against a specified set of nodes.
 	 * 
-	 * @param nodes a Nodes instance
+	 * @param nodes a Nodes object
 	 * @return true if at least one of these nodes matches
 	 */
 	public boolean is(Nodes nodes) {
@@ -714,6 +714,12 @@ public class Nodes extends ArrayList<Node> {
 		return false;
 	}
 	
+	/**
+	 * Get a index number of the first element matched a specified pattern.
+	 * 
+	 * @param pattern a XPath pattern
+	 * @return a index number if a matched node exists. else -1
+	 */
 	public int index(String pattern) {
 		if (pattern == null || pattern.isEmpty() || isEmpty()) return -1;
 		
@@ -726,6 +732,12 @@ public class Nodes extends ArrayList<Node> {
 		return -1;
 	}
 	
+	/**
+	 * Get a index number of the first element matched the first node of a specified Nodes.
+	 * 
+	 * @param nodes a Nodes object
+	 * @return a index number if a matched node exists. else -1
+	 */
 	public int index(Nodes nodes) {
 		if (nodes == null || nodes.isEmpty()) return -1;
 		if (isEmpty()) return -1;
@@ -733,6 +745,12 @@ public class Nodes extends ArrayList<Node> {
 		return index(nodes.get(0));
 	}
 	
+	/**
+	 * Get a index number of the first element matched a specified node.
+	 * 
+	 * @param nodes a node
+	 * @return a index number if a matched node exists. else -1
+	 */
 	public int index(Node node) {
 		for (int i = 0; i < size(); i++) {
 			if (get(i) == node) return i;

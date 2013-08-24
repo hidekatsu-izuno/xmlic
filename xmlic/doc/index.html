@@ -11,7 +11,7 @@
 <body>
 <div class="nav">
 <h1 class="logo"><a href="#"><img src="img/xmlic.jpg" alt="XMLIC" width="115" height="34" /></a></h1>
-<div class="bar">version 0.9.1</div>
+<div class="bar">version 0.9.2</div>
 <ul class="menu">
 	<li><a href="#introduction">XMLICとは</a></li>
 	<li><a href="#download">ダウンロード</a></li>
@@ -191,28 +191,28 @@ xml.traverse("*", true, new Visitor&lt;Nodes&gt;() {
 </pre>
 
 <h3 id="xpath">XPath と CSS セレクタとの比較</h3>
-<p>主要な XPath 式と CSS セレクタの対比表を次に示します。参考にしてください。</p>
+<p>主要な XPath 式と <code>find</code>などで用いるXPath パターンとCSS セレクタの対比表を次に示します。参考にしてください。</p>
 <table class="table">
 <colgroup>
-<col style="width: 150px" />
-<col style="width: 200px" />
-<col style="width: 200px" />
 <col />
+<col style="width: 200px" />
+<col style="width: 200px" />
+<col style="width: 200px" />
 </colgroup>
 <thead>
-<tr><th>対象</th><th>XPath</th><th>CSS セレクタ</th><th>備考</th></tr>
+<tr><th>対象</th><th>XPath</th><th>XPath パターン</th><th>CSS セレクタ</th></tr>
 </thead>
 <tbody>
-<tr><td>すべての要素</td><td><code>*</code></td><td><code>*</code></td><td></td></tr>
-<tr><td>要素が一致</td><td><code>element</code></td><td><code>element</code></td><td></td></tr>
-<tr><td>子要素</td><td><code>parent/child</code></td><td><code>parent &gt; child</code></td><td></td></tr>
-<tr><td>子孫要素</td><td><code>ancestor//descendant</code></td><td><code>ancestor descendant</code></td><td></td></tr>
-<tr><td>属性がある</td><td><code>*[@name]</code></td><td><code>[name]</code></td><td></td></tr>
-<tr><td>属性が一致</td><td><code>*[@name='value']</code>　あるいは <code>@name='value'</code></td><td><code>[name='value']</code></td><td></td></tr>
-<tr><td>n番目の子要素</td><td><code>*[n]</code> あるいは <code>*[position()=n]</code></td><td><code>:nth-child(n)</code></td><td></td></tr>
-<tr><td>最初の子要素</td><td><code>*[first()]</code></td><td><code>:first-child</code></td><td></td></tr>
-<tr><td>最後の子要素</td><td><code>*[last()]</code></td><td><code>:last-child</code></td><td></td></tr>
-<tr><td>OR 条件選択</td><td><code>expr | ... | expr</code></td><td><code>expr, ..., expr</code></td><td></td></tr>
+<tr><td>すべての要素</td><td><code>.//*</code></td><td><code>*</code></td><td><code>*</code></td></tr>
+<tr><td>要素が一致</td><td><code>.//element</code></td><td><code>element</code></td><td><code>element</code></td></tr>
+<tr><td>子要素</td><td><code>.//parent/child</code></td><td><code>parent/child</code></td><td><code>parent &gt; child</code></td></tr>
+<tr><td>子孫要素</td><td><code>.//ancestor//descendant</code></td><td><code>ancestor//descendant</code></td><td><code>ancestor descendant</code></td></tr>
+<tr><td>属性がある</td><td><code>.//*[@name]</code></td><td><code>*[@name]</code></td><td><code>[name]</code></td></tr>
+<tr><td>属性が一致</td><td><code>.//*[@name='value']</code></td><td><code>@name='value'</code></td><td><code>[name='value']</code></td></tr>
+<tr><td>n番目の子要素</td><td><code>.//*[n]</code>あるいは <code>.//*[position()=n]</code></td><td><code>*[n]</code>あるいは <code>*[position()=n]</code></td><td><code>:nth-child(n)</code></td></tr>
+<tr><td>最初の子要素</td><td><code>.//*[1]</code></td><td><code>*[1]</code></td><td><code>:first-child</code></td></tr>
+<tr><td>最後の子要素</td><td><code>.//*[last()]</code></td><td><code>*[last()]</code></td><td><code>:last-child</code></td></tr>
+<tr><td>OR 条件選択</td><td><code>expr | ... | expr</code></td><td><code>expr | ... | expr</code></td><td><code>expr, ..., expr</code></td></tr>
 </tbody>
 </table>
 <p>jQueryでは <code>#ID</code> の形でID指定を多用しますが、XMLではスキーマにID型が指定されない限り利用できないため、通常の属性同様 <code>@id='ID'</code> と記述します
