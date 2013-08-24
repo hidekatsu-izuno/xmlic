@@ -787,10 +787,23 @@ public class Nodes extends ArrayList<Node> {
 		return result;
 	}
 	
+	/**
+	 * Iterates a each node of the current nodes.
+	 * 
+	 * @param func a visitor function
+	 * @return a reference to this object
+	 */
 	public Nodes each(Visitor<Nodes> func) {
 		return each(func, false);
 	}
 	
+	/**
+	 * Iterates a each node of the current nodes.
+	 * 
+	 * @param func a visitor function
+	 * @param reverse true if you wish to iterate reverse.
+	 * @return a reference to this object
+	 */
 	public Nodes each(Visitor<Nodes> func, boolean reverse) {
 		if (func == null || isEmpty()) {
 			return this;
@@ -811,6 +824,12 @@ public class Nodes extends ArrayList<Node> {
 		return this;
 	}
 	
+	/**
+	 * Reduces the set of elements to those that have a descendant that matched a specified pattern.
+	 * 
+	 * @param pattern a XPath pattern
+	 * @return the set of elements  to those that have a descendant that matched
+	 */
 	public Nodes has(String pattern) {
 		if (pattern == null || pattern.isEmpty() || isEmpty()) {
 			return new Nodes(getOwner(), this, 0);
