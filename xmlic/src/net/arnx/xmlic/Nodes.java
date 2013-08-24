@@ -1009,7 +1009,7 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	/**
-	 * Find nodes by a specified XPath expression.
+	 * Selects nodes by a specified XPath expression.
 	 * 
 	 * @param xpath a XPath expression
 	 * @return a set of nodes
@@ -1033,7 +1033,7 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	/**
-	 * Find elements by a specified XPath pattern.
+	 * Finds elements by a specified XPath pattern.
 	 * 
 	 * @param pattern a XPath pattern
 	 * @return a set of elements
@@ -2621,6 +2621,12 @@ public class Nodes extends ArrayList<Node> {
 		return this;
 	}
 	
+	/**
+	 * Gets the value of a css property in a style attribute for the first element in the set of current elements.
+	 * 
+	 * @param name css property name
+	 * @return css property value
+	 */
 	public String css(String name) {
 		if (name == null) throw new NullPointerException("name must not be null.");
 		
@@ -2636,6 +2642,12 @@ public class Nodes extends ArrayList<Node> {
 		return null;
 	}
 	
+	/**
+	 * Sets the value of a css property to a style attribute for each element in the set of current elements.
+	 * 
+	 * @param name css property name
+	 * @return a reference to this object
+	 */
 	public Nodes css(String name, String value) {
 		if (name == null) throw new NullPointerException("name must not be null.");
 		
@@ -2678,6 +2690,12 @@ public class Nodes extends ArrayList<Node> {
 		return this;
 	}
 	
+	/**
+	 * Sets the css properties to a style attribute for each element in the set of current elements.
+	 * 
+	 * @param props css properties
+	 * @return a reference to this object
+	 */
 	public Nodes css(Map<String, String> props) {
 		if (props == null || props.isEmpty()) return this;
 

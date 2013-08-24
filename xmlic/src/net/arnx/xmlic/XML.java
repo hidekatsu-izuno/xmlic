@@ -259,9 +259,9 @@ public class XML implements Serializable {
 	}
 	
 	/**
-	 * Gets a Nodes instance that has Document.
+	 * Gets a Nodes instance that has document node.
 	 * 
-	 * @return a Nodes instance that has Document
+	 * @return a Nodes instance that has document node
 	 */
 	public Nodes doc() {
 		Nodes nodes = new Nodes(this, null, 1);
@@ -270,9 +270,9 @@ public class XML implements Serializable {
 	}
 	
 	/**
-	 * Gets a Nodes instance that has the root Element of this document.
+	 * Gets a Nodes instance that has the root element of this document.
 	 * 
-	 * @return a Nodes instance that has the root Element of this document
+	 * @return a Nodes instance that has the root element of this document
 	 */
 	public Nodes root() {
 		Nodes nodes = new Nodes(this, doc(), 1);
@@ -280,6 +280,11 @@ public class XML implements Serializable {
 		return nodes;
 	}
 	
+	/**
+	 * Sets the root element of this document.
+	 * 
+	 * @return a Nodes instance that has the root element of this document
+	 */
 	public Nodes root(Nodes nodes) {
 		if (nodes == null || nodes.isEmpty()) {
 			return doc().empty();
@@ -288,8 +293,14 @@ public class XML implements Serializable {
 		}
 	}
 	
-	public Nodes parse(String text) {
-		if (text == null || text.isEmpty()) {
+	/**
+	 * Build new Nodes instance for specified XML contents.
+	 * 
+	 * @param xml XML contents
+	 * @return new Nodes instance
+	 */
+	public Nodes parse(String xml) {
+		if (xml == null || xml.isEmpty()) {
 			return new Nodes(this, null, 0);
 		}
 		
@@ -305,7 +316,7 @@ public class XML implements Serializable {
 			}
 			sb.append(uri.replace("\"", "&quot;")).append("\"");
 		}
-		sb.append(">").append(text).append("</x>");
+		sb.append(">").append(xml).append("</x>");
 		
 		try {
 			XMLInputFactory factory = XMLInputFactory.newInstance();
@@ -385,10 +396,26 @@ public class XML implements Serializable {
 		}
 	}
 	
+	/**
+	 * Evaluate a specified XPath expression at this document.
+	 * And gets as a specified type.
+	 * This method is same to doc().evaluate(xpath, cls). 
+	 * 
+	 * @param xpath a XPath expression
+	 * @param cls a result type
+	 * @return a result value.
+	 */
 	public <T> T evaluate(String xpath, Class<T> cls) {
 		return doc().evaluate(xpath, cls);
 	}
 	
+	/**
+	 * Selects nodes by a specified XPath expression.
+	 * This method is same to doc().select(xpath). 
+	 * 
+	 * @param xpath a XPath expression
+	 * @return a set of nodes
+	 */
 	public Nodes select(String xpath) {
 		return doc().select(xpath);
 	}
@@ -433,6 +460,7 @@ public class XML implements Serializable {
 		return doc().normalize();
 	}
 	
+	@Override
 	public XML clone() {
 		return new XML(xmlContext, (Document)doc.cloneNode(true));
 	}
@@ -464,9 +492,14 @@ public class XML implements Serializable {
 		}
 	}
 	
+	/**
+	 * Writes to a character stream. This method close the stream.
+	 * 
+	 * @param writer a character stream
+	 * @throws IOException if I/O Error occurred
+	 */
 	public void writeTo(Writer writer) throws IOException {
 		XMLWriter serializer = new XMLWriter();
-		
 		try {
 			serializer.writeTo(writer, doc);
 		} finally {
