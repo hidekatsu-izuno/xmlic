@@ -1062,7 +1062,7 @@ public class Nodes extends ArrayList<Node> {
 	 * Filters a set of current nodes with a specified pattern.
 	 * 
 	 * @param pattern a pattern
-	 * @return a filtered set of nodes.
+	 * @return a filtered set of nodes
 	 */
 	public Nodes filter(String pattern) {
 		if (pattern == null || pattern.isEmpty() || isEmpty()) {
@@ -1080,6 +1080,12 @@ public class Nodes extends ArrayList<Node> {
 		return results;
 	}
 	
+	/**
+	 * Filters a set of current nodes with a filter function.
+	 * 
+	 * @param func a filter function
+	 * @return a filtered set of nodes
+	 */
 	public Nodes filter(Judge<Nodes> func) {
 		if (func == null || isEmpty()) {
 			return new Nodes(getOwner(), this, 0);
@@ -1103,6 +1109,12 @@ public class Nodes extends ArrayList<Node> {
 		return results;
 	}
 	
+	/**
+	 * Get a set of nodes that not matched a specified pattern.
+	 * 
+	 * @param pattern a pattern
+	 * @return a set of nodes that not matched a specified pattern
+	 */
 	public Nodes not(String pattern) {
 		if (pattern == null || pattern.isEmpty()) {
 			Nodes results = new Nodes(getOwner(), this, size());
@@ -1123,10 +1135,25 @@ public class Nodes extends ArrayList<Node> {
 		return results;
 	}
 	
+	/**
+	 * Traverses descendants of the current nodes that matched a specified pattern.
+	 * 
+	 * @param pattern a pattern
+	 * @param func a visitor function
+	 * @return a reference of this object
+	 */
 	public Nodes traverse(String pattern, Visitor<Nodes> func) {
 		return traverse(pattern, func, false);
 	}
 	
+	/**
+	 * Traverses descendants of the current nodes that matched a specified pattern.
+	 * 
+	 * @param pattern a pattern
+	 * @param func a visitor function
+	 * @param reverse true if you wish to iterate reverse
+	 * @return a reference of this object
+	 */
 	public Nodes traverse(String pattern, Visitor<Nodes> func, boolean reverse) {
 		if (pattern == null || func == null) {
 			return this;
@@ -1198,22 +1225,50 @@ public class Nodes extends ArrayList<Node> {
 		return this;
 	}
 	
+	/**
+	 * Gets the set of parent for the current nodes.
+	 * 
+	 * @return the set of parent for the current nodes
+	 */
 	public Nodes parent() {
 		return parentsInternal(SelectMode.FIRST);
 	}
 	
+	/**
+	 * Gets the set of parent for the current nodes, and filters with a specified pattern.
+	 * 
+	 * @param pattern a pattern
+	 * @return the filtered set of parent for the current nodes
+	 */
 	public Nodes parent(String pattern) {
 		return parentsInternal(pattern, SelectMode.FIRST);
 	}
 	
+	/**
+	 * Gets the set of parent for the current nodes, and collects until matched a specified pattern.
+	 * 
+	 * @param pattern a pattern
+	 * @return the filtered set of parent for the current nodes
+	 */
 	public Nodes parentsUntil(String pattern) {
 		return parentsInternal(pattern, SelectMode.UNTIL);
 	}
 	
+	/**
+	 * Gets the set of parents for the current nodes.
+	 * 
+	 * @return the set of parents for the current nodes
+	 */
 	public Nodes parents() {
 		return parentsInternal(SelectMode.ALL);
 	}
 	
+	/**
+	 * Gets the filtered set of parents for the current nodes.
+	 * 
+	 * @param pattern a pattern
+	 * @return the filtered set of parents for the current nodes
+	 */
 	public Nodes parents(String pattern) {
 		return parentsInternal(pattern, SelectMode.ALL);
 	}
@@ -1371,10 +1426,20 @@ public class Nodes extends ArrayList<Node> {
 		return results;
 	}
 	
+	/**
+	 * Gets the first node of the current nodes.
+	 * 
+	 * @return the first node
+	 */
 	public Nodes first() {
 		return eq(0);
 	}
 	
+	/**
+	 * Gets the last node of the current nodes.
+	 * 
+	 * @return the last node
+	 */
 	public Nodes last() {
 		return eq(-1);
 	}
