@@ -1033,7 +1033,7 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	/**
-	 * Finds elements by a specified XPath pattern.
+	 * Finds elements matched a specified XPath pattern.
 	 * 
 	 * @param pattern a XPath pattern
 	 * @return a set of elements
@@ -2462,7 +2462,7 @@ public class Nodes extends ArrayList<Node> {
 	 * Normalizes the set of current nodes.
 	 * This method executes below two action:
 	 * - executes {@link org.w3c.dom.Node#normalize()}. 
-	 * - removes waste namespace declaration.
+	 * - removes waste namespace declarations.
 	 * 
 	 * @return a reference to this object
 	 */

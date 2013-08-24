@@ -421,6 +421,17 @@ public class XML implements Serializable {
 	}
 	
 	/**
+	 * Finds elements matched a specified XPath pattern.
+	 * This method is same to doc().find(pattern). 
+	 * 
+	 * @param pattern a XPath pattern
+	 * @return a set of elements
+	 */
+	public Nodes find(String pattern) {
+		return doc().find(pattern);
+	}
+	
+	/**
 	 * Gets the set of child nodes for current document.
 	 * This method is same to doc().contents(). 
 	 * 
@@ -440,34 +451,77 @@ public class XML implements Serializable {
 		return doc().contents(pattern);
 	}
 	
-	public Nodes find(String pattern) {
-		return doc().find(pattern);
-	}
-	
+	/**
+	 * Traverses all nodes that matched a specified pattern.
+	 * This method is same to doc().traverse(pattern, func). 
+	 * 
+	 * @param pattern a pattern
+	 * @param func a visitor function
+	 * @return a Nodes instance that has document node
+	 */
 	public Nodes traverse(String pattern, Visitor<Nodes> func) {
 		return doc().traverse(pattern, func);
 	}
 	
+	/**
+	 * Removes all child nodes of the set of current nodes.
+	 * This method is same to doc().empty(). 
+	 * 
+	 * @return a Nodes instance that has document node
+	 */
 	public Nodes empty() {
 		return doc().empty();
 	}
 	
+	/**
+	 * Removes the filtered set of all nodes.
+	 * This method is same to doc().remove(pattern). 
+	 * 
+	 * @param pattern a pattern
+	 * @return a Nodes instance that has document node
+	 */
 	public Nodes remove(String pattern) {
 		return doc().remove(pattern);
 	}
 	
+	/**
+	 * Gets a concatenated text of this document.
+	 * This method is same to doc().text(). 
+	 * 
+	 * @return a concatenated text of this document.
+	 */
 	public String text() {
 		return doc().text();
 	}
 	
+	/**
+	 * Get a XML text for this document.
+	 * This method is same to doc().xml(). 
+	 * 
+	 * @return a XML text for this document
+	 */
 	public String xml() {
 		return doc().xml();
 	}
 	
+	/**
+	 * Sets the XML contents of this document.
+	 * 
+	 * @param xml a XML contents
+	 * @return a Nodes instance that has document node
+	 */
 	public Nodes xml(String xml) {
 		return doc().xml(xml);
 	}
 	
+	/**
+	 * Normalizes this document.
+	 * This method executes below two action:
+	 * - executes {@link org.w3c.dom.Document#normalize()}. 
+	 * - removes waste namespace declarations.
+	 * 
+	 * @return a Nodes instance that has document node
+	 */
 	public Nodes normalize() {
 		return doc().normalize();
 	}
@@ -575,6 +629,12 @@ public class XML implements Serializable {
 		return writer.toString();
 	}
 	
+	/**
+	 * Escapes text for XML contents.
+	 * 
+	 * @param text a text
+	 * @return a escaped text
+	 */
 	public static String escape(String text) {
 		StringBuilder sb = null;
 		int start = 0;
@@ -598,6 +658,12 @@ public class XML implements Serializable {
 		return text;
 	}
 	
+	/**
+	 * Unescapes text for plain text.
+	 * 
+	 * @param text a escaped text
+	 * @return a text
+	 */
 	public static String unescape(String text) {
 		StringBuilder sb = null;
 		int start = 0;
