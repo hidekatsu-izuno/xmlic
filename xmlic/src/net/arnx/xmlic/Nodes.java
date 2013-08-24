@@ -2201,10 +2201,24 @@ public class Nodes extends ArrayList<Node> {
 		return this;
 	}
 	
+	/**
+	 * Replace each element in the set of current elements with the provided new content 
+	 * and return the set of elements that was removed.
+	 * 
+	 * @param xml replacing XML contents 
+	 * @return a reference to this object
+	 */
 	public Nodes replaceWith(String xml) {
 		return replaceWith(getOwner().parse(xml));
 	}
 	
+	/**
+	 * Replace each element in the set of current elements with the provided new content 
+	 * and return the set of elements that was removed.
+	 * 
+	 * @param nodes replacing nodes 
+	 * @return a reference to this object
+	 */	
 	public Nodes replaceWith(Nodes nodes) {
 		if (nodes == null) return this;
 		
@@ -2232,10 +2246,22 @@ public class Nodes extends ArrayList<Node> {
 		return this;
 	}
 	
+	/**
+	 * Replace each target element with the set of current elements.
+	 * 
+	 * @param pattern a pattern
+	 * @return a reference to this object
+	 */
 	public Nodes replaceAll(String pattern) {
 		return replaceAll(getOwner().find(pattern));
 	}
 	
+	/**
+	 * Replace each target element with the set of current elements.
+	 * 
+	 * @param nodes replacing nodes
+	 * @return a reference to this object
+	 */
 	public Nodes replaceAll(Nodes nodes) {
 		if (nodes == null) return new Nodes(getOwner(), this, 0);
 		
