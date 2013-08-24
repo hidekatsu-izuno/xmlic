@@ -46,6 +46,7 @@
 			<li><a href="#clone">要素の複製</a></li>
 			<li><a href="#evaluate">ノードの評価</a></li>
 			<li><a href="#normalize">ノードの正規化</a></li>
+			<li><a href="#html">HTML互換機能</a></li>
 		</ul>
 	</li>
 	<li><a href="#write">XML文書の出力</a></li>
@@ -589,11 +590,43 @@ if (nodes.evaluate("self::node()[@name='test']", boolean.class)) {
 }
 </pre>
 
-<h3 id="normalize">ノードの正規化</h3>
+<h3 id="normalize">ノードの正規化<span class="sub"> - normalize</span></h3>
 <p><code>normalize</code> メソッドは、ノードの正規化を行います。具体的には、子要素より下にあるテキストノードを結合してひとつのノードにまとめます。これは、<code>Node</code> クラスの 
 <code>normalize</code> の動作と同じですが、XMLIC ではこの動作に加え、不用な名前空間宣言の除去も行います。</p>
 <pre class="source">
 nodes.normalize();
+</pre>
+
+<h3 id="html">HTML互換機能<span class="sub"> - addClass/toggleClass/removeClass/hasClass, css</span></h3>
+<p>XMLIC は XML を対象としていますが、XHTML での操作時に便利なように次の jQuery ライクな HTML 互換操作機能を用意しています。</p>
+<p><code>addClass</code>、<code>removeClass</code> はそれぞれ要素の <code>class</code> 属性の空白文字で区切られたリストに文字列を追加／削除します。<br />
+<code>toggleClass</code> は、フラグにより要素の追加、削除を入れ替えます。<br />
+<code>hasClass</code> は、要素の <code>class</code> 属性の空白文字で区切られたリストに指定した文字列が含まれているかを確認します。</p>
+<pre class="source">
+<span class="comment">// クラスを追加します。複数追加するときは空白で区切ります。</span>
+nodes.addClass("warning error");
+
+<span class="comment">// クラスを削除します</span>
+nodes.removeClass("warning");
+
+<span class="comment">// クラスを入れ替えます。</span>
+nodes.removeClass("warning", warning != null);
+
+<span class="comment">// クラスが存在しているかチェックします。</span>
+if (nodes.hasClass("error")) {
+    System.out.println("エラーはまだ存在しています。");
+}
+</pre>
+<p><code>css</code> メソッドは、要素の <code>style</code> 属性に対し CSSスタイルを取得／追加／削除します。jQuery とは異なり、link要素やstyle要素で指定されたスタイル情報ができるわけではないので、注意してください。</p>
+<pre class="source">
+<span class="comment">// style 属性に　font-size:10pt; を追加します。</span>
+nodes.css("font-size", "10pt");
+
+<span class="comment">// font-size を取得します。</span>
+System.out.println(nodes.css("font-size"));
+
+<span class="comment">// style 属性から font-size を削除します。</span>
+nodes.css("font-size", null);
 </pre>
 
 <h2 id="write">XML 文書の出力<span class="sub"> - Write</span></h2>
@@ -640,10 +673,11 @@ writer.writeTo(new FileOutputStream("test.xml"), xml.getDocument());
 
 <h2 id="releasenote">リリースノート</h2>
 
-<h3>2013/8/XX version 0.9.2</h3>
+<h3>2013/8/24 version 0.9.2</h3>
 <ul>
 <li>ロード時の名前空間走査処理をルートノードだけに限定しました。</li>
 <li>デフォルト名前空間が指定された場合の XPath 式の取り扱いを XSLT2.0 の xpath-default-namespace 属性設定時に合わせました。</li>
+<li>HTML 互換機能として addClass, css メソッドを追加しました。</li>
 <li>StatusImpl を internal パッケージに移動しました。</li>
 </ul>
 
