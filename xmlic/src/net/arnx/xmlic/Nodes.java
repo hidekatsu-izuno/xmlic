@@ -2107,6 +2107,11 @@ public class Nodes extends ArrayList<Node> {
 		return clone;
 	}
 	
+	/**
+	 * Get a XML text for the children of the first node.
+	 * 
+	 * @return a XML text for the children of the first node
+	 */
 	public String xml() {
 		if (isEmpty()) return "";
 		
@@ -2131,6 +2136,11 @@ public class Nodes extends ArrayList<Node> {
 		return this;
 	}
 	
+	/**
+	 * Get a concatenated text of the current nodes.
+	 * 
+	 * @return a concatenated text of the current nodes
+	 */
 	public String text() {
 		if (isEmpty()) return "";
 		
