@@ -2535,14 +2535,32 @@ public class Nodes extends ArrayList<Node> {
 		return true;
 	}
 	
+	/**
+	 * Adds the specified classes to each of the set of current elements.
+	 * 
+	 * @param classes adding classes
+	 * @return a reference to this object
+	 */
 	public Nodes addClass(String classes) {
 		return toggleClassInternal(classes, true);
 	}
 	
+	/**
+	 * Removes classes from each element in the set of current elements
+	 * 
+	 * @param classes removing classes
+	 * @return a reference to this object
+	 */	
 	public Nodes removeClass(String classes) {
 		return toggleClassInternal(classes, false);
 	}
 	
+	/**
+	 * Toggles classes from each element in the set of current elements
+	 * 
+	 * @param classes toggling classes
+	 * @return a reference to this object
+	 */	
 	public Nodes toggleClass(String classes, boolean toggle) {
 		return toggleClassInternal(classes, toggle);
 	}
