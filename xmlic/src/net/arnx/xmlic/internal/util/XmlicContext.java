@@ -275,7 +275,7 @@ public class XmlicContext implements Serializable {
 		} catch (net.arnx.xmlic.internal.org.jaxen.XPathSyntaxException e) {
 			throw new XPathSyntaxException(e.getXPath(), e.getPosition(), e.getMultilineMessage(), e);
 		} catch (JaxenException e) {
-			throw new IllegalStateException(e);
+			throw new IllegalStateException(e.getMessage(), e);
 		} finally {
 			current.remove();
 		}

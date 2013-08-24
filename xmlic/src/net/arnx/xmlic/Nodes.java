@@ -1226,48 +1226,48 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	/**
-	 * Gets the set of parent element for the current nodes.
+	 * Gets the set of the parent element for the current nodes.
 	 * 
-	 * @return the set of parent element
+	 * @return the set of the parent element
 	 */
 	public Nodes parent() {
 		return parentsInternal(SelectMode.FIRST);
 	}
 	
 	/**
-	 * Gets the set of parent element for the current nodes, and filters with a specified pattern.
+	 * Gets the set of the parent element for the current nodes, and filters with a specified pattern.
 	 * 
 	 * @param pattern a pattern
-	 * @return the filtered set of parent element
+	 * @return the filtered set of the parent element
 	 */
 	public Nodes parent(String pattern) {
 		return parentsInternal(pattern, SelectMode.FIRST);
 	}
 	
 	/**
-	 * Collects the set of parent element for the current nodes until matches a specified pattern.
+	 * Collects the set of the parent element for the current nodes until matches a specified pattern.
 	 * 
 	 * @param pattern a pattern
-	 * @return the filtered set of parent element
+	 * @return the filtered set of the parent element
 	 */
 	public Nodes parentsUntil(String pattern) {
 		return parentsInternal(pattern, SelectMode.UNTIL);
 	}
 	
 	/**
-	 * Gets the set of ancestor elements for the current nodes.
+	 * Gets the set of the ancestor elements for the current nodes.
 	 * 
-	 * @return the set of ancestor elements
+	 * @return the set of the ancestor elements
 	 */
 	public Nodes parents() {
 		return parentsInternal(SelectMode.ALL);
 	}
 	
 	/**
-	 * Gets the filtered set of ancestor elements for the current nodes.
+	 * Gets the filtered set of the ancestor elements for the current nodes.
 	 * 
 	 * @param pattern a pattern
-	 * @return the filtered set of ancestor elements
+	 * @return the filtered set of the ancestor elements
 	 */
 	public Nodes parents(String pattern) {
 		return parentsInternal(pattern, SelectMode.ALL);
@@ -1323,10 +1323,10 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	/**
-	 * Collects the set of ancestors or self elements for the current nodes until matches a pattern.
+	 * Collects the set of the ancestors or self elements for the current nodes until matches a pattern.
 	 * 
 	 * @param pattern a pattern
-	 * @return the filtered set of ancestor or self elements
+	 * @return the filtered set of the ancestor or self elements
 	 */
 	public Nodes closest(String pattern) {
 		if (pattern == null || pattern.isEmpty() || isEmpty()) {
@@ -1353,9 +1353,9 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	/**
-	 * Gets the set of child elements for the current nodes.
+	 * Gets the set of the child elements for the current nodes.
 	 * 
-	 * @return the set of child elements
+	 * @return the set of the child elements
 	 */
 	public Nodes children() {
 		Nodes results = new Nodes(getOwner(), this, size() * 2);
@@ -1375,7 +1375,7 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	/**
-	 * Gets the filtered set of child elements for the current nodes.
+	 * Gets the filtered set of the child elements for the current nodes.
 	 * 
 	 * @param pattern a pattern
 	 * @return the filtered set of child elements
@@ -1405,7 +1405,7 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	/**
-	 * Gets the set of child nodes for the current nodes.
+	 * Gets the set of the child nodes for the current nodes.
 	 * 
 	 * @return the set of child nodes
 	 */
@@ -1426,10 +1426,10 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	/**
-	 * Gets the filtered set of child nodes for the current nodes.
+	 * Gets the filtered set of the child nodes for the current nodes.
 	 * 
 	 * @param pattern a pattern
-	 * @return the filtered set of child nodes
+	 * @return the filtered set of the child nodes
 	 */
 	public Nodes contents(String pattern) {
 		if (pattern == null || pattern.isEmpty() || isEmpty()) {
@@ -1472,22 +1472,48 @@ public class Nodes extends ArrayList<Node> {
 		return eq(-1);
 	}
 	
+	/**
+	 * Gets the set of the previous element for the current nodes.
+	 * 
+	 * @return the set of the previous element
+	 */
 	public Nodes prev() {
 		return prevInternal(SelectMode.FIRST);
 	}
 	
+	/**
+	 * Gets the filtered set of the previous element for the current nodes.
+	 * 
+	 * @return the filtered set of the previous element
+	 */
 	public Nodes prev(String pattern) {
 		return prevInternal(pattern, SelectMode.FIRST);
 	}
 	
+	/**
+	 * Collects the set of the previous element for the current nodes until matches a specified pattern.
+	 * 
+	 * @param pattern a pattern
+	 * @return the filtered set of the previous element
+	 */
 	public Nodes prevUntil(String pattern) {
 		return prevInternal(pattern, SelectMode.UNTIL);
 	}
 	
+	/**
+	 * Gets the set of the all previous elements for the current nodes.
+	 * 
+	 * @return the set of the all previous elements
+	 */
 	public Nodes prevAll() {
 		return prevInternal(SelectMode.ALL);
 	}
 	
+	/**
+	 * Gets the filtered set of the all previous elements for the current nodes.
+	 * 
+	 * @return the filtered set of the all previous elements
+	 */
 	public Nodes prevAll(String pattern) {
 		return prevInternal(pattern, SelectMode.ALL);
 	}
@@ -1541,22 +1567,50 @@ public class Nodes extends ArrayList<Node> {
 		return results;
 	}
 	
+	/**
+	 * Gets the set of the next element for the current nodes.
+	 * 
+	 * @return the set of the next element
+	 */
 	public Nodes next() {
 		return nextInternal(SelectMode.FIRST);
 	}
 	
+	/**
+	 * Gets the filtered set of the next element for the current nodes.
+	 * 
+	 * @param pattern a pattern
+	 * @return the filtered set of the next element
+	 */
 	public Nodes next(String pattern) {
 		return nextInternal(pattern, SelectMode.FIRST);
 	}
 	
+	/**
+	 * Collects the set of the next element for the current nodes until matches a specified pattern.
+	 * 
+	 * @param pattern a pattern
+	 * @return the filtered set of the next element
+	 */
 	public Nodes nextUntil(String pattern) {
 		return nextInternal(pattern, SelectMode.UNTIL);
 	}
 	
+	/**
+	 * Gets the set of the all next elements for the current nodes.
+	 * 
+	 * @return the set of the all next elements
+	 */
 	public Nodes nextAll() {
 		return nextInternal(SelectMode.ALL);
 	}
 	
+	/**
+	 * Gets the filtered set of the all next elements for the current nodes.
+	 * 
+	 * @param pattern a pattern
+	 * @return the filtered set of the all next elements
+	 */
 	public Nodes nextAll(String pattern) {
 		return nextInternal(pattern, SelectMode.ALL);
 	}
@@ -1609,6 +1663,11 @@ public class Nodes extends ArrayList<Node> {
 		return results;
 	}
 	
+	/**
+	 * Gets the set of the all previous or next elements for the current nodes.
+	 * 
+	 * @return the set of the all previous or next elements
+	 */
 	public Nodes siblings() {
 		Nodes results = new Nodes(getOwner(), this, size());
 		for (Node self : this) {
@@ -1632,6 +1691,12 @@ public class Nodes extends ArrayList<Node> {
 		return results;
 	}
 	
+	/**
+	 * Gets the filtered set of the all previous or next elements for the current nodes.
+	 * 
+	 * @param pattern a pattern
+	 * @return the filtered set of the all previous or next elements
+	 */
 	public Nodes siblings(String pattern) {
 		if (pattern == null || pattern.isEmpty() || isEmpty()) {
 			return new Nodes(getOwner(), this, 0);
