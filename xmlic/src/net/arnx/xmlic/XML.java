@@ -465,22 +465,47 @@ public class XML implements Serializable {
 		return new XML(xmlContext, (Document)doc.cloneNode(true));
 	}
 	
+	/**
+	 * Gets a XSLT template transformer.
+	 * 
+	 * @return a XSLT template transformer. null if not exists. 
+	 * @throws TransformerConfigurationException if failed to load XSLT. 
+	 */
 	public Transformer stylesheet() throws TransformerConfigurationException {
 		TransformerFactory tf = TransformerFactory.newInstance();
 		Source src = tf.getAssociatedStylesheet(new DOMSource(doc), null, null, null);
 		return (src != null) ? tf.newTransformer(src) : null;
 	}
 	
-	public XML transform(Transformer t) throws TransformerException {
+	/**
+	 * Transform current document by a specified transformer.
+	 * 
+	 * @param tf a XSLT template transformer object
+	 * @return a reference to this object
+	 * @throws TransformerException if failed to transform.
+	 */
+	public XML transform(Transformer tf) throws TransformerException {
 		DOMResult result = new DOMResult();
-		t.transform(new DOMSource(doc), result);
+		tf.transform(new DOMSource(doc), result);
 		return new XML(xmlContext, (Document)result.getNode());
 	}
 	
+	/**
+	 * Writes to a file in UTF-8. This method close the stream.
+	 * 
+	 * @param file a file
+	 * @throws IOException if I/O Error occurred
+	 */
 	public void writeTo(File file) throws IOException {
 		writeTo(new FileOutputStream(file));
 	}
 	
+	/**
+	 * Writes to a binary stream in UTF-8. This method close the stream.
+	 * 
+	 * @param file a file
+	 * @throws IOException if I/O Error occurred
+	 */
 	public void writeTo(OutputStream out) throws IOException {
 		XMLWriter serializer = new XMLWriter();
 		serializer.setEncoding("UTF-8");
