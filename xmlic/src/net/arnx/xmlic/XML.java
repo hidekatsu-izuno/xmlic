@@ -569,7 +569,7 @@ public class XML implements Serializable {
 	/**
 	 * Writes to a binary stream in UTF-8. This method close the stream.
 	 * 
-	 * @param file a file
+	 * @param out a binary stream
 	 * @throws IOException if I/O Error occurred
 	 */
 	public void writeTo(OutputStream out) throws IOException {

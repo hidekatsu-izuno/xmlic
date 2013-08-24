@@ -697,7 +697,6 @@ public class Nodes extends ArrayList<Node> {
 		return false;
 	}
 	
-	
 	/**
 	 * Checks current nodes matched against a specified node.
 	 * 
@@ -748,7 +747,7 @@ public class Nodes extends ArrayList<Node> {
 	/**
 	 * Gets a index number of the first element matched a specified node.
 	 * 
-	 * @param nodes a node
+	 * @param node a node
 	 * @return a index number if a matched node exists. else -1
 	 */
 	public int index(Node node) {
