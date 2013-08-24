@@ -637,10 +637,10 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	/**
-	 * Check the current nodes matched against a specified pattern.
+	 * Checks the current nodes matched against a specified pattern.
 	 * 
 	 * @param pattern xpath pattern
-	 * @return true if at least one of these elements matches
+	 * @return true if at least one of these nodes matches
 	 */
 	public boolean is(String pattern) {
 		if (pattern == null || isEmpty()) return false;
@@ -654,6 +654,12 @@ public class Nodes extends ArrayList<Node> {
 		return false;
 	}
 	
+	/**
+	 * Checks the current nodes matched against a specified filter function.
+	 * 
+	 * @param func a filter function
+	 * @return true if at least one of these nodes matches
+	 */
 	public boolean is(Judge<Nodes> func) {
 		if (func == null || isEmpty()) return false;
 		
@@ -673,6 +679,12 @@ public class Nodes extends ArrayList<Node> {
 		return false;
 	}
 	
+	/**
+	 * Checks the current nodes matched against a specified set of nodes.
+	 * 
+	 * @param nodes a Nodes instance
+	 * @return true if at least one of these nodes matches
+	 */
 	public boolean is(Nodes nodes) {
 		if (isEmpty() || nodes.isEmpty()) return false;
 		
@@ -685,6 +697,13 @@ public class Nodes extends ArrayList<Node> {
 		return false;
 	}
 	
+	
+	/**
+	 * Checks the current nodes matched against a specified node.
+	 * 
+	 * @param node a node
+	 * @return true if at least one of these nodes matches
+	 */
 	public boolean is(Node node) {
 		if (node == null || isEmpty()) return false;
 		for (Node self : this) {
