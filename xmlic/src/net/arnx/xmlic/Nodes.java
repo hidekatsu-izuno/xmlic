@@ -483,6 +483,13 @@ public class Nodes extends ArrayList<Node> {
 		return this;
 	}
 	
+	/**
+	 * Filters a each attribute value of the current elements.
+	 * 
+	 * @param name a attribute name 
+	 * @param func filter function
+	 * @return a reference to this object
+	 */
 	public Nodes attr(String name, Filter<String> func) {
 		if (name == null) throw new IllegalArgumentException("name is null");
 		if (func == null) return this;
@@ -541,6 +548,12 @@ public class Nodes extends ArrayList<Node> {
 		return this;
 	}
 	
+	/**
+	 * Removes attribute of the specified name.
+	 * 
+	 * @param name a attribute name
+	 * @return a reference to this object
+	 */
 	public Nodes removeAttr(String name) {
 		if (name == null) return this;
 		if (isEmpty()) return this;
@@ -605,6 +618,13 @@ public class Nodes extends ArrayList<Node> {
 		return get(0).getNodeValue();
 	}
 	
+	/**
+	 * Get a Nodes instance for a node at the specified index.
+	 * -N is the relative index for last.
+	 * 
+	 * @param index a index number
+	 * @return a Nodes instance for a node at the specified index
+	 */
 	public Nodes eq(int index) {
 		Node self = get(index);
 		if (self != null) {
@@ -616,6 +636,12 @@ public class Nodes extends ArrayList<Node> {
 		}
 	}
 	
+	/**
+	 * Check the current nodes matched against a specified pattern.
+	 * 
+	 * @param pattern xpath pattern
+	 * @return true if at least one of these elements matches
+	 */
 	public boolean is(String pattern) {
 		if (pattern == null || isEmpty()) return false;
 		
