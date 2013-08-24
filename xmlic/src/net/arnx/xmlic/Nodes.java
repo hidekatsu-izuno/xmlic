@@ -637,7 +637,7 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	/**
-	 * Checks the current nodes matched against a specified pattern.
+	 * Checks current nodes matched against a specified pattern.
 	 * 
 	 * @param pattern xpath pattern
 	 * @return true if at least one of these nodes matches
@@ -655,7 +655,7 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	/**
-	 * Checks the current nodes matched against a specified filter function.
+	 * Checks current nodes matched against a specified filter function.
 	 * 
 	 * @param func a filter function
 	 * @return true if at least one of these nodes matches
@@ -680,7 +680,7 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	/**
-	 * Checks the current nodes matched against a specified set of nodes.
+	 * Checks current nodes matched against a specified set of nodes.
 	 * 
 	 * @param nodes a Nodes object
 	 * @return true if at least one of these nodes matches
@@ -699,7 +699,7 @@ public class Nodes extends ArrayList<Node> {
 	
 	
 	/**
-	 * Checks the current nodes matched against a specified node.
+	 * Checks current nodes matched against a specified node.
 	 * 
 	 * @param node a node
 	 * @return true if at least one of these nodes matches
@@ -759,7 +759,7 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	/**
-	 * Gets a mapped value's list from the current nodes.
+	 * Gets a mapped value's list from current nodes.
 	 * 
 	 * @param func a mapper function
 	 * @return a mapped value's list
@@ -788,7 +788,7 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	/**
-	 * Iterates a each node of the current nodes.
+	 * Iterates a each node of current nodes.
 	 * 
 	 * @param func a visitor function
 	 * @return a reference to this object
@@ -798,7 +798,7 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	/**
-	 * Iterates a each node of the current nodes.
+	 * Iterates a each node of current nodes.
 	 * 
 	 * @param func a visitor function
 	 * @param reverse true if you wish to iterate reverse.
@@ -989,7 +989,7 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	/**
-	 * Evaluate a specified XPath expression at a first node of the current nodes.
+	 * Evaluate a specified XPath expression at a first node of current nodes.
 	 * And gets as a specified type.
 	 * 
 	 * @param xpath a XPath expression
@@ -1136,7 +1136,7 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	/**
-	 * Traverses descendants of the current nodes that matched a specified pattern.
+	 * Traverses descendants of current nodes that matched a specified pattern.
 	 * 
 	 * @param pattern a pattern
 	 * @param func a visitor function
@@ -1147,7 +1147,7 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	/**
-	 * Traverses descendants of the current nodes that matched a specified pattern.
+	 * Traverses descendants of current nodes that matched a specified pattern.
 	 * 
 	 * @param pattern a pattern
 	 * @param func a visitor function
@@ -1226,7 +1226,7 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	/**
-	 * Gets the set of the parent element for the current nodes.
+	 * Gets the set of the parent element for current nodes.
 	 * 
 	 * @return the set of the parent element
 	 */
@@ -1235,7 +1235,7 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	/**
-	 * Gets the set of the parent element for the current nodes, and filters with a specified pattern.
+	 * Gets the set of the parent element for current nodes, and filters with a specified pattern.
 	 * 
 	 * @param pattern a pattern
 	 * @return the filtered set of the parent element
@@ -1245,7 +1245,7 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	/**
-	 * Collects the set of the parent element for the current nodes until matches a specified pattern.
+	 * Collects the set of the parent element for current nodes until matches a specified pattern.
 	 * 
 	 * @param pattern a pattern
 	 * @return the filtered set of the parent element
@@ -1255,7 +1255,7 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	/**
-	 * Gets the set of the ancestor elements for the current nodes.
+	 * Gets the set of the ancestor elements for current nodes.
 	 * 
 	 * @return the set of the ancestor elements
 	 */
@@ -1264,7 +1264,7 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	/**
-	 * Gets the filtered set of the ancestor elements for the current nodes.
+	 * Gets the filtered set of the ancestor elements for current nodes.
 	 * 
 	 * @param pattern a pattern
 	 * @return the filtered set of the ancestor elements
@@ -1323,7 +1323,7 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	/**
-	 * Collects the set of the ancestors or self elements for the current nodes until matches a pattern.
+	 * Collects the set of the ancestors or self elements for current nodes until matches a pattern.
 	 * 
 	 * @param pattern a pattern
 	 * @return the filtered set of the ancestor or self elements
@@ -1353,7 +1353,7 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	/**
-	 * Gets the set of the child elements for the current nodes.
+	 * Gets the set of the child elements for current nodes.
 	 * 
 	 * @return the set of the child elements
 	 */
@@ -1375,7 +1375,7 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	/**
-	 * Gets the filtered set of the child elements for the current nodes.
+	 * Gets the filtered set of the child elements for current nodes.
 	 * 
 	 * @param pattern a pattern
 	 * @return the filtered set of child elements
@@ -1405,7 +1405,7 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	/**
-	 * Gets the set of the child nodes for the current nodes.
+	 * Gets the set of the child nodes for current nodes.
 	 * 
 	 * @return the set of child nodes
 	 */
@@ -1426,7 +1426,7 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	/**
-	 * Gets the filtered set of the child nodes for the current nodes.
+	 * Gets the filtered set of the child nodes for current nodes.
 	 * 
 	 * @param pattern a pattern
 	 * @return the filtered set of the child nodes
@@ -1455,7 +1455,7 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	/**
-	 * Gets the first node of the current nodes.
+	 * Gets the first node of current nodes.
 	 * 
 	 * @return the first node
 	 */
@@ -1464,7 +1464,7 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	/**
-	 * Gets the last node of the current nodes.
+	 * Gets the last node of current nodes.
 	 * 
 	 * @return the last node
 	 */
@@ -1473,7 +1473,7 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	/**
-	 * Gets the set of the previous element for the current nodes.
+	 * Gets the set of the previous element for current nodes.
 	 * 
 	 * @return the set of the previous element
 	 */
@@ -1482,7 +1482,7 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	/**
-	 * Gets the filtered set of the previous element for the current nodes.
+	 * Gets the filtered set of the previous element for current nodes.
 	 * 
 	 * @return the filtered set of the previous element
 	 */
@@ -1491,7 +1491,7 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	/**
-	 * Collects the set of the previous element for the current nodes until matches a specified pattern.
+	 * Collects the set of the previous element for current nodes until matches a specified pattern.
 	 * 
 	 * @param pattern a pattern
 	 * @return the filtered set of the previous element
@@ -1501,7 +1501,7 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	/**
-	 * Gets the set of the all previous elements for the current nodes.
+	 * Gets the set of the all previous elements for current nodes.
 	 * 
 	 * @return the set of the all previous elements
 	 */
@@ -1510,7 +1510,7 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	/**
-	 * Gets the filtered set of the all previous elements for the current nodes.
+	 * Gets the filtered set of the all previous elements for current nodes.
 	 * 
 	 * @return the filtered set of the all previous elements
 	 */
@@ -1568,7 +1568,7 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	/**
-	 * Gets the set of the next element for the current nodes.
+	 * Gets the set of the next element for current nodes.
 	 * 
 	 * @return the set of the next element
 	 */
@@ -1577,7 +1577,7 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	/**
-	 * Gets the filtered set of the next element for the current nodes.
+	 * Gets the filtered set of the next element for current nodes.
 	 * 
 	 * @param pattern a pattern
 	 * @return the filtered set of the next element
@@ -1587,7 +1587,7 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	/**
-	 * Collects the set of the next element for the current nodes until matches a specified pattern.
+	 * Collects the set of the next element for current nodes until matches a specified pattern.
 	 * 
 	 * @param pattern a pattern
 	 * @return the filtered set of the next element
@@ -1597,7 +1597,7 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	/**
-	 * Gets the set of the all next elements for the current nodes.
+	 * Gets the set of the all next elements for current nodes.
 	 * 
 	 * @return the set of the all next elements
 	 */
@@ -1606,7 +1606,7 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	/**
-	 * Gets the filtered set of the all next elements for the current nodes.
+	 * Gets the filtered set of the all next elements for current nodes.
 	 * 
 	 * @param pattern a pattern
 	 * @return the filtered set of the all next elements
@@ -1664,7 +1664,7 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	/**
-	 * Gets the set of the all previous or next elements for the current nodes.
+	 * Gets the set of the all previous or next elements for current nodes.
 	 * 
 	 * @return the set of the all previous or next elements
 	 */
@@ -1692,7 +1692,7 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	/**
-	 * Gets the filtered set of the all previous or next elements for the current nodes.
+	 * Gets the filtered set of the all previous or next elements for current nodes.
 	 * 
 	 * @param pattern a pattern
 	 * @return the filtered set of the all previous or next elements
@@ -2224,6 +2224,11 @@ public class Nodes extends ArrayList<Node> {
 		return results;
 	}
 	
+	/**
+	 * Removes all child nodes of the set of current nodes.
+	 * 
+	 * @return a reference to this object
+	 */
 	public Nodes empty() {
 		for (Node self : this) {
 			if (self == null) continue;
@@ -2236,7 +2241,12 @@ public class Nodes extends ArrayList<Node> {
 		}
 		return this;
 	}
-
+	
+	/**
+	 * Removes the set of current nodes.
+	 * 
+	 * @return a reference to this object
+	 */
 	public Nodes remove() {
 		for (Node self : this) {
 			if (self == null) continue;
@@ -2250,6 +2260,12 @@ public class Nodes extends ArrayList<Node> {
 		return this;
 	}
 	
+	/**
+	 * Removes the filtered set of current nodes.
+	 * 
+	 * @param pattern a pattern
+	 * @return a reference to this object
+	 */
 	public Nodes remove(String pattern) {
 		if (pattern == null || pattern.isEmpty() || isEmpty()) {
 			return this;
@@ -2317,9 +2333,9 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	/**
-	 * Gets a concatenated text of the current nodes.
+	 * Gets a concatenated text of current nodes.
 	 * 
-	 * @return a concatenated text of the current nodes
+	 * @return a concatenated text of current nodes
 	 */
 	public String text() {
 		if (isEmpty()) return "";
@@ -2375,6 +2391,14 @@ public class Nodes extends ArrayList<Node> {
 		return sb.toString();
 	}
 	
+	/**
+	 * Normalizes the set of current nodes.
+	 * This method executes below two action:
+	 * - executes {@link org.w3c.dom.Node#normalize()}. 
+	 * - removes waste namespace declaration.
+	 * 
+	 * @return a reference to this object
+	 */
 	public Nodes normalize() {
 		if (isEmpty()) return this;
 		
@@ -2398,6 +2422,7 @@ public class Nodes extends ArrayList<Node> {
 					}
 				}
 			}
+			self.normalize();
 		}
 		return this;
 	}
@@ -2612,9 +2637,9 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	/**
-	 * Gets the current nodes count.
+	 * Gets count of current nodes.
 	 * 
-	 * @return the current nodes count
+	 * @return count of current nodes
 	 */
 	public int getLength() {
 		return size();
