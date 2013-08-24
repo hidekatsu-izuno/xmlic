@@ -1405,7 +1405,7 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	/**
-	 * Gets the set of the child nodes for current nodes.
+	 * Gets the set of child nodes for current nodes.
 	 * 
 	 * @return the set of child nodes
 	 */
@@ -1426,10 +1426,10 @@ public class Nodes extends ArrayList<Node> {
 	}
 	
 	/**
-	 * Gets the filtered set of the child nodes for current nodes.
+	 * Gets the filtered set of child nodes for current nodes.
 	 * 
 	 * @param pattern a pattern
-	 * @return the filtered set of the child nodes
+	 * @return the filtered set of child nodes
 	 */
 	public Nodes contents(String pattern) {
 		if (pattern == null || pattern.isEmpty() || isEmpty()) {

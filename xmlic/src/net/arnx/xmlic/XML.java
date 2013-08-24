@@ -420,10 +420,22 @@ public class XML implements Serializable {
 		return doc().select(xpath);
 	}
 	
+	/**
+	 * Gets the set of child nodes for current document.
+	 * This method is same to doc().contents(). 
+	 * 
+	 * @return the set of child nodes
+	 */
 	public Nodes contents() {
 		return doc().contents();
 	}
 	
+	/**
+	 * Gets the filtered set of child nodes for current document.
+	 * This method is same to doc().contents(pattern). 
+	 * 
+	 * @return the filtered set of child nodes
+	 */
 	public Nodes contents(String pattern) {
 		return doc().contents(pattern);
 	}
