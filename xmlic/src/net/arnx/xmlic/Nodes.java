@@ -2494,6 +2494,12 @@ public class Nodes extends ArrayList<Node> {
 		return this;
 	}
 	
+	/**
+	 * Determines whether any of the current elements are assigned the given class.
+	 * 
+	 * @param classes determining classes
+	 * @return true if any of the current elements are assigned the given class
+	 */
 	public boolean hasClass(String classes) {
 		if (classes == null || classes.isEmpty()) return false;
 		
