@@ -550,16 +550,16 @@ xml.parse("&lt;span&gt;最初の子要素として追加！&lt;/span&gt;").repla
 <code>unwrap</code> は <code>wrap</code> とは反対にラッピングを解除し、子要素で置換します。</p>
 <pre class="source">
 <span class="comment">// すべての <code>div</code> 要素を指定した要素でラップします。</span>
-xml.find("div").wrap("&lt;div class=".wrap"&gt;&lt;&gt;"); <span class="comment">// &gt;&lt;の間に要素が挿入されます。</span>
+xml.find("div").wrap("&lt;div class=".wrap"&gt;&lt;/div&gt;"); <span class="comment">// &gt;&lt;の間に要素が挿入されます。</span>
 xml.find("div").unwrap(); <span class="comment">// すべての <code>div</code> 要素のラッピングを解除します。</span>
 
 <span class="comment">// すべての <code>div</code> 要素の内側を指定した要素でラップします。</span>
-xml.find("div").wrapInner("&lt;div class=".wrap"&gt;&lt;&gt;");
+xml.find("div").wrapInner("&lt;div class=".wrap"&gt;&lt;/div&gt;");
 </pre>
 <p><code>wrapAll</code> は、対象となる要素の最初の位置に対象のすべての要素を包み込むようにラッピングします。</p>
 <pre class="source">
 <span class="comment">// 最初の <code>div</code> 要素の位置にすべての <code>div</code> 要素がラッピングされるように移動されます。</span>
-xml.find("div").wrapInner("&lt;div class=".wrap"&gt;&lt;&gt;");
+xml.find("div").wrapInner("&lt;div class=".wrap"&gt;&lt;/div&gt;");
 </pre>
 
 <h3 id="remove">要素の削除<span class="sub"> - remove, empty</span></h3>

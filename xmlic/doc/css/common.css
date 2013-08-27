@@ -48,6 +48,7 @@ table {
 	border-right: 1px solid silver;
 	background: white;
 	overflow-y: auto;
+	z-index: 1;
 }
 
 .header {
@@ -103,6 +104,7 @@ ul { list-style-image: url(../img/marker.jpg); }
 .menu { margin: 15px 5px 15px 5px; line-height: 1.5; list-style-image: none; }
 .menu ul { padding-left: 20px; }
 .menu li a { text-decoration: none; }
+.menu li li { font-size: 0.9em; }
 
 .main ul { padding-left: 30px;  }
 .source { border: 1px solid silver; font-size: 0.9em; font-family: monospace; padding: 10px; background-color: #E0FFFF; }
