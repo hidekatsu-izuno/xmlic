@@ -532,7 +532,18 @@ public class XML implements Serializable {
 	}
 	
 	/**
-	 * Gets a XSLT template transformer.
+	 * Creates a XSLT template transformer from this document.
+	 * 
+	 * @return a XSLT template transformer. null if not exists. 
+	 * @throws TransformerConfigurationException if failed to load XSLT. 
+	 */
+	public Transformer toTransformer() throws TransformerConfigurationException {
+		TransformerFactory tf = TransformerFactory.newInstance();
+		return tf.newTransformer(new DOMSource(doc));
+	}
+	
+	/**
+	 * Gets a XSLT template transformer from a associated stylesheet.
 	 * 
 	 * @return a XSLT template transformer. null if not exists. 
 	 * @throws TransformerConfigurationException if failed to load XSLT. 
