@@ -534,7 +534,7 @@ public class XML implements Serializable {
 	/**
 	 * Creates a XSLT template transformer from this document.
 	 * 
-	 * @return a XSLT template transformer. null if not exists. 
+	 * @return a XSLT template transformer
 	 * @throws TransformerConfigurationException if failed to load XSLT. 
 	 */
 	public Transformer toTransformer() throws TransformerConfigurationException {

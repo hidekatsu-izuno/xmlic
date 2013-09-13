@@ -12,10 +12,20 @@ public class XPathSyntaxException extends RuntimeException {
 		this.position = pos;
 	}
 	
+	/**
+	 * Gets a path.
+	 * 
+	 * @return a path
+	 */
 	public String getXPath() {
 		return xpath;
 	}
 	
+	/**
+	 * Gets a position.
+	 * 
+	 * @return a position
+	 */
 	public int getPosition() {
 		return position;
 	}
