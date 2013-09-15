@@ -17,6 +17,10 @@ public class XSLTTest {
 			xslt = XSLT.load(getClass().getResource("test_error.xsl"));
 			fail();
 		} catch (XSLTException e) {
+			e.printStackTrace();
+			for (XSLTException.Detail detail : e.getErrors()) {
+				System.out.println(detail);
+			}
 			assertNotNull(e);
 		}
 	}

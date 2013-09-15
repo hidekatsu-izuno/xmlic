@@ -6,7 +6,12 @@ import java.io.Reader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
+import javax.xml.transform.ErrorListener;
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
@@ -40,17 +45,8 @@ public class XSLT {
 	 * @throws XSLTException if XSLT parsing error caused. 
 	 */
 	public static XSLT load(URI uri) throws XSLTException {
-		TransformerFactory tf = TransformerFactory.newInstance();
-		try {
-			String base = uri.normalize().toASCIIString();
-			URIResolver resolver = new URIResolverImpl(base);
-			tf.setURIResolver(resolver);
-			Transformer t = tf.newTransformer(new StreamSource(base));
-			t.setURIResolver(resolver);
-			return new XSLT(t);
-		} catch (TransformerConfigurationException e) {
-			throw toXSLTSyntaxException(e);
-		}
+		String path = uri.normalize().toASCIIString();
+		return load(new StreamSource(path), path);
 	}
 	
 	/**
@@ -76,12 +72,7 @@ public class XSLT {
 	 * @throws XSLTException if XSLT parsing error caused. 
 	 */
 	public static XSLT load(InputStream in) throws XSLTException {
-		TransformerFactory tf = TransformerFactory.newInstance();
-		try {
-			return new XSLT(tf.newTransformer(new StreamSource(in)));
-		} catch (TransformerConfigurationException e) {
-			throw toXSLTSyntaxException(e);
-		}
+		return load(new StreamSource(in), null);
 	}
 	
 	/**
@@ -92,12 +83,7 @@ public class XSLT {
 	 * @throws XSLTException if XSLT parsing error caused. 
 	 */
 	public static XSLT load(Reader reader) throws XSLTException {
-		TransformerFactory tf = TransformerFactory.newInstance();
-		try {
-			return new XSLT(tf.newTransformer(new StreamSource(reader)));
-		} catch (TransformerConfigurationException e) {
-			throw toXSLTSyntaxException(e);
-		}
+		return load(new StreamSource(reader), null);
 	}
 	
 	/**
@@ -108,16 +94,7 @@ public class XSLT {
 	 * @throws XSLTException if XSLT parsing error caused. 
 	 */
 	public static XSLT load(Document doc) throws XSLTException {
-		TransformerFactory tf = TransformerFactory.newInstance();
-		try {
-			URIResolver resolver = new URIResolverImpl(doc.getBaseURI());
-			tf.setURIResolver(resolver);
-			Transformer t = tf.newTransformer(new DOMSource(doc));
-			t.setURIResolver(resolver);
-			return new XSLT(t);
-		} catch (TransformerConfigurationException e) {
-			throw toXSLTSyntaxException(e);
-		}
+		return load(new DOMSource(doc), doc.getBaseURI());
 	}
 	
 	/**
@@ -128,17 +105,65 @@ public class XSLT {
 	 * @throws XSLTException if XSLT syntax error caused. 
 	 */
 	public static XSLT load(XML xml) throws XSLTException {
-		return load(xml.get());
+		return load(new DOMSource(xml.get()), xml.get().getBaseURI());
+	}
+	
+	private static XSLT load(Source source, String base) throws XSLTException {
+		TransformerFactory tf = TransformerFactory.newInstance();
+		
+		final List<XSLTException.Detail> warnings = new ArrayList<XSLTException.Detail>();
+		final List<XSLTException.Detail> errors = new ArrayList<XSLTException.Detail>();
+		tf.setErrorListener(new ErrorListener() {
+			@Override
+			public void warning(TransformerException e) throws TransformerException {
+				int line = (e.getLocator() != null) ? e.getLocator().getLineNumber() : -1;
+				int column = (e.getLocator() != null) ? e.getLocator().getColumnNumber() : -1;
+				warnings.add(new XSLTException.Detail(line, column, e.getMessage()));
+			}
+			
+			@Override
+			public void error(TransformerException e) throws TransformerException {
+				int line = (e.getLocator() != null) ? e.getLocator().getLineNumber() : -1;
+				int column = (e.getLocator() != null) ? e.getLocator().getColumnNumber() : -1;
+				errors.add(new XSLTException.Detail(line, column, e.getMessage()));
+			}
+			
+			@Override
+			public void fatalError(TransformerException e) throws TransformerException {
+				throw e;
+			}
+		});
+		
+		try {
+			URIResolver resolver = new URIResolverImpl(base);
+			tf.setURIResolver(resolver);
+			Transformer t = tf.newTransformer(source);
+			t.setURIResolver(resolver);
+			return new XSLT(t, warnings);
+		} catch (TransformerConfigurationException e) {
+			throw new XSLTException(e, warnings, errors);
+		}
 	}
 	
 	private final Transformer transformer;
+	private final Collection<XSLTException.Detail> warnings;
 	
 	public XSLT(Transformer transformer) {
 		this.transformer = transformer;
+		this.warnings = Collections.emptyList();
+	}
+	
+	public XSLT(Transformer transformer, Collection<XSLTException.Detail> warnings) {
+		this.transformer = transformer;
+		this.warnings = Collections.unmodifiableCollection(new ArrayList<XSLTException.Detail>(warnings));
 	}
 	
 	public Transformer get() {
 		return transformer;
+	}
+	
+	public Collection<XSLTException.Detail> getWarnings() {
+		return warnings;
 	}
 	
 	public XML transform(XML xml) {
@@ -149,14 +174,6 @@ public class XSLT {
 			throw new IllegalStateException(e);
 		}
 		return new XML(xml.xmlContext, (Document)result.getNode());
-	}
-	
-	static XSLTException toXSLTSyntaxException(TransformerConfigurationException e) {
-		int line = (e.getLocator() != null) ? e.getLocator().getLineNumber() : -1;
-		int column = (e.getLocator() != null) ? e.getLocator().getColumnNumber() : -1;
-		String message = e.getMessage();
-		
-		throw new XSLTException(line, column, message, e);	
 	}
 	
 	static class URIResolverImpl implements URIResolver {
