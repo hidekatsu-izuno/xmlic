@@ -1,5 +1,5 @@
 <?xml-stylesheet type="text/xsl" href="test2.xsl" ?>
-<?xml-stylesheet type="text/xsl" href="test3.xsl" ?>
+<?xml-stylesheet type="text/xsl" href="test.xsl" ?>
 <body>
 top
 <div class="s1">

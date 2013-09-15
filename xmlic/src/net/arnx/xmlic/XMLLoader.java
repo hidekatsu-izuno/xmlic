@@ -4,12 +4,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.net.URI;
+import java.net.URISyntaxException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.w3c.dom.Document;
+import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
@@ -91,10 +93,41 @@ public class XMLLoader {
 			throw new IllegalArgumentException(e.getMessage(), e);
 		}
 		
+		if (is.getSystemId() != null) {
+			db.setEntityResolver(new EntityResolverImpl(is.getSystemId()));
+		}
+		
 		try {
 			return db.parse(is);
 		} catch (SAXException e) {
 			throw new IllegalStateException(e.getMessage(), e);
+		}
+	}
+	
+	private static class EntityResolverImpl implements EntityResolver {
+		private String base;
+		
+		public EntityResolverImpl(String base) {
+			this.base = base;
+		}
+		
+		@Override
+		public InputSource resolveEntity(String publicId, String systemId) throws SAXException, IOException {
+			if (systemId == null) return null;
+			
+			try {
+				URI uri = new URI(systemId);
+				if (!uri.isAbsolute()) {
+					if (this.base != null && !this.base.isEmpty()) {
+						uri = new URI(this.base).resolve(uri);
+					} else {
+						throw new SAXException("base url is missing.");
+					}
+				}
+				return new InputSource(uri.normalize().toASCIIString());
+			} catch (URISyntaxException e) {
+				throw new SAXException(e);
+			}
 		}
 	}
 }

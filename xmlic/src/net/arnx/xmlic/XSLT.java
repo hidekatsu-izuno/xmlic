@@ -179,7 +179,7 @@ public class XSLT {
 						throw new TransformerException("base url is missing.");
 					}
 				}
-				return new StreamSource(uri.toASCIIString());
+				return new StreamSource(uri.normalize().toASCIIString());
 			} catch (URISyntaxException e) {
 				throw new TransformerException(e);
 			}

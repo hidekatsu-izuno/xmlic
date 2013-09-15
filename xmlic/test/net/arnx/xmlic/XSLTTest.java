@@ -13,7 +13,12 @@ public class XSLTTest {
 		XSLT xslt = XSLT.load(getClass().getResource("test.xsl"));
 		assertNotNull(xslt);
 		
-		xslt = XSLT.load(getClass().getResource("test_error.xsl"));
+		try {
+			xslt = XSLT.load(getClass().getResource("test_error.xsl"));
+			fail();
+		} catch (XSLTException e) {
+			assertNotNull(e);
+		}
 	}
 	
 	@Test
