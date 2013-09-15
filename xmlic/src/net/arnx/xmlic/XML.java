@@ -540,10 +540,7 @@ public class XML implements Serializable {
 			Source src = tf.getAssociatedStylesheet(new DOMSource(doc), null, null, null);
 			return (src != null) ? new XSLT(tf.newTransformer(src)) : null;
 		} catch (TransformerConfigurationException e) {
-			throw new XSLTSyntaxException(
-					e.getLocator().getLineNumber(),
-					e.getLocator().getColumnNumber(),
-					e.getMessageAndLocation(), e);
+			throw XSLT.toXSLTSyntaxException(e);
 		}
 	}
 	
