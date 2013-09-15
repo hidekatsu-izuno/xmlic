@@ -65,19 +65,19 @@ public class XMLLoader {
 		return xincludeAware;
 	}
 	
-	public Document load(URI uri) throws IOException {
+	public Document load(URI uri) throws XMLException {
 		return load(new InputSource(uri.normalize().toASCIIString()));
 	}
 	
-	public Document load(InputStream in) throws IOException {
+	public Document load(InputStream in) throws XMLException {
 		return load(new InputSource(in));
 	}
 	
-	public Document load(Reader reader) throws IOException {
+	public Document load(Reader reader) throws XMLException {
 		return load(new InputSource(reader));
 	}
 	
-	Document load(InputSource is) throws IOException {
+	Document load(InputSource is) throws XMLException {
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		dbf.setNamespaceAware(true);
 		dbf.setValidating(validating);
@@ -99,8 +99,8 @@ public class XMLLoader {
 		
 		try {
 			return db.parse(is);
-		} catch (SAXException e) {
-			throw new IllegalStateException(e.getMessage(), e);
+		} catch (Exception e) {
+			throw new XMLException(e.getMessage(), e);
 		}
 	}
 	

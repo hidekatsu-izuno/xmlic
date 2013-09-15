@@ -63,9 +63,9 @@ public class XML implements Serializable {
 	 * 
 	 * @param file a input file.
 	 * @return a new XML instance.
-	 * @throws IOException if I/O error occurred.
+	 * @throws XMLException if XML parsing error caused.
 	 */
-	public static XML load(File file) throws IOException {
+	public static XML load(File file) throws XMLException {
 		XMLLoader loader = new XMLLoader();
 		return new XML(loader.load(file.toURI()));
 	}
@@ -75,9 +75,9 @@ public class XML implements Serializable {
 	 * 
 	 * @param uri a URI.
 	 * @return a new XML instance.
-	 * @throws IOException if I/O error occurred.
+	 * @throws XMLException if XML parsing error caused.
 	 */
-	public static XML load(URI uri) throws IOException {
+	public static XML load(URI uri) throws XMLException {
 		XMLLoader loader = new XMLLoader();
 		return new XML(loader.load(uri));
 	}
@@ -87,9 +87,9 @@ public class XML implements Serializable {
 	 * 
 	 * @param url a URL.
 	 * @return a new XML instance.
-	 * @throws IOException if I/O error occurred.
+	 * @throws XMLException if XML parsing error caused.
 	 */
-	public static XML load(URL url) throws IOException {
+	public static XML load(URL url) throws XMLException {
 		try {
 			XMLLoader loader = new XMLLoader();
 			return new XML(loader.load(url.toURI()));
@@ -103,9 +103,9 @@ public class XML implements Serializable {
 	 * 
 	 * @param in a binary input stream.
 	 * @return a new XML instance.
-	 * @throws IOException if I/O error occurred.
+	 * @throws XMLException if XML parsing error caused.
 	 */
-	public static XML load(InputStream in) throws IOException {
+	public static XML load(InputStream in) throws XMLException {
 		XMLLoader loader = new XMLLoader();
 		return new XML(loader.load(in));
 	}
@@ -115,9 +115,9 @@ public class XML implements Serializable {
 	 * 
 	 * @param reader a character input stream.
 	 * @return a new XML instance.
-	 * @throws IOException if I/O error occurred.
+	 * @throws XMLException if XML parsing error caused.
 	 */
-	public static XML load(Reader reader) throws IOException {
+	public static XML load(Reader reader) throws XMLException {
 		XMLLoader loader = new XMLLoader();
 		return new XML(loader.load(reader));
 	}

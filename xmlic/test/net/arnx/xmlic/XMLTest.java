@@ -32,7 +32,7 @@ public class XMLTest {
 	}
 	
 	@Test
-	public void testExtendedFunction() throws IOException {
+	public void testExtendedFunction() {
 		XML xml = XML.load(getClass().getResource("test_ns.xml"));
 		assertEquals("<body>\ntop\n<div class=\"s1\">\n\t<ul class=\"s11\">\n\t\t<li>t1</li>\n\t\t<li>t2</li>\n\t\t<li>t3</li>\n\t</ul>\n\t<ul class=\"s12\">\n\t\t<li>t4</li>\n\t\t<li>t5</li>\n\t\t<li>t6</li>\n\t</ul>\n</div>\nmiddle\n<div class=\"s2\">\n\tprefix\n\t<ul class=\"s21\">\n\t\t<li>t7</li>\n\t\t<li>t8</li>\n\t\t<li>t9</li>\n\t</ul>\n\tsuffix\n</div>\nbottom\n</body>", xml.evaluate("document('test.xml')", Nodes.class).toString());
 		assertEquals("<html:ul xmlns:html=\"http://www.w3.org/1999/xhtml\" class=\"s11\">\n\t\t<html:li>t1</html:li>\n\t\t<html:li>t2</html:li>\n\t\t<html:li>t3</html:li>\n\t</html:ul><html:ul xmlns:html=\"http://www.w3.org/1999/xhtml\" class=\"s12\">\n\t\t<html:li>t4</html:li>\n\t\t<html:li>t5</html:li>\n\t\t<html:li>t6</html:li>\n\t</html:ul>", xml.find(".//html:div").find("./html:ul[current()/@class='s1']").toString());
@@ -42,7 +42,7 @@ public class XMLTest {
 	}
 	
 	@Test
-	public void testNamespaceMapping() throws IOException {
+	public void testNamespaceMapping() {
 		XML xml = XML.load(getClass().getResource("test_ns2.xml"));
 		
 		Map<String, String> map = xml.getNamespaceMappings();
@@ -85,7 +85,7 @@ public class XMLTest {
 	}
 	
 	@Test
-	public void testEscape() throws IOException {
+	public void testEscape() {
 		assertEquals("abcde", XML.escape("abcde"));
 		assertEquals("&lt;abcde&gt;", XML.escape("<abcde>"));
 		assertEquals("a&gt;bcd&lt;e", XML.escape("a>bcd<e"));
@@ -95,7 +95,7 @@ public class XMLTest {
 	}
 	
 	@Test
-	public void testUnescape() throws IOException {
+	public void testUnescape() {
 		assertEquals("abcde", XML.unescape("abcde"));
 		assertEquals("<abcde>", XML.unescape("&lt;abcde&gt;"));
 		assertEquals("a>bcd<e", XML.unescape("a&gt;bcd&lt;e"));
