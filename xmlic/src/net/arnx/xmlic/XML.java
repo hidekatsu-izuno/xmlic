@@ -15,6 +15,8 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.xml.XMLConstants;
 import javax.xml.stream.XMLInputFactory;
@@ -22,11 +24,14 @@ import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.transform.Source;
+import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 
+import net.arnx.xmlic.internal.org.jaxen.FunctionCallException;
 import net.arnx.xmlic.internal.org.jaxen.XPath;
+import net.arnx.xmlic.internal.org.jaxen.function.StringFunction;
 import net.arnx.xmlic.internal.util.NodeMatcher;
 import net.arnx.xmlic.internal.util.XmlicContext;
 import net.arnx.xmlic.internal.util.XmlicContext.Key;
@@ -37,6 +42,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.w3c.dom.ProcessingInstruction;
 import org.xml.sax.InputSource;
 
 /**
@@ -528,19 +534,69 @@ public class XML implements Serializable {
 		return new XML(xmlContext, (Document)doc.cloneNode(true));
 	}
 	
+	static final Pattern ATTR_PATTERN = Pattern.compile("\\G[ \\t\\r\\n]*([^ \\t\\r\\n=]+)[ \\t\\r\\n]*=[ \\t\\r\\n]*(?:\"([^\"]+)\"|'([^'])')[ \\t\\r\\n]*");
+	
 	/**
 	 * Gets a XSLT template transformer from a associated stylesheet.
 	 * 
 	 * @return a XSLT template transformer. null if not exists.
 	 * @throws XSLTSyntaxException if XSLT syntax error caused. 
 	 */
-	public XSLT stylesheet() throws XSLTSyntaxException {
-		TransformerFactory tf = TransformerFactory.newInstance();
-		try {
-			Source src = tf.getAssociatedStylesheet(new DOMSource(doc), null, null, null);
-			return (src != null) ? new XSLT(tf.newTransformer(src)) : null;
-		} catch (TransformerConfigurationException e) {
-			throw XSLT.toXSLTSyntaxException(e);
+	public XSLT stylesheet() throws XSLTSyntaxException, IOException {
+		String target = null;
+		
+		NodeList list = doc.getChildNodes();
+		for (int i = 0; i < list.getLength(); i++) {
+			Node node = list.item(i);
+			if (node.getNodeType() == Node.ELEMENT_NODE) break;
+			if (node.getNodeType() != Node.PROCESSING_INSTRUCTION_NODE) continue;
+			
+			ProcessingInstruction pi = (ProcessingInstruction)node;
+			if (!"xml-stylesheet".equals(pi.getTarget()) || pi.getData() == null) continue;
+			
+			Matcher m = ATTR_PATTERN.matcher(pi.getData());
+			boolean valid = true;
+			String type = null;
+			String href = null;
+			while (m.find()) {
+				String aname = m.group(1);
+				String avalue = unescape((m.group(2) != null) ? m.group(2) : m.group(3));
+				if ("href".equals(aname)) {
+					href = avalue;
+				} else if ("type".equals(aname)) {
+					type = avalue;
+				} else if ("title".equals(aname)
+						|| "media".equals(aname)
+						|| "charset".equals(aname)
+						|| "alternate".equals(aname)) {
+					// no handle
+				} else {
+					valid = false;
+					break;
+				}
+			}
+			
+			if (valid && "text/xsl".equals(type) && href != null) {
+				target = href;
+			}
+		}
+		
+		if (target != null) {
+			try {
+				URI uri = new URI(target);
+				if (!uri.isAbsolute()) {
+					if (doc.getBaseURI() != null) {
+						uri = new URI(doc.getBaseURI()).resolve(uri);
+					} else {
+						throw new IllegalStateException("base url is missing.");
+					}
+				}
+				return XSLT.load(uri);
+			} catch (URISyntaxException e) {
+				throw new IllegalStateException(e);
+			}
+		} else {
+			return null;
 		}
 	}
 	

@@ -8,10 +8,12 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 
+import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.URIResolver;
 import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamSource;
@@ -110,7 +112,9 @@ public class XSLT {
 	public static XSLT load(Document doc) throws XSLTSyntaxException, IOException {
 		TransformerFactory tf = TransformerFactory.newInstance();
 		try {
-			return new XSLT(tf.newTransformer(new DOMSource(doc)));
+			Transformer t = tf.newTransformer(new DOMSource(doc));
+			t.setURIResolver(new URIResolverImpl(doc.getBaseURI()));
+			return new XSLT(t);
 		} catch (TransformerConfigurationException e) {
 			throw toXSLTSyntaxException(e);
 		}
@@ -154,5 +158,31 @@ public class XSLT {
 		String message = e.getMessage();
 		
 		throw new XSLTSyntaxException(line, column, message, e);	
+	}
+	
+	static class URIResolverImpl implements URIResolver {
+		private String base;
+		
+		public URIResolverImpl(String base) {
+			this.base = base;
+		}
+		
+		@Override
+		public Source resolve(String href, String base) throws TransformerException {
+			try {
+				URI uri = new URI(href);
+				if (!uri.isAbsolute()) {
+					if (this.base != null) {
+						uri = new URI(this.base).resolve(uri);
+					} else {
+						throw new TransformerException("base url is missing.");
+					}
+				}
+			} catch (URISyntaxException e) {
+				throw new TransformerException(e);
+			}
+
+			return null;
+		}
 	}
 }

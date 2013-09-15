@@ -15,5 +15,10 @@ public class XSLTTest {
 		
 		xslt = XSLT.load(getClass().getResource("test_error.xsl"));
 	}
-
+	
+	@Test
+	public void testStylesheet() throws IOException {
+		assertNull(XML.load(getClass().getResource("test.xml")).stylesheet());
+		assertNotNull(XML.load(getClass().getResource("test_xslt.xml")).stylesheet());
+	}
 }
