@@ -22,11 +22,8 @@ import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import javax.xml.transform.Source;
-import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.dom.DOMSource;
 
 import net.arnx.xmlic.internal.org.jaxen.XPath;
@@ -532,39 +529,22 @@ public class XML implements Serializable {
 	}
 	
 	/**
-	 * Creates a XSLT template transformer from this document.
-	 * 
-	 * @return a XSLT template transformer
-	 * @throws TransformerConfigurationException if failed to load XSLT. 
-	 */
-	public Transformer toTransformer() throws TransformerConfigurationException {
-		TransformerFactory tf = TransformerFactory.newInstance();
-		return tf.newTransformer(new DOMSource(doc));
-	}
-	
-	/**
 	 * Gets a XSLT template transformer from a associated stylesheet.
 	 * 
-	 * @return a XSLT template transformer. null if not exists. 
-	 * @throws TransformerConfigurationException if failed to load XSLT. 
+	 * @return a XSLT template transformer. null if not exists.
+	 * @throws XSLTSyntaxException if XSLT syntax error caused. 
 	 */
-	public Transformer stylesheet() throws TransformerConfigurationException {
+	public XSLT stylesheet() throws XSLTSyntaxException {
 		TransformerFactory tf = TransformerFactory.newInstance();
-		Source src = tf.getAssociatedStylesheet(new DOMSource(doc), null, null, null);
-		return (src != null) ? tf.newTransformer(src) : null;
-	}
-	
-	/**
-	 * Transform current document by a specified transformer.
-	 * 
-	 * @param tf a XSLT template transformer object
-	 * @return a reference to this object
-	 * @throws TransformerException if failed to transform.
-	 */
-	public XML transform(Transformer tf) throws TransformerException {
-		DOMResult result = new DOMResult();
-		tf.transform(new DOMSource(doc), result);
-		return new XML(xmlContext, (Document)result.getNode());
+		try {
+			Source src = tf.getAssociatedStylesheet(new DOMSource(doc), null, null, null);
+			return (src != null) ? new XSLT(tf.newTransformer(src)) : null;
+		} catch (TransformerConfigurationException e) {
+			throw new XSLTSyntaxException(
+					e.getLocator().getLineNumber(),
+					e.getLocator().getColumnNumber(),
+					e.getMessageAndLocation(), e);
+		}
 	}
 	
 	/**
