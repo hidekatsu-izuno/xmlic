@@ -23,15 +23,8 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
-import javax.xml.transform.Source;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
 
-import net.arnx.xmlic.internal.org.jaxen.FunctionCallException;
 import net.arnx.xmlic.internal.org.jaxen.XPath;
-import net.arnx.xmlic.internal.org.jaxen.function.StringFunction;
 import net.arnx.xmlic.internal.util.NodeMatcher;
 import net.arnx.xmlic.internal.util.XmlicContext;
 import net.arnx.xmlic.internal.util.XmlicContext.Key;
@@ -540,9 +533,9 @@ public class XML implements Serializable {
 	 * Gets a XSLT template transformer from a associated stylesheet.
 	 * 
 	 * @return a XSLT template transformer. null if not exists.
-	 * @throws XSLTSyntaxException if XSLT syntax error caused. 
+	 * @throws XSLTException if XSLT load error caused. 
 	 */
-	public XSLT stylesheet() throws XSLTSyntaxException, IOException {
+	public XSLT stylesheet() throws XSLTException {
 		String target = null;
 		
 		NodeList list = doc.getChildNodes();

@@ -1,7 +1,6 @@
 package net.arnx.xmlic;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.net.URI;
@@ -27,10 +26,9 @@ public class XSLT {
 	 * 
 	 * @param file a input file.
 	 * @return a new XSLT instance.
-	 * @throws XSLTSyntaxException if XSLT syntax error caused. 
-	 * @throws IOException if I/O error occurred.
+	 * @throws XSLTException if XSLT parsing error caused. 
 	 */
-	public static XSLT load(File file) throws XSLTSyntaxException, IOException {
+	public static XSLT load(File file) throws XSLTException {
 		return load(file.toURI());
 	}
 	
@@ -39,13 +37,17 @@ public class XSLT {
 	 * 
 	 * @param uri a URI.
 	 * @return a new XML instance.
-	 * @throws XSLTSyntaxException if XSLT syntax error caused. 
-	 * @throws IOException if I/O error occurred.
+	 * @throws XSLTException if XSLT parsing error caused. 
 	 */
-	public static XSLT load(URI uri) throws XSLTSyntaxException, IOException {
+	public static XSLT load(URI uri) throws XSLTException {
 		TransformerFactory tf = TransformerFactory.newInstance();
 		try {
-			return new XSLT(tf.newTransformer(new StreamSource(uri.normalize().toASCIIString())));
+			String base = uri.normalize().toASCIIString();
+			URIResolver resolver = new URIResolverImpl(base);
+			tf.setURIResolver(resolver);
+			Transformer t = tf.newTransformer(new StreamSource(base));
+			t.setURIResolver(resolver);
+			return new XSLT(t);
 		} catch (TransformerConfigurationException e) {
 			throw toXSLTSyntaxException(e);
 		}
@@ -56,10 +58,9 @@ public class XSLT {
 	 * 
 	 * @param url a URL.
 	 * @return a new XSLT instance.
-	 * @throws XSLTSyntaxException if XSLT syntax error caused. 
-	 * @throws IOException if I/O error occurred.
+	 * @throws XSLTException if XSLT parsing error caused. 
 	 */
-	public static XSLT load(URL url) throws XSLTSyntaxException, IOException {
+	public static XSLT load(URL url) throws XSLTException {
 		try {
 			return load(url.toURI());
 		} catch (URISyntaxException e) {
@@ -72,10 +73,9 @@ public class XSLT {
 	 * 
 	 * @param in a binary input stream.
 	 * @return a new XSLT instance.
-	 * @throws XSLTSyntaxException if XSLT syntax error caused. 
-	 * @throws IOException if I/O error occurred.
+	 * @throws XSLTException if XSLT parsing error caused. 
 	 */
-	public static XSLT load(InputStream in) throws XSLTSyntaxException, IOException {
+	public static XSLT load(InputStream in) throws XSLTException {
 		TransformerFactory tf = TransformerFactory.newInstance();
 		try {
 			return new XSLT(tf.newTransformer(new StreamSource(in)));
@@ -89,10 +89,9 @@ public class XSLT {
 	 * 
 	 * @param reader a character input stream.
 	 * @return a new XSLT instance.
-	 * @throws XSLTSyntaxException if XSLT syntax error caused. 
-	 * @throws IOException if I/O error occurred.
+	 * @throws XSLTException if XSLT parsing error caused. 
 	 */
-	public static XSLT load(Reader reader) throws XSLTSyntaxException, IOException {
+	public static XSLT load(Reader reader) throws XSLTException {
 		TransformerFactory tf = TransformerFactory.newInstance();
 		try {
 			return new XSLT(tf.newTransformer(new StreamSource(reader)));
@@ -106,14 +105,15 @@ public class XSLT {
 	 * 
 	 * @param doc a DOM document
 	 * @return a new XSLT instance.
-	 * @throws XSLTSyntaxException if XSLT syntax error caused. 
-	 * @throws IOException if I/O error occurred.
+	 * @throws XSLTException if XSLT parsing error caused. 
 	 */
-	public static XSLT load(Document doc) throws XSLTSyntaxException, IOException {
+	public static XSLT load(Document doc) throws XSLTException {
 		TransformerFactory tf = TransformerFactory.newInstance();
 		try {
+			URIResolver resolver = new URIResolverImpl(doc.getBaseURI());
+			tf.setURIResolver(resolver);
 			Transformer t = tf.newTransformer(new DOMSource(doc));
-			t.setURIResolver(new URIResolverImpl(doc.getBaseURI()));
+			t.setURIResolver(resolver);
 			return new XSLT(t);
 		} catch (TransformerConfigurationException e) {
 			throw toXSLTSyntaxException(e);
@@ -125,10 +125,9 @@ public class XSLT {
 	 * 
 	 * @param doc a DOM document
 	 * @return a new XSLT instance.
-	 * @throws XSLTSyntaxException if XSLT syntax error caused. 
-	 * @throws IOException if I/O error occurred.
+	 * @throws XSLTException if XSLT syntax error caused. 
 	 */
-	public static XSLT load(XML xml) throws XSLTSyntaxException, IOException {
+	public static XSLT load(XML xml) throws XSLTException {
 		return load(xml.get());
 	}
 	
@@ -152,12 +151,12 @@ public class XSLT {
 		return new XML(xml.xmlContext, (Document)result.getNode());
 	}
 	
-	static XSLTSyntaxException toXSLTSyntaxException(TransformerConfigurationException e) {
+	static XSLTException toXSLTSyntaxException(TransformerConfigurationException e) {
 		int line = (e.getLocator() != null) ? e.getLocator().getLineNumber() : -1;
 		int column = (e.getLocator() != null) ? e.getLocator().getColumnNumber() : -1;
 		String message = e.getMessage();
 		
-		throw new XSLTSyntaxException(line, column, message, e);	
+		throw new XSLTException(line, column, message, e);	
 	}
 	
 	static class URIResolverImpl implements URIResolver {
@@ -172,17 +171,18 @@ public class XSLT {
 			try {
 				URI uri = new URI(href);
 				if (!uri.isAbsolute()) {
-					if (this.base != null) {
+					if (base != null && !base.isEmpty()) {
+						uri = new URI(base).resolve(uri);
+					} else if (this.base != null && !this.base.isEmpty()) {
 						uri = new URI(this.base).resolve(uri);
 					} else {
 						throw new TransformerException("base url is missing.");
 					}
 				}
+				return new StreamSource(uri.toASCIIString());
 			} catch (URISyntaxException e) {
 				throw new TransformerException(e);
 			}
-
-			return null;
 		}
 	}
 }
