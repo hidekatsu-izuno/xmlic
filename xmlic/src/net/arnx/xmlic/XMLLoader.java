@@ -5,6 +5,8 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -12,8 +14,10 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.w3c.dom.Document;
 import org.xml.sax.EntityResolver;
+import org.xml.sax.ErrorHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 
 /**
  * XMLLoader is for loading XML file and building DOM.
@@ -90,17 +94,36 @@ public class XMLLoader {
 		try {
 			db = dbf.newDocumentBuilder();
 		} catch (ParserConfigurationException e) {
-			throw new IllegalArgumentException(e.getMessage(), e);
+			throw new IllegalStateException(e.getMessage(), e);
 		}
 		
 		if (is.getSystemId() != null) {
 			db.setEntityResolver(new EntityResolverImpl(is.getSystemId()));
 		}
 		
+		final List<XMLException.Detail> warnings = new ArrayList<XMLException.Detail>();
+		final List<XMLException.Detail> errors = new ArrayList<XMLException.Detail>();
+		db.setErrorHandler(new ErrorHandler() {
+			@Override
+			public void warning(SAXParseException e) throws SAXException {
+				warnings.add(new XMLException.Detail(e));
+			}
+			
+			@Override
+			public void error(SAXParseException e) throws SAXException {
+				errors.add(new XMLException.Detail(e));
+			}
+			
+			@Override
+			public void fatalError(SAXParseException e) throws SAXException {
+				throw e;
+			}
+		});
+		
 		try {
 			return db.parse(is);
 		} catch (Exception e) {
-			throw new XMLException(e.getMessage(), e);
+			throw new XMLException(e, warnings, errors);
 		}
 	}
 	

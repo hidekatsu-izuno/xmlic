@@ -4,16 +4,16 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 
-import javax.xml.transform.TransformerException;
+import org.xml.sax.SAXParseException;
 
-public class XSLTException extends RuntimeException {
+public class XMLException extends RuntimeException {
 	private static final long serialVersionUID = 1L;
 	
 	private Collection<Detail> warnings;
 	private Collection<Detail> errors;
 	
-	public XSLTException(Throwable t, Collection<Detail> warnings, Collection<Detail> errors) {
-		super(t.getMessage(), t);
+	public XMLException(Throwable cause, Collection<Detail> warnings, Collection<Detail> errors) {
+		super(cause.getMessage(), cause);
 		this.warnings = Collections.unmodifiableCollection(new ArrayList<Detail>(warnings));
 		this.errors = Collections.unmodifiableCollection(new ArrayList<Detail>(errors));
 	}
@@ -27,18 +27,18 @@ public class XSLTException extends RuntimeException {
 	}
 	
 	public static class Detail {
-		private TransformerException cause;
+		private SAXParseException cause;
 		
-		Detail(TransformerException cause) {
+		Detail(SAXParseException cause) {
 			this.cause = cause;
 		}
 		
 		public int getLineNumber() {
-			return (cause.getLocator() != null) ? cause.getLocator().getLineNumber() : -1;
+			return cause.getLineNumber();
 		}
 		
 		public int getColumnNumber() {
-			return (cause.getLocator() != null) ? cause.getLocator().getColumnNumber() : -1;
+			return cause.getColumnNumber();
 		}
 		
 		public String getMessage() {

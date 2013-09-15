@@ -116,16 +116,12 @@ public class XSLT {
 		tf.setErrorListener(new ErrorListener() {
 			@Override
 			public void warning(TransformerException e) throws TransformerException {
-				int line = (e.getLocator() != null) ? e.getLocator().getLineNumber() : -1;
-				int column = (e.getLocator() != null) ? e.getLocator().getColumnNumber() : -1;
-				warnings.add(new XSLTException.Detail(line, column, e.getMessage()));
+				warnings.add(new XSLTException.Detail(e));
 			}
 			
 			@Override
 			public void error(TransformerException e) throws TransformerException {
-				int line = (e.getLocator() != null) ? e.getLocator().getLineNumber() : -1;
-				int column = (e.getLocator() != null) ? e.getLocator().getColumnNumber() : -1;
-				errors.add(new XSLTException.Detail(line, column, e.getMessage()));
+				errors.add(new XSLTException.Detail(e));
 			}
 			
 			@Override
