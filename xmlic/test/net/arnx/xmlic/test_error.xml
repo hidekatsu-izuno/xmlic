@@ -1,0 +1,14 @@
+<body>
+top
+<div class="s1">
+	<ul class="s11">
+		<li>t1</li>
+		<li>t2</li>
+		<li>t3</li>
+	</ul>
+	<ul class="s12">
+		<li>t4</li>
+		<li>t5</li>
+		<li>t6</li>
+	</ul>
+</div>

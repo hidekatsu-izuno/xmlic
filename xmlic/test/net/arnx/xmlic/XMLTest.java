@@ -29,6 +29,17 @@ public class XMLTest {
 		assertEquals(expected, XML.load(getClass().getResource("test_ns.xml")).toString());
 		assertEquals(expected, XML.load(getClass().getResourceAsStream("test_ns.xml")).toString());
 		assertEquals(expected, XML.load(new InputStreamReader(getClass().getResourceAsStream("test_ns.xml"), "UTF-8")).toString());
+
+		try {
+			XML.load(getClass().getResource("test_error.xml"));
+			fail();
+		} catch (XMLException e) {
+			e.printStackTrace();
+			for (XMLException.Detail detail : e.getErrors()) {
+				System.err.println(detail);
+			}
+			assertNotNull(e);
+		}
 	}
 	
 	@Test
