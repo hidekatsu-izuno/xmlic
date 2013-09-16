@@ -1,6 +1,7 @@
 package net.arnx.xmlic;
 
 import java.io.IOException;
+import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -16,6 +17,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.xml.XMLConstants;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamConstants;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
 
 import net.arnx.xmlic.internal.util.NodeMatcher;
 import net.arnx.xmlic.internal.util.NodeMatcher.MatchType;
@@ -105,6 +110,99 @@ public class Nodes extends ArrayList<Node> {
 		this(owner, null, list.getLength());
 		for (int i = 0; i < list.getLength(); i++) {
 			add(list.item(i));
+		}
+	}
+	
+	public Nodes(XML owner, String xml) {
+		this(owner, null, 4);
+		
+		StringBuilder sb = new StringBuilder();
+		sb.append("<x");
+		
+		for (String prefix : owner.xmlContext.getPrefixes()) {
+			String uri = owner.xmlContext.getNamespaceURI(prefix);
+			if (prefix != null && !prefix.isEmpty()) {
+				sb.append(" xmlns:").append(prefix).append("=\"");
+			} else {
+				sb.append(" xmlns=\"");
+			}
+			sb.append(uri.replace("\"", "&quot;")).append("\"");
+		}
+		sb.append(">").append(xml).append("</x>");
+		
+		try {
+			XMLInputFactory factory = XMLInputFactory.newInstance();
+			factory.setProperty(XMLInputFactory.IS_NAMESPACE_AWARE, true);
+			factory.setProperty(XMLInputFactory.IS_COALESCING, false);
+			factory.setProperty(XMLInputFactory.IS_VALIDATING, false);
+			factory.setProperty(XMLInputFactory.SUPPORT_DTD, false);
+			factory.setProperty(XMLInputFactory.IS_REPLACING_ENTITY_REFERENCES, true);
+			factory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false);
+			XMLStreamReader reader = factory.createXMLStreamReader(owner.doc.getBaseURI(), new StringReader(sb.toString()));
+			
+			Element root = null;
+			Element current = null;
+			while (reader.hasNext()) {
+				switch (reader.next()) {
+				case XMLStreamConstants.START_ELEMENT: {
+
+					Element elem = owner.doc.createElementNS(
+							reader.getNamespaceURI(), 
+							reader.getLocalName());
+					
+					for (int i = 0; i < reader.getAttributeCount(); i++) {
+						elem.setAttributeNS(
+								reader.getAttributeNamespace(i), 
+								reader.getAttributeLocalName(i), 
+								reader.getAttributeValue(i));
+					}
+					
+					if (root == null) {
+						root = elem;
+					} else {
+						current.appendChild(elem);
+					}
+					current = elem;
+					break;
+				}
+				case XMLStreamConstants.END_ELEMENT: {
+					current = (Element)current.getParentNode();						
+					break;
+				}
+				case XMLStreamConstants.PROCESSING_INSTRUCTION: {
+					String target = reader.getPITarget();
+					String data = reader.getPIData();
+					current.appendChild(owner.doc.createProcessingInstruction(target, data));
+					break;
+				}
+				case XMLStreamConstants.COMMENT: {
+					String data = reader.getText();
+					current.appendChild(owner.doc.createComment(data));
+					break;
+				}
+				case XMLStreamConstants.CDATA: {
+					String data = reader.getText();
+					current.appendChild(owner.doc.createCDATASection(data));
+					break;
+				}
+				case XMLStreamConstants.CHARACTERS:
+				case XMLStreamConstants.SPACE: {
+					String data = reader.getText();
+					current.appendChild(owner.doc.createTextNode(data));
+					break;
+				}
+				}
+			}
+			
+			NodeList list = root.getChildNodes();
+			for (int i = 0; i < list.getLength(); i++) {
+				add(list.item(i));
+			}
+			while (root.hasChildNodes()) {
+				root.removeChild(root.getLastChild());
+			}
+		} catch (XMLStreamException e) {
+			throw new IllegalArgumentException(e);
 		}
 	}
 	
@@ -1775,7 +1873,7 @@ public class Nodes extends ArrayList<Node> {
 	public Nodes prepend(String xml) {
 		if (xml == null || xml.isEmpty()) return this;
 		
-		return prepend(getOwner().parse(xml));
+		return prepend(new Nodes(getOwner(), xml));
 	}
 	
 	/**
@@ -1858,7 +1956,7 @@ public class Nodes extends ArrayList<Node> {
 	public Nodes append(String xml) {
 		if (xml == null || xml.isEmpty()) return this;
 		
-		return append(getOwner().parse(xml));
+		return append(new Nodes(getOwner(), xml));
 	}
 	
 	/**
@@ -1928,7 +2026,7 @@ public class Nodes extends ArrayList<Node> {
 	 * @return a reference of this object
 	 */
 	public Nodes before(String xml) {
-		return before(getOwner().parse(xml));
+		return before(new Nodes(getOwner(), xml));
 	}
 	
 	/**
@@ -1996,7 +2094,7 @@ public class Nodes extends ArrayList<Node> {
 	 * @return a reference of this object
 	 */
 	public Nodes after(String xml) {
-		return after(getOwner().parse(xml));
+		return after(new Nodes(getOwner(), xml));
 	}
 	
 	/**
@@ -2069,7 +2167,7 @@ public class Nodes extends ArrayList<Node> {
 	 * @return a reference to this object
 	 */
 	public Nodes wrap(String xml) {
-		return wrap(getOwner().parse(xml));
+		return wrap(new Nodes(getOwner(), xml));
 	}
 	
 	/**
@@ -2103,7 +2201,7 @@ public class Nodes extends ArrayList<Node> {
 	 * @return a reference to this object
 	 */
 	public Nodes wrapInner(String xml) {
-		return wrapInner(getOwner().parse(xml));
+		return wrapInner(new Nodes(getOwner(), xml));
 	}
 	
 	/**
@@ -2137,7 +2235,7 @@ public class Nodes extends ArrayList<Node> {
 	 * @return a reference to this object.
 	 */
 	public Nodes wrapAll(String xml) {
-		return wrapAll(getOwner().parse(xml));
+		return wrapAll(new Nodes(getOwner(), xml));
 	}
 	
 	/**
@@ -2208,7 +2306,7 @@ public class Nodes extends ArrayList<Node> {
 	 * @return a reference to this object
 	 */
 	public Nodes replaceWith(String xml) {
-		return replaceWith(getOwner().parse(xml));
+		return replaceWith(new Nodes(getOwner(), xml));
 	}
 	
 	/**

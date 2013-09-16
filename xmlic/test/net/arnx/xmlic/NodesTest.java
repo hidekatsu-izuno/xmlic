@@ -477,8 +477,8 @@ public class NodesTest {
 	@Test
 	public void testReplaceAll() throws IOException {
 		XML xml = XML.load(getClass().getResource("test.xml"));
-		assertEquals("<ol><li>replace</li></ol><ol><li>replace</li></ol><ol><li>replace</li></ol>", xml.parse("<ol><li>replace</li></ol>").replaceAll("//ul").toString());
-		assertEquals("", xml.parse("<ol><li>replace</li></ol>").replaceAll("").toString());
+		assertEquals("<ol><li>replace</li></ol><ol><li>replace</li></ol><ol><li>replace</li></ol>", new Nodes(xml, "<ol><li>replace</li></ol>").replaceAll("//ul").toString());
+		assertEquals("", new Nodes(xml, "<ol><li>replace</li></ol>").replaceAll("").toString());
 	}
 	
 	@Test
