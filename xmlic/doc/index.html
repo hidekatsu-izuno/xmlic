@@ -99,7 +99,6 @@ jQuery が単一の <code>window.document</code> に対して　XMLIC は複数�
 </ul>
 <p>XPath は  XSLT 1.0 パターンとして判定されます。そのため、子孫要素の <code>div</code> を捜すために <code>find(".//div")</code> のように記述する必要はなく、 
 <code>find("div")</code> と書くことができます。</p>
-<p>なお、現状は、HTML 向けの機能（<code>addClass</code>、<code>removeClass</code>、<code>val</code>　や HTML 形式での出力）は実装されておりません（仕様に不整合があるわけではないので、実装することは可能ですが、優先順位の問題から行なっていません）。</p>
 
 <h2 id="load">XML 文書の読み込み <span class="sub">- Load</span></h2>
 
@@ -125,15 +124,13 @@ XML xml = XML.load(new URI("http://..."));
 XMLLoader loader = new XMLLoader();
 loader.setValidation(true);
 loader.setIgnoringComments(true);
-Document doc = loader.load(new FileInputStream(new File("test.xml")));
-
-XML xml = new XML(doc);
+XML xml = loader.load(new FileInputStream(new File("test.xml")));
 </pre>
 
-<p>外部にあるドキュメントではなく、部分的な XML をインラインで読み込む場合には、<code>parse</code> メソッドを使います。すでに DOM ノード値して構築されている場合は、 <code>Nodes</code>　コンストラクタを使って取り込みます。</p>
+<p>外部にあるドキュメントではなく、部分的な XML や DOM ノード値して構築されている場合は、 <code>Nodes</code>　コンストラクタを使って取り込みます。</p>
 <pre class="source">
 <span class="comment">// 部分的な XML をインラインで読み込みます。</span>
-Nodes nodes = xml.parse("&lt;div&gt;部分的なXML&lt;/div&gt;&lt;div&gt;部分的なXML&lt;/div&gt;");
+Nodes nodes = new Nodes(xml, "&lt;div&gt;部分的なXML&lt;/div&gt;&lt;div&gt;部分的なXML&lt;/div&gt;");
 
 <span class="comment">// 構築済みのノードを <code>Nodes</code> オブジェクトに変換します。</span>
 Node node = ...;
@@ -651,7 +648,7 @@ writer.setEncoding("EUC-JP");
 writer.setLineSeparator("\r\n");
 writer.setPrettyPrinting(true);
 
-writer.writeTo(new FileOutputStream("test.xml"), xml.get());
+writer.writeTo(new FileOutputStream("test.xml"), xml);
 </pre>
 
 <p>部分的な XML を出力したい場合は、<code>toString</code> でも取得出来ます。</p>
@@ -672,6 +669,15 @@ writer.writeTo(new FileOutputStream("test.xml"), xml.get());
 <p>バグや要望などは<a href="http://sourceforge.jp/projects/xmlic">XMLIC プロジェクトサイト</a>の<a href="http://sourceforge.jp/projects/xmlic/ticket/">チケット</a>に報告ください。</p>
 
 <h2 id="releasenote">リリースノート</h2>
+
+<h3>2013/9/16 version 1.0.0</h3>
+<ul>
+<li>XML や XSLT のロード時に発生する例外を XMLException に統一しました。個々のエラーにもアクセスすることができます。XML　や XMLException の getWarnings() メソッドを通じて警告にもアクセスできます。</li>
+<li>XSLT を取り扱う XSLT クラスを追加しました。</li>
+<li>XMLLoader#load の戻り値を Document から XML クラスに変更しました。</li>
+<li>XMLWriter#writeTo に XML クラスを引数にとるメソッドを追加しました。</li>
+<li>XML#parse を廃止し、 new Nodes(XML, String) コンストラクタに変更しました。</li>
+</ul>
 
 <h3>2013/8/25 version 0.9.2</h3>
 <ul>
