@@ -152,6 +152,9 @@ public class XML implements Serializable {
 	}
 	
 	XML(Document doc, Collection<XMLException.Detail> warnings) {
+		if (doc == null) throw new NullPointerException("doc must not be null.");
+		if (warnings == null) throw new NullPointerException("warnings must not be null.");
+		
 		this.xmlContext = new XmlicContext();
 		this.doc = doc;
 		this.warnings = warnings;

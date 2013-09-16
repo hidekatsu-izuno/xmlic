@@ -113,12 +113,18 @@ public class Nodes extends ArrayList<Node> {
 		}
 	}
 	
-	public Nodes(XML owner, String xml) {
+	/**
+	 * Constructs a Nodes instance from an XML text.
+	 * 
+	 * @param owner Owner Document
+	 * @param xml an XML text
+	 * @throws XMLException if XML parsing error caused.
+	 */
+	public Nodes(XML owner, String xml) throws XMLException {
 		this(owner, null, 4);
 		
 		StringBuilder sb = new StringBuilder();
 		sb.append("<x");
-		
 		for (String prefix : owner.xmlContext.getPrefixes()) {
 			String uri = owner.xmlContext.getNamespaceURI(prefix);
 			if (prefix != null && !prefix.isEmpty()) {
@@ -126,7 +132,7 @@ public class Nodes extends ArrayList<Node> {
 			} else {
 				sb.append(" xmlns=\"");
 			}
-			sb.append(uri.replace("\"", "&quot;")).append("\"");
+			sb.append(XML.escape(uri)).append("\"");
 		}
 		sb.append(">").append(xml).append("</x>");
 		
@@ -1869,8 +1875,9 @@ public class Nodes extends ArrayList<Node> {
 	 * 
 	 * @param xml XML contents
 	 * @return a reference of this object
+	 * @throws XMLException if XML parsing error caused.
 	 */
-	public Nodes prepend(String xml) {
+	public Nodes prepend(String xml) throws XMLException {
 		if (xml == null || xml.isEmpty()) return this;
 		
 		return prepend(new Nodes(getOwner(), xml));
@@ -1952,8 +1959,9 @@ public class Nodes extends ArrayList<Node> {
 	 * 
 	 * @param xml XML contents
 	 * @return a reference of this object
+	 * @throws XMLException if XML parsing error caused.
 	 */
-	public Nodes append(String xml) {
+	public Nodes append(String xml) throws XMLException {
 		if (xml == null || xml.isEmpty()) return this;
 		
 		return append(new Nodes(getOwner(), xml));
@@ -2024,8 +2032,9 @@ public class Nodes extends ArrayList<Node> {
 	 * 
 	 * @param xml XML contents
 	 * @return a reference of this object
+	 * @throws XMLException if XML parsing error caused.
 	 */
-	public Nodes before(String xml) {
+	public Nodes before(String xml) throws XMLException {
 		return before(new Nodes(getOwner(), xml));
 	}
 	
@@ -2092,8 +2101,9 @@ public class Nodes extends ArrayList<Node> {
 	 * 
 	 * @param xml XML contents
 	 * @return a reference of this object
+	 * @throws XMLException if XML parsing error caused.
 	 */
-	public Nodes after(String xml) {
+	public Nodes after(String xml) throws XMLException {
 		return after(new Nodes(getOwner(), xml));
 	}
 	
@@ -2165,8 +2175,9 @@ public class Nodes extends ArrayList<Node> {
 	 * 
 	 * @param xml wrapping XML contents
 	 * @return a reference to this object
+	 * @throws XMLException if XML parsing error caused.
 	 */
-	public Nodes wrap(String xml) {
+	public Nodes wrap(String xml) throws XMLException {
 		return wrap(new Nodes(getOwner(), xml));
 	}
 	
@@ -2200,7 +2211,7 @@ public class Nodes extends ArrayList<Node> {
 	 * @param xml wrapping XML contents
 	 * @return a reference to this object
 	 */
-	public Nodes wrapInner(String xml) {
+	public Nodes wrapInner(String xml) throws XMLException {
 		return wrapInner(new Nodes(getOwner(), xml));
 	}
 	
@@ -2233,8 +2244,9 @@ public class Nodes extends ArrayList<Node> {
 	 * 
 	 * @param xml wrapping XML contents
 	 * @return a reference to this object.
+	 * @throws XMLException if XML parsing error caused.
 	 */
-	public Nodes wrapAll(String xml) {
+	public Nodes wrapAll(String xml) throws XMLException {
 		return wrapAll(new Nodes(getOwner(), xml));
 	}
 	
@@ -2304,8 +2316,9 @@ public class Nodes extends ArrayList<Node> {
 	 * 
 	 * @param xml replacing XML contents 
 	 * @return a reference to this object
+	 * @throws XMLException if XML parsing error caused.
 	 */
-	public Nodes replaceWith(String xml) {
+	public Nodes replaceWith(String xml) throws XMLException {
 		return replaceWith(new Nodes(getOwner(), xml));
 	}
 	

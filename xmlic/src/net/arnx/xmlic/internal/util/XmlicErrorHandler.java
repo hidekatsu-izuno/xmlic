@@ -2,6 +2,7 @@ package net.arnx.xmlic.internal.util;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import javax.xml.transform.ErrorListener;
@@ -57,10 +58,10 @@ public class XmlicErrorHandler implements ErrorHandler, ErrorListener {
 	}
 	
 	public Collection<Detail> getWarnings() {
-		return warnings;
+		return Collections.unmodifiableCollection(warnings);
 	}
 	
 	public Collection<Detail> getErrors() {
-		return errors;
+		return Collections.unmodifiableCollection(errors);
 	}
 }

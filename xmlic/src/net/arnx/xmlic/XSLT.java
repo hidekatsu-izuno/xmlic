@@ -6,7 +6,6 @@ import java.io.Reader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 
@@ -108,14 +107,13 @@ public class XSLT {
 		return load(new DOMSource(xml.get()), xml.get().getBaseURI());
 	}
 	
-	private static XSLT load(Source source, String base) throws XMLException {
+	static XSLT load(Source source, String base) throws XMLException {
 		TransformerFactory tf = TransformerFactory.newInstance();
-		
 		XmlicErrorHandler handler = new XmlicErrorHandler();
-		tf.setErrorListener(handler);
+		URIResolver resolver = new URIResolverImpl(base);
 		
 		try {
-			URIResolver resolver = new URIResolverImpl(base);
+			tf.setErrorListener(handler);
 			tf.setURIResolver(resolver);
 			Transformer t = tf.newTransformer(source);
 			t.setURIResolver(resolver);
@@ -125,17 +123,17 @@ public class XSLT {
 		}
 	}
 	
-	private final Transformer transformer;
-	private final Collection<XMLException.Detail> warnings;
+	final Transformer transformer;
+	final Collection<XMLException.Detail> warnings;
 	
 	public XSLT(Transformer transformer) {
 		this.transformer = transformer;
 		this.warnings = Collections.emptyList();
 	}
 	
-	public XSLT(Transformer transformer, Collection<XMLException.Detail> warnings) {
+	XSLT(Transformer transformer, Collection<XMLException.Detail> warnings) {
 		this.transformer = transformer;
-		this.warnings = Collections.unmodifiableCollection(new ArrayList<XMLException.Detail>(warnings));
+		this.warnings = warnings;
 	}
 	
 	public Transformer get() {
