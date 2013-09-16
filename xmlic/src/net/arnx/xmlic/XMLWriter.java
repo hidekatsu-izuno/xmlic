@@ -52,6 +52,14 @@ public class XMLWriter {
 		return linesep;
 	}
 	
+	public void writeTo(OutputStream out, XML xml) throws IOException {
+		writeTo(out, xml.get());
+	}
+	
+	public void writeTo(Writer writer, XML xml) throws IOException {
+		writeTo(writer, xml.get());
+	}
+	
 	public void writeTo(OutputStream out, Node node) throws IOException {
 		LSOutput output = createLSOutput(node);
 		output.setByteStream(out);

@@ -9,9 +9,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 
-import javax.xml.transform.ErrorListener;
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
@@ -22,6 +20,8 @@ import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamSource;
 
+import net.arnx.xmlic.internal.util.XmlicErrorHandler;
+
 import org.w3c.dom.Document;
 
 public class XSLT {
@@ -31,9 +31,9 @@ public class XSLT {
 	 * 
 	 * @param file a input file.
 	 * @return a new XSLT instance.
-	 * @throws XSLTException if XSLT parsing error caused. 
+	 * @throws XMLException if XSLT parsing error caused. 
 	 */
-	public static XSLT load(File file) throws XSLTException {
+	public static XSLT load(File file) throws XMLException {
 		return load(file.toURI());
 	}
 	
@@ -42,9 +42,9 @@ public class XSLT {
 	 * 
 	 * @param uri a URI.
 	 * @return a new XML instance.
-	 * @throws XSLTException if XSLT parsing error caused. 
+	 * @throws XMLException if XSLT parsing error caused. 
 	 */
-	public static XSLT load(URI uri) throws XSLTException {
+	public static XSLT load(URI uri) throws XMLException {
 		String path = uri.normalize().toASCIIString();
 		return load(new StreamSource(path), path);
 	}
@@ -54,9 +54,9 @@ public class XSLT {
 	 * 
 	 * @param url a URL.
 	 * @return a new XSLT instance.
-	 * @throws XSLTException if XSLT parsing error caused. 
+	 * @throws XMLException if XSLT parsing error caused. 
 	 */
-	public static XSLT load(URL url) throws XSLTException {
+	public static XSLT load(URL url) throws XMLException {
 		try {
 			return load(url.toURI());
 		} catch (URISyntaxException e) {
@@ -69,9 +69,9 @@ public class XSLT {
 	 * 
 	 * @param in a binary input stream.
 	 * @return a new XSLT instance.
-	 * @throws XSLTException if XSLT parsing error caused. 
+	 * @throws XMLException if XSLT parsing error caused. 
 	 */
-	public static XSLT load(InputStream in) throws XSLTException {
+	public static XSLT load(InputStream in) throws XMLException {
 		return load(new StreamSource(in), null);
 	}
 	
@@ -80,9 +80,9 @@ public class XSLT {
 	 * 
 	 * @param reader a character input stream.
 	 * @return a new XSLT instance.
-	 * @throws XSLTException if XSLT parsing error caused. 
+	 * @throws XMLException if XSLT parsing error caused. 
 	 */
-	public static XSLT load(Reader reader) throws XSLTException {
+	public static XSLT load(Reader reader) throws XMLException {
 		return load(new StreamSource(reader), null);
 	}
 	
@@ -91,9 +91,9 @@ public class XSLT {
 	 * 
 	 * @param doc a DOM document
 	 * @return a new XSLT instance.
-	 * @throws XSLTException if XSLT parsing error caused. 
+	 * @throws XMLException if XSLT parsing error caused. 
 	 */
-	public static XSLT load(Document doc) throws XSLTException {
+	public static XSLT load(Document doc) throws XMLException {
 		return load(new DOMSource(doc), doc.getBaseURI());
 	}
 	
@@ -102,74 +102,60 @@ public class XSLT {
 	 * 
 	 * @param doc a DOM document
 	 * @return a new XSLT instance.
-	 * @throws XSLTException if XSLT syntax error caused. 
+	 * @throws XMLException if XSLT syntax error caused. 
 	 */
-	public static XSLT load(XML xml) throws XSLTException {
+	public static XSLT load(XML xml) throws XMLException {
 		return load(new DOMSource(xml.get()), xml.get().getBaseURI());
 	}
 	
-	private static XSLT load(Source source, String base) throws XSLTException {
+	private static XSLT load(Source source, String base) throws XMLException {
 		TransformerFactory tf = TransformerFactory.newInstance();
 		
-		final List<XSLTException.Detail> warnings = new ArrayList<XSLTException.Detail>();
-		final List<XSLTException.Detail> errors = new ArrayList<XSLTException.Detail>();
-		tf.setErrorListener(new ErrorListener() {
-			@Override
-			public void warning(TransformerException e) throws TransformerException {
-				warnings.add(new XSLTException.Detail(e));
-			}
-			
-			@Override
-			public void error(TransformerException e) throws TransformerException {
-				errors.add(new XSLTException.Detail(e));
-			}
-			
-			@Override
-			public void fatalError(TransformerException e) throws TransformerException {
-				throw e;
-			}
-		});
+		XmlicErrorHandler handler = new XmlicErrorHandler();
+		tf.setErrorListener(handler);
 		
 		try {
 			URIResolver resolver = new URIResolverImpl(base);
 			tf.setURIResolver(resolver);
 			Transformer t = tf.newTransformer(source);
 			t.setURIResolver(resolver);
-			return new XSLT(t, warnings);
+			return new XSLT(t, handler.getWarnings());
 		} catch (TransformerConfigurationException e) {
-			throw new XSLTException(e, warnings, errors);
+			throw new XMLException(e, handler.getWarnings(), handler.getErrors());
 		}
 	}
 	
 	private final Transformer transformer;
-	private final Collection<XSLTException.Detail> warnings;
+	private final Collection<XMLException.Detail> warnings;
 	
 	public XSLT(Transformer transformer) {
 		this.transformer = transformer;
 		this.warnings = Collections.emptyList();
 	}
 	
-	public XSLT(Transformer transformer, Collection<XSLTException.Detail> warnings) {
+	public XSLT(Transformer transformer, Collection<XMLException.Detail> warnings) {
 		this.transformer = transformer;
-		this.warnings = Collections.unmodifiableCollection(new ArrayList<XSLTException.Detail>(warnings));
+		this.warnings = Collections.unmodifiableCollection(new ArrayList<XMLException.Detail>(warnings));
 	}
 	
 	public Transformer get() {
 		return transformer;
 	}
 	
-	public Collection<XSLTException.Detail> getWarnings() {
+	public Collection<XMLException.Detail> getWarnings() {
 		return warnings;
 	}
 	
-	public XML transform(XML xml) {
+	public XML transform(XML xml) throws XMLException {
 		DOMResult result = new DOMResult();
+		XmlicErrorHandler handler = new XmlicErrorHandler();
+		transformer.setErrorListener(handler);
 		try {
 			transformer.transform(new DOMSource(xml.get()), result);
 		} catch (TransformerException e) {
-			throw new IllegalStateException(e);
+			throw new XMLException(e, handler.getWarnings(), handler.getErrors());
 		}
-		return new XML(xml.xmlContext, (Document)result.getNode());
+		return new XML(xml.xmlContext, (Document)result.getNode(), handler.getWarnings());
 	}
 	
 	static class URIResolverImpl implements URIResolver {

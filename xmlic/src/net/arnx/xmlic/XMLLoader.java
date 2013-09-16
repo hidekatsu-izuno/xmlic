@@ -5,19 +5,16 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.w3c.dom.Document;
+import net.arnx.xmlic.internal.util.XmlicErrorHandler;
+
 import org.xml.sax.EntityResolver;
-import org.xml.sax.ErrorHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
 
 /**
  * XMLLoader is for loading XML file and building DOM.
@@ -69,19 +66,19 @@ public class XMLLoader {
 		return xincludeAware;
 	}
 	
-	public Document load(URI uri) throws XMLException {
+	public XML load(URI uri) throws XMLException {
 		return load(new InputSource(uri.normalize().toASCIIString()));
 	}
 	
-	public Document load(InputStream in) throws XMLException {
+	public XML load(InputStream in) throws XMLException {
 		return load(new InputSource(in));
 	}
 	
-	public Document load(Reader reader) throws XMLException {
+	public XML load(Reader reader) throws XMLException {
 		return load(new InputSource(reader));
 	}
 	
-	Document load(InputSource is) throws XMLException {
+	XML load(InputSource is) throws XMLException {
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		dbf.setNamespaceAware(true);
 		dbf.setValidating(validating);
@@ -101,29 +98,13 @@ public class XMLLoader {
 			db.setEntityResolver(new EntityResolverImpl(is.getSystemId()));
 		}
 		
-		final List<XMLException.Detail> warnings = new ArrayList<XMLException.Detail>();
-		final List<XMLException.Detail> errors = new ArrayList<XMLException.Detail>();
-		db.setErrorHandler(new ErrorHandler() {
-			@Override
-			public void warning(SAXParseException e) throws SAXException {
-				warnings.add(new XMLException.Detail(e));
-			}
-			
-			@Override
-			public void error(SAXParseException e) throws SAXException {
-				errors.add(new XMLException.Detail(e));
-			}
-			
-			@Override
-			public void fatalError(SAXParseException e) throws SAXException {
-				throw e;
-			}
-		});
+		XmlicErrorHandler handler = new XmlicErrorHandler();
+		db.setErrorHandler(handler);
 		
 		try {
-			return db.parse(is);
+			return new XML(db.parse(is), handler.getWarnings());
 		} catch (Exception e) {
-			throw new XMLException(e, warnings, errors);
+			throw new XMLException(e, handler.getWarnings(), handler.getErrors());
 		}
 	}
 	

@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 
-import org.xml.sax.SAXParseException;
-
 public class XMLException extends RuntimeException {
 	private static final long serialVersionUID = 1L;
 	
@@ -27,22 +25,28 @@ public class XMLException extends RuntimeException {
 	}
 	
 	public static class Detail {
-		private SAXParseException cause;
+		private int line;
+		private int column;
+		private String message;
+		private Throwable cause;
 		
-		Detail(SAXParseException cause) {
+		public Detail(int line, int column, String message, Throwable cause) {
+			this.line = line;
+			this.column = column;
+			this.message = message;
 			this.cause = cause;
 		}
 		
 		public int getLineNumber() {
-			return cause.getLineNumber();
+			return line;
 		}
 		
 		public int getColumnNumber() {
-			return cause.getColumnNumber();
+			return column;
 		}
 		
 		public String getMessage() {
-			return cause.getMessage();
+			return message;
 		}
 		
 		public Throwable getCause() {
@@ -52,10 +56,8 @@ public class XMLException extends RuntimeException {
 		@Override
 		public String toString() {
 			StringBuilder sb = new StringBuilder();
-			int line = getLineNumber();
 			if (line >= 0) {
 				sb.append("[").append(line);
-				int column = getColumnNumber();
 				if (column >= 0) {
 					sb.append(",").append(column);
 				}

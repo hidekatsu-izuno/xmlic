@@ -2374,17 +2374,17 @@ public class Nodes extends ArrayList<Node> {
 		NodeList nodes = get(0).getChildNodes();
 		if (nodes.getLength() == 0) return "";
 		
-		XMLWriter serializer = new XMLWriter();
-		serializer.setShowXMLDeclaration(false);
-		StringWriter writer = new StringWriter();
+		XMLWriter writer = new XMLWriter();
+		writer.setShowXMLDeclaration(false);
+		StringWriter out = new StringWriter();
 		try {
 			for (int i = 0; i < nodes.getLength(); i++) {
-				serializer.writeTo(writer, nodes.item(i));
+				writer.writeTo(out, nodes.item(i));
 			}
 		} catch (IOException e) {
 			throw new IllegalStateException(e);
 		}
-		return writer.toString();
+		return out.toString();
 	}
 	
 	/**

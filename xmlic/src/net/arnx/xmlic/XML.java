@@ -13,6 +13,8 @@ import java.io.Writer;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -36,7 +38,6 @@ import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.ProcessingInstruction;
-import org.xml.sax.InputSource;
 
 /**
  * XML class is for managing XML Document and namespace settings.
@@ -66,8 +67,7 @@ public class XML implements Serializable {
 	 * @throws XMLException if XML parsing error caused.
 	 */
 	public static XML load(File file) throws XMLException {
-		XMLLoader loader = new XMLLoader();
-		return new XML(loader.load(file.toURI()));
+		return load(file.toURI());
 	}
 	
 	/**
@@ -78,8 +78,7 @@ public class XML implements Serializable {
 	 * @throws XMLException if XML parsing error caused.
 	 */
 	public static XML load(URI uri) throws XMLException {
-		XMLLoader loader = new XMLLoader();
-		return new XML(loader.load(uri));
+		return new XMLLoader().load(uri);
 	}
 	
 	/**
@@ -91,8 +90,7 @@ public class XML implements Serializable {
 	 */
 	public static XML load(URL url) throws XMLException {
 		try {
-			XMLLoader loader = new XMLLoader();
-			return new XML(loader.load(url.toURI()));
+			return load(url.toURI());
 		} catch (URISyntaxException e) {
 			throw new IllegalArgumentException(e);
 		}
@@ -106,8 +104,7 @@ public class XML implements Serializable {
 	 * @throws XMLException if XML parsing error caused.
 	 */
 	public static XML load(InputStream in) throws XMLException {
-		XMLLoader loader = new XMLLoader();
-		return new XML(loader.load(in));
+		return new XMLLoader().load(in);
 	}
 	
 	/**
@@ -118,12 +115,12 @@ public class XML implements Serializable {
 	 * @throws XMLException if XML parsing error caused.
 	 */
 	public static XML load(Reader reader) throws XMLException {
-		XMLLoader loader = new XMLLoader();
-		return new XML(loader.load(reader));
+		return new XMLLoader().load(reader);
 	}
 	
 	final Document doc;
 	final XmlicContext xmlContext;
+	final Collection<XMLException.Detail> warnings;
 	
 	/**
 	 * Construct a new XML instance by the empty Document.
@@ -131,20 +128,22 @@ public class XML implements Serializable {
 	public XML() {
 		this.xmlContext = new XmlicContext();
 		this.doc = XmlicContext.getDocumentBuilder().newDocument();
+		this.warnings = Collections.emptyList();
 	}
 	
 	/**
 	 * Construct a new XML instance by parsing the specified text.
 	 * 
 	 * @param text an XML text.
+	 * @throws XMLException if XML parsing error caused.
 	 */
-	public XML(String text) {
-		this.xmlContext = new XmlicContext();
-		try {
-			this.doc = XmlicContext.getDocumentBuilder().parse(new InputSource(new StringReader(text)));
-		} catch (Exception e) {
-			throw new IllegalStateException(e.getMessage(), e);
-		}
+	public XML(String text) throws XMLException {
+		XMLLoader loader = new XMLLoader();
+		XML xml = loader.load(new StringReader(text));
+		
+		this.xmlContext = xml.xmlContext;
+		this.doc = xml.doc;
+		this.warnings = xml.warnings;
 	}
 	
 	/**
@@ -153,8 +152,13 @@ public class XML implements Serializable {
 	 * @param doc an instance of Document.
 	 */
 	public XML(Document doc) {
+		this(doc, Collections.<XMLException.Detail>emptyList());
+	}
+	
+	XML(Document doc, Collection<XMLException.Detail> warnings) {
 		this.xmlContext = new XmlicContext();
 		this.doc = doc;
+		this.warnings = warnings;
 		
 		Element root = doc.getDocumentElement();
 		if (root != null) {
@@ -176,9 +180,10 @@ public class XML implements Serializable {
 		}
 	}
 	
-	XML(XmlicContext nsContext, Document doc) {
+	XML(XmlicContext nsContext, Document doc, Collection<XMLException.Detail> warnings) {
 		this.xmlContext = nsContext;
 		this.doc = doc;
+		this.warnings = warnings;
 	}
 	
 	/**
@@ -524,7 +529,7 @@ public class XML implements Serializable {
 	
 	@Override
 	public XML clone() {
-		return new XML(xmlContext, (Document)doc.cloneNode(true));
+		return new XML(xmlContext, (Document)doc.cloneNode(true), warnings);
 	}
 	
 	static final Pattern ATTR_PATTERN = Pattern.compile("\\G[ \\t\\r\\n]*([^ \\t\\r\\n=]+)[ \\t\\r\\n]*=[ \\t\\r\\n]*(?:\"([^\"]+)\"|'([^'])')[ \\t\\r\\n]*");
@@ -535,7 +540,7 @@ public class XML implements Serializable {
 	 * @return a XSLT template transformer. null if not exists.
 	 * @throws XSLTException if XSLT load error caused. 
 	 */
-	public XSLT stylesheet() throws XSLTException {
+	public XSLT stylesheet() throws XMLException {
 		String target = null;
 		
 		NodeList list = doc.getChildNodes();
@@ -614,7 +619,7 @@ public class XML implements Serializable {
 		serializer.setEncoding("UTF-8");
 	
 		try {
-			serializer.writeTo(out, doc);
+			serializer.writeTo(out, this);
 		} finally {
 			out.close();
 		}
@@ -629,7 +634,7 @@ public class XML implements Serializable {
 	public void writeTo(Writer writer) throws IOException {
 		XMLWriter serializer = new XMLWriter();
 		try {
-			serializer.writeTo(writer, doc);
+			serializer.writeTo(writer, this);
 		} finally {
 			writer.close();
 		}
@@ -653,7 +658,7 @@ public class XML implements Serializable {
 		xwriter.setShowXMLDeclaration(false);
 		StringWriter writer = new StringWriter();
 		try {
-			xwriter.writeTo(writer, doc);
+			xwriter.writeTo(writer, this);
 		} catch (IOException e) {
 			throw new IllegalStateException(e);
 		} finally {
