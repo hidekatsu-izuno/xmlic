@@ -119,7 +119,7 @@ public class XSLT {
 			t.setURIResolver(resolver);
 			return new XSLT(t, handler.getWarnings());
 		} catch (TransformerConfigurationException e) {
-			throw new XMLException(e, handler.getWarnings(), handler.getErrors());
+			throw new XMLException(e.getMessage(), e, handler.getWarnings(), handler.getErrors());
 		}
 	}
 	
@@ -127,8 +127,7 @@ public class XSLT {
 	final Collection<XMLException.Detail> warnings;
 	
 	public XSLT(Transformer transformer) {
-		this.transformer = transformer;
-		this.warnings = Collections.emptyList();
+		this(transformer, Collections.<XMLException.Detail>emptyList());
 	}
 	
 	XSLT(Transformer transformer, Collection<XMLException.Detail> warnings) {
@@ -151,7 +150,7 @@ public class XSLT {
 		try {
 			transformer.transform(new DOMSource(xml.get()), result);
 		} catch (TransformerException e) {
-			throw new XMLException(e, handler.getWarnings(), handler.getErrors());
+			throw new XMLException(e.getMessage(), e, handler.getWarnings(), handler.getErrors());
 		}
 		return new XML(xml.xmlContext, (Document)result.getNode(), handler.getWarnings());
 	}

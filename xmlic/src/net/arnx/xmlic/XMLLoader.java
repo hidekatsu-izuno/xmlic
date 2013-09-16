@@ -104,7 +104,7 @@ public class XMLLoader {
 		try {
 			return new XML(db.parse(is), handler.getWarnings());
 		} catch (Exception e) {
-			throw new XMLException(e, handler.getWarnings(), handler.getErrors());
+			throw new XMLException(e.getMessage(), e, handler.getWarnings(), handler.getErrors());
 		}
 	}
 	

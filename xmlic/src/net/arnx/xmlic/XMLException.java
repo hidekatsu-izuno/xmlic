@@ -4,14 +4,25 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 
+/**
+ * This type throws if XML syntax error or I/O error occurred.
+ */
 public class XMLException extends RuntimeException {
 	private static final long serialVersionUID = 1L;
 	
 	private Collection<Detail> warnings;
 	private Collection<Detail> errors;
 	
-	public XMLException(Throwable cause, Collection<Detail> warnings, Collection<Detail> errors) {
-		super(cause.getMessage(), cause);
+	/**
+	 * Constructs XMLException.
+	 * 
+	 * @param message an error message
+	 * @param cause an error cause
+	 * @param warnings warning messages for detail
+	 * @param errors error messages for detail
+	 */
+	public XMLException(String message, Throwable cause, Collection<Detail> warnings, Collection<Detail> errors) {
+		super(message, cause);
 		this.warnings = Collections.unmodifiableCollection(new ArrayList<Detail>(warnings));
 		this.errors = Collections.unmodifiableCollection(new ArrayList<Detail>(errors));
 	}
