@@ -6,8 +6,10 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.xml.XMLConstants;
@@ -39,17 +41,18 @@ import net.arnx.xmlic.internal.org.jaxen.pattern.Pattern;
 import net.arnx.xmlic.internal.org.jaxen.pattern.PatternParser;
 import net.arnx.xmlic.internal.org.jaxen.saxpath.SAXPathException;
 
+import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 public class XmlicContext implements Serializable {
 	private static final long serialVersionUID = 1L;
-	
 	public static final String VARIABLE_NAME = "__XML_CONTEXT__";
 	
 	private ThreadLocal<Node> current = new ThreadLocal<Node>();
 	
 	private Map<String, Key> keyMap = new ConcurrentHashMap<String, Key>();
+	private Map<Node, Map<String, Object>> dataSet = new WeakHashMap<Node, Map<String, Object>>(); 
 	
 	private NamespaceContextImpl nsContext = new NamespaceContextImpl();
 	private VariableContextImpl varContext = new VariableContextImpl();
@@ -96,6 +99,123 @@ public class XmlicContext implements Serializable {
 	
 	public void removeKey(String name) {
 		keyMap.remove(name);
+	}
+	
+	public void addData(Node node, String name, Object value) {
+		synchronized (dataSet) {
+			Map<String, Object> map = dataSet.get(node);
+			if (map == null) {
+				map = new HashMap<String, Object>();
+				dataSet.put(node, map);
+			}
+			map.put(name, value);
+		}
+	}
+	
+	public Object getData(Node node, String name) {
+		synchronized (dataSet) {
+			Map<String, Object> map = dataSet.get(node);
+			if (map != null && map.containsKey(name)) {
+				return map.get(name);
+			}
+			
+			if (node instanceof Element) {
+				StringBuilder sb = new StringBuilder(name.length() + 5);
+				sb.append("data-");
+				
+				int index = name.indexOf('-');
+				if (index != -1) {
+					sb.append(name, 0, index);
+					boolean upper = true;
+					for (int i = index + 1; i < name.length(); i++) {
+						char c = name.charAt(i);
+						if (c == '-') {
+							if (upper) {
+								sb.append(c);
+							} else {
+								upper = true;
+							}
+						} else {
+							if (upper) {
+								sb.append(Character.toUpperCase(c));
+								upper = false;
+							} else {
+								sb.append(c);
+							}
+						}
+					}
+				}
+				
+				String text = ((Element)node).getAttributeNS(null, sb.toString());
+				if (text == null) {
+					return null;
+				}
+				
+				Object value;
+				if ("null".equals(text)) {
+					value = null;
+				} else if ("true".equals(text)) {
+					value = true;
+				} else if ("false".equals(text)) {
+					value = false;
+				} else if (isInteger(text)) {
+					value = Integer.parseInt(text);
+				} else {
+					value = text;
+				}
+				
+				if (map == null) {
+					map = new HashMap<String, Object>();
+					dataSet.put(node, map);
+				}
+				map.put(name, value);
+				return value;
+			}
+			
+			return null;
+		}
+	}
+	
+	private boolean isInteger(String text) {
+		int start = 0;
+		int len = text.length();
+		
+		if (len == 0) return false;
+		
+		if (text.charAt(start) == '-') {
+			start = 1;
+			len = len-1;
+		}
+		
+		if (len > 10) return false;
+		if (text.charAt(start) == '0') return len == 1;
+		
+		boolean max = (len == 10);
+		for (int i = 0; i < len; i++) {
+			char c = text.charAt(start + i);
+			if (c < '0' && c > '9') return false;
+			
+			if (max) {
+				char m = "2147483647".charAt(i);
+				if (m < c) {
+					return false;
+				} else if (m < c) {
+					max = false;
+				}
+			}
+		}
+		
+		return true;
+	}
+	
+	public void removeData(Node node, String name) {
+		synchronized (dataSet) {
+			Map<String, Object> map = dataSet.get(node);
+			map.remove(name);
+			if (map.isEmpty()) {
+				dataSet.remove(node);
+			}
+		}
 	}
 	
 	public void addNamespace(String prefix, String namespaceURI) {

@@ -2604,6 +2604,33 @@ public class Nodes extends ArrayList<Node> {
 		return this;
 	}
 	
+	public Nodes data(String name, Object value) {
+		if (name == null) throw new NullPointerException("name must not be null.");
+		
+		for (Node self : this) {
+			getOwner().xmlContext.addData(self, name, value);
+		}
+		
+		return this;
+	}
+	
+	public Object data(String name) {
+		if (name == null) throw new NullPointerException("name must not be null.");
+		if (isEmpty()) return null;
+		
+		return getOwner().xmlContext.getData(get(0), name);
+	}
+	
+	public Nodes removeData(String name) {
+		if (name == null) throw new NullPointerException("name must not be null.");
+		
+		for (Node self : this) {
+			getOwner().xmlContext.removeData(self, name);
+		}
+		
+		return this;
+	}
+	
 	/**
 	 * Determines whether any of the current elements are assigned the given class.
 	 * 
