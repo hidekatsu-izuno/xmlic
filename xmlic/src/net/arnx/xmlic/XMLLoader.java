@@ -9,6 +9,7 @@ import java.net.URISyntaxException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.validation.Schema;
 
 import net.arnx.xmlic.internal.util.XmlicErrorHandler;
 
@@ -21,6 +22,7 @@ import org.xml.sax.SAXException;
  */
 public class XMLLoader {
 	boolean validating = false;
+	Schema schema;
 	boolean ignoringComments = false;
 	boolean coalescing = false;
 	boolean expandEntityReferences = true;
@@ -32,6 +34,14 @@ public class XMLLoader {
 	
 	public boolean isValidating() {
 		return validating;
+	}
+	
+	public void setSchema(Schema schema) {
+		this.schema = schema;
+	}
+	
+	public Schema getSchema() {
+		return schema;
 	}
 	
 	public void setIgnoringComments(boolean flag) {
@@ -82,6 +92,9 @@ public class XMLLoader {
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		dbf.setNamespaceAware(true);
 		dbf.setValidating(validating);
+		if (schema != null) {
+			dbf.setSchema(schema);
+		}
 		dbf.setIgnoringComments(ignoringComments);
 		dbf.setCoalescing(coalescing);
 		dbf.setExpandEntityReferences(expandEntityReferences);
