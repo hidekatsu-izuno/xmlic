@@ -627,7 +627,11 @@ public class Nodes extends ArrayList<Node> {
 				}
 				
 				Element elem = (Element)self;
-				String oval = elem.getAttributeNS(uri, localName);
+				String oval = null;
+				if (elem.hasAttributeNS(uri, localName)) {
+					oval = elem.getAttributeNS(uri, localName);
+				}
+				
 				String nval = func.filter(oval, state);
 				if (nval == null) {
 					elem.removeAttributeNS(uri, localName);

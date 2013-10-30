@@ -146,11 +146,13 @@ public class XmlicContext implements Serializable {
 					}
 				}
 				
-				String text = ((Element)node).getAttributeNS(null, sb.toString());
-				if (text == null) {
+				Element elem = (Element)node;
+				String dname = sb.toString();
+				if (!elem.hasAttributeNS(null, dname)) {
 					return null;
 				}
 				
+				String text = elem.getAttributeNS(null, dname);
 				Object value;
 				if ("null".equals(text)) {
 					value = null;

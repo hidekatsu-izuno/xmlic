@@ -11,7 +11,7 @@
 <body>
 <div class="nav">
 <h1 class="logo"><a href="#"><img src="img/xmlic.jpg" alt="XMLIC" width="115" height="34" /></a></h1>
-<div class="bar">version 1.0.0</div>
+<div class="bar">version 1.0.1</div>
 <ul class="menu">
 	<li><a href="#introduction">XMLICとは</a></li>
 	<li><a href="#download">ダウンロード</a></li>
@@ -46,6 +46,7 @@
 			<li><a href="#clone">要素の複製</a></li>
 			<li><a href="#evaluate">ノードの評価</a></li>
 			<li><a href="#normalize">ノードの正規化</a></li>
+			<li><a href="#data">データの紐付け</a></li>
 			<li><a href="#html">HTML互換機能</a></li>
 		</ul>
 	</li>
@@ -594,6 +595,20 @@ if (nodes.evaluate("self::node()[@name='test']", boolean.class)) {
 nodes.normalize();
 </pre>
 
+<h3 id="data">データの紐付け<span class="sub"> - data/removeData</span></h3>
+<p>DOM の属性などにはしたくないが、特定のノードとオブジェクトを紐付けておきたい場合には Data APIを利用します。</p>
+<pre class="source">
+<span class="comment">// ノードにオブジェクトを紐付けます。</span>
+nodes.data("key", "value");
+
+<span class="comment">// ノードからオブジェクトを取得します。</span>
+Object value = nodes.data("key");
+
+<span class="comment">// ノードからオブジェクトを削除します。</span>
+nodes.removeData("key");
+</pre>
+<p>なお、jQuery同様「data-名前」という属性がある場合には、Data API から取得できるデフォルト値として扱います。</p>
+
 <h3 id="html">HTML互換機能<span class="sub"> - addClass/toggleClass/removeClass/hasClass, css</span></h3>
 <p>XMLIC は XML を対象としていますが、XHTML での操作時に便利なように次の jQuery ライクな HTML 互換操作機能を用意しています。</p>
 <p><code>addClass</code>、<code>removeClass</code> はそれぞれ要素の <code>class</code> 属性の空白文字で区切られたリストに文字列を追加／削除します。<br />
@@ -669,6 +684,13 @@ writer.writeTo(new FileOutputStream("test.xml"), xml);
 <p>バグや要望などは<a href="http://sourceforge.jp/projects/xmlic">XMLIC プロジェクトサイト</a>の<a href="http://sourceforge.jp/projects/xmlic/ticket/">チケット</a>に報告ください。</p>
 
 <h2 id="releasenote">リリースノート</h2>
+
+<h3>2013/10/30 version 1.0.1</h3>
+<ul>
+<li>Nodes クラスに owner() メソッドを追加するとともに、getOwner() メソッドを非推奨にしました 。</li>
+<li>Nodes クラスに jQuery 同様の Data API を追加しました。</li>
+<li>Nodes クラスにて別のドキュメントの要素を append/prepend/before/after した際、エラーが発生していた問題を修正しました。</li>
+</ul>
 
 <h3>2013/9/18 version 1.0.0</h3>
 <ul>
