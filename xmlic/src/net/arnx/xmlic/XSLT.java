@@ -99,7 +99,7 @@ public class XSLT {
 	/**
 	 * Load an XSLT transformer from a DOM document.
 	 * 
-	 * @param doc a DOM document
+	 * @param xml a XML instance
 	 * @return a new XSLT instance.
 	 * @throws XMLException if XSLT syntax error caused. 
 	 */

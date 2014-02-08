@@ -327,6 +327,21 @@ public class NodesTest {
 		expected.add("t7");
 		
 		assertEquals(expected, result);
+
+		result = xml.find("li").map("text()");
+
+		expected = new ArrayList<String>();
+		expected.add("t1");
+		expected.add("t2");
+		expected.add("t3");
+		expected.add("t4");
+		expected.add("t5");
+		expected.add("t6");
+		expected.add("t7");
+		expected.add("t8");
+		expected.add("t9");
+
+		assertEquals(expected, result);
 	}
 	
 	@Test

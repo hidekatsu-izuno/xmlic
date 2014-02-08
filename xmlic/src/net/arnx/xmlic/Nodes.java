@@ -873,6 +873,28 @@ public class Nodes extends ArrayList<Node> {
 	/**
 	 * Gets a mapped value's list from current nodes.
 	 * 
+	 * @param xpath a mapper xpath expression
+	 * @return a mapped value's list
+	 */
+	public List<String> map(String xpath) {
+		if (xpath == null || isEmpty()) {
+			return new ArrayList<String>(0);
+		}
+		Object expr = owner().compileXPath(xpath, false);
+		
+		List<String> result = new ArrayList<String>(size());
+		for (Node self : this) {
+			String value = owner().evaluate(expr, self, String.class);
+			if (value != null) {
+				result.add(value);
+			}
+		}
+		return result;
+	}
+	
+	/**
+	 * Gets a mapped value's list from current nodes.
+	 * 
 	 * @param func a mapper function
 	 * @return a mapped value's list
 	 */
@@ -882,7 +904,7 @@ public class Nodes extends ArrayList<Node> {
 		}
 		
 		StatusImpl status = new StatusImpl();
-		List<String> result = new ArrayList<String>();
+		List<String> result = new ArrayList<String>(size());
 		try {
 			for (Node self : this) {
 				status.next(size()-1);
