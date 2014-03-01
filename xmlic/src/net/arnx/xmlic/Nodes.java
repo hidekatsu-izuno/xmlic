@@ -2701,6 +2701,13 @@ public class Nodes extends ArrayList<Node> {
 		return this;
 	}
 	
+	/**
+	 * Reverses the order of the current nodes.
+	 */
+	public void reverse() {
+		Collections.reverse(this);
+	}
+	
 	public Nodes data(String name, Object value) {
 		if (name == null) throw new NullPointerException("name must not be null.");
 		
