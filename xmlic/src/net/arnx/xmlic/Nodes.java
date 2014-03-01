@@ -2708,6 +2708,13 @@ public class Nodes extends ArrayList<Node> {
 		Collections.reverse(this);
 	}
 	
+	/**
+	 * Store arbitrary data associated with the matched elements.
+	 * 
+	 * @param name access key.
+	 * @param value the associated data.
+	 * @return a reference to this object
+	 */
 	public Nodes data(String name, Object value) {
 		if (name == null) throw new NullPointerException("name must not be null.");
 		
@@ -2718,6 +2725,12 @@ public class Nodes extends ArrayList<Node> {
 		return this;
 	}
 	
+	/**
+	 * Get data associated with the matched elements.
+	 * 
+	 * @param name access key.
+	 * @return the associated data for name.
+	 */
 	public Object data(String name) {
 		if (name == null) throw new NullPointerException("name must not be null.");
 		if (isEmpty()) return null;
