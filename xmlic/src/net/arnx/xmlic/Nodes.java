@@ -42,28 +42,28 @@ import org.w3c.dom.traversal.NodeIterator;
 public class Nodes extends ArrayList<Node> {
 	private static final long serialVersionUID = 1L;
 	private static final Pattern STYLE_PATTERN = Pattern.compile("\\G\\s*([^:]+)\\s*:\\s*([^;]+)\\s*(?:;+|$)");
-		
+
 	static enum SelectMode {
 		FIRST,
 		UNTIL,
 		ALL
 	}
-	
+
 	final XML owner;
 	final Nodes back;
-	
+
 	/**
 	 * Constructs empty Nodes instance.
-	 * 
+	 *
 	 * @param owner Owner Document
 	 */
 	public Nodes(XML owner) {
 		this(owner, null, 4);
 	}
-	
+
 	/**
 	 * Constructs a Nodes instance that has a specified DOM node.
-	 * 
+	 *
 	 * @param owner Owner Document
 	 * @param node DOM node
 	 */
@@ -75,10 +75,10 @@ public class Nodes extends ArrayList<Node> {
 			throw new NullPointerException("node is null.");
 		}
 	}
-	
+
 	/**
 	 * Constructs a Nodes instance that has specified DOM nodes.
-	 * 
+	 *
 	 * @param owner Owner Document
 	 * @param nodes DOM nodes
 	 */
@@ -88,10 +88,10 @@ public class Nodes extends ArrayList<Node> {
 			add(nodes[i]);
 		}
 	}
-	
+
 	/**
 	 * Constructs a Nodes instance that has nodes of DOM node collection.
-	 * 
+	 *
 	 * @param owner Owner Document
 	 * @param list DOM node collection
 	 */
@@ -99,10 +99,10 @@ public class Nodes extends ArrayList<Node> {
 		this(owner, null, list.size());
 		addAll(list);
 	}
-	
+
 	/**
 	 * Constructs a Nodes instance that has nodes of DOM NodeList.
-	 * 
+	 *
 	 * @param owner Owner Document
 	 * @param list DOM NodeList
 	 */
@@ -112,17 +112,17 @@ public class Nodes extends ArrayList<Node> {
 			add(list.item(i));
 		}
 	}
-	
+
 	/**
 	 * Constructs a Nodes instance from an XML text.
-	 * 
+	 *
 	 * @param owner Owner Document
 	 * @param xml an XML text
 	 * @throws XMLException if XML parsing error caused.
 	 */
 	public Nodes(XML owner, String xml) throws XMLException {
 		this(owner, null, 4);
-		
+
 		StringBuilder sb = new StringBuilder();
 		sb.append("<x");
 		for (String prefix : owner.xmlContext.getPrefixes()) {
@@ -135,7 +135,7 @@ public class Nodes extends ArrayList<Node> {
 			sb.append(XML.escape(uri)).append("\"");
 		}
 		sb.append(">").append(xml).append("</x>");
-		
+
 		try {
 			XMLInputFactory factory = XMLInputFactory.newInstance();
 			factory.setProperty(XMLInputFactory.IS_NAMESPACE_AWARE, true);
@@ -145,7 +145,7 @@ public class Nodes extends ArrayList<Node> {
 			factory.setProperty(XMLInputFactory.IS_REPLACING_ENTITY_REFERENCES, true);
 			factory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false);
 			XMLStreamReader reader = factory.createXMLStreamReader(owner.doc.getBaseURI(), new StringReader(sb.toString()));
-			
+
 			Element root = null;
 			Element current = null;
 			while (reader.hasNext()) {
@@ -153,16 +153,16 @@ public class Nodes extends ArrayList<Node> {
 				case XMLStreamConstants.START_ELEMENT: {
 
 					Element elem = owner.doc.createElementNS(
-							reader.getNamespaceURI(), 
+							reader.getNamespaceURI(),
 							reader.getLocalName());
-					
+
 					for (int i = 0; i < reader.getAttributeCount(); i++) {
 						elem.setAttributeNS(
-								reader.getAttributeNamespace(i), 
-								reader.getAttributeLocalName(i), 
+								reader.getAttributeNamespace(i),
+								reader.getAttributeLocalName(i),
 								reader.getAttributeValue(i));
 					}
-					
+
 					if (root == null) {
 						root = elem;
 					} else {
@@ -172,7 +172,7 @@ public class Nodes extends ArrayList<Node> {
 					break;
 				}
 				case XMLStreamConstants.END_ELEMENT: {
-					current = (Element)current.getParentNode();						
+					current = (Element)current.getParentNode();
 					break;
 				}
 				case XMLStreamConstants.PROCESSING_INSTRUCTION: {
@@ -199,7 +199,7 @@ public class Nodes extends ArrayList<Node> {
 				}
 				}
 			}
-			
+
 			NodeList list = root.getChildNodes();
 			for (int i = 0; i < list.getLength(); i++) {
 				add(list.item(i));
@@ -211,28 +211,28 @@ public class Nodes extends ArrayList<Node> {
 			throw new IllegalArgumentException(e);
 		}
 	}
-	
+
 	Nodes(XML owner, Nodes back, int size) {
 		super(size);
 		if (owner == null) throw new NullPointerException("owner must not be null.");
 		this.owner = owner;
 		this.back = back;
 	}
-	
+
 	@Deprecated
 	public XML getOwner() {
 		return owner;
 	}
-	
+
 	/**
 	 * Gets Owner Document.
-	 * 
+	 *
 	 * @return Owner Document
-	 */	
+	 */
 	public XML owner() {
 		return owner;
 	}
-	
+
 	@Override
 	public Node get(int index) {
 		if (index < -size() || index >= size()) {
@@ -240,18 +240,18 @@ public class Nodes extends ArrayList<Node> {
 		}
 		return super.get((index < 0) ? size() + index : index);
 	}
-	
+
 	/**
 	 * Gets a namespace URI of the first element.
-	 * 
+	 *
 	 * @return a namespace URI of the first element
 	 */
 	public String namespace() {
 		if (isEmpty()) return null;
-		
+
 		Node self = get(0);
 		if (self == null) return null;
-		
+
 		switch (self.getNodeType()) {
 		case Node.ELEMENT_NODE:
 			return self.getNamespaceURI();
@@ -269,16 +269,16 @@ public class Nodes extends ArrayList<Node> {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Sets namespace URI of the first element.
-	 * 
+	 *
 	 * @param uri namespace URI
 	 * @return a reference to this object
 	 */
 	public Nodes namespace(String uri) {
 		if (uri == null) uri = "";
-		
+
 		for (Node self : this) {
 			if (self == null) continue;
 
@@ -300,22 +300,22 @@ public class Nodes extends ArrayList<Node> {
 				break;
 			}
 		}
-		
+
 		return this;
 	}
-	
+
 	/**
 	 * Removes all namespace of the current elements.
-	 * 
+	 *
 	 * @return a reference to this object
 	 */
 	public Nodes removeNamespace() {
 		return namespace(null);
 	}
-	
+
 	/**
 	 * Removes the specified namespace of the current elements.
-	 * 
+	 *
 	 * @param uri namespace URI
 	 * @return a reference to this object
 	 */
@@ -326,35 +326,35 @@ public class Nodes extends ArrayList<Node> {
 		} else if (XMLConstants.XMLNS_ATTRIBUTE_NS_URI.equals(uri)) {
 			throw new IllegalArgumentException("XMLNS namespace can't remove.");
 		}
-		
+
 		for (Node self : this) {
 			if (self == null) continue;
-			
+
 			switch (self.getNodeType()) {
 			case Node.ELEMENT_NODE:
 			case Node.ATTRIBUTE_NODE:
 				String suri = self.getNamespaceURI();
 				if (suri == null) suri = XMLConstants.DEFAULT_NS_PREFIX;
 				if (!suri.equals(uri)) continue;
-			
+
 				owner().doc.renameNode(self, XMLConstants.DEFAULT_NS_PREFIX, self.getLocalName());
 			}
 		}
-		
+
 		return this;
 	}
-	
+
 	/**
 	 * Gets a prefix of the first element.
-	 * 
+	 *
 	 * @return a prefix of the first element
 	 */
 	public String prefix() {
 		if (isEmpty()) return null;
-		
+
 		Node self = get(0);
 		if (self == null) return null;
-		
+
 		switch(self.getNodeType()) {
 		case Node.ELEMENT_NODE:
 		case Node.ATTRIBUTE_NODE:
@@ -362,17 +362,17 @@ public class Nodes extends ArrayList<Node> {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Sets a prefix of the current elements.
-	 * 
+	 *
 	 * @param prefix a prefix
 	 * @return a reference to this object
 	 */
 	public Nodes prefix(String prefix) {
 		for (Node self : this) {
 			if (self == null) continue;
-			
+
 			switch (self.getNodeType()) {
 			case Node.ELEMENT_NODE:
 			case Node.ATTRIBUTE_NODE:
@@ -386,21 +386,21 @@ public class Nodes extends ArrayList<Node> {
 				break;
 			}
 		}
-		
+
 		return this;
 	}
-	
+
 	/**
-	 * Gets a local name of the first element. 
-	 * 
+	 * Gets a local name of the first element.
+	 *
 	 * @return a local name of the first element
 	 */
 	public String localName() {
 		if (isEmpty()) return null;
-		
+
 		Node self = get(0);
 		if (self == null) return null;
-		
+
 		switch(self.getNodeType()) {
 		case Node.ELEMENT_NODE:
 		case Node.ATTRIBUTE_NODE:
@@ -408,17 +408,17 @@ public class Nodes extends ArrayList<Node> {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Sets a local name of the current elements.
-	 * 
+	 *
 	 * @param localName a local name
 	 * @return a reference to this object
 	 */
 	public Nodes localName(String localName) {
 		for (Node self : this) {
 			if (self == null) continue;
-			
+
 			switch (self.getNodeType()) {
 			case Node.ELEMENT_NODE:
 			case Node.ATTRIBUTE_NODE:
@@ -430,21 +430,21 @@ public class Nodes extends ArrayList<Node> {
 				break;
 			}
 		}
-		
+
 		return this;
 	}
-	
+
 	/**
-	 * Gets a name of the first element. 
-	 * 
+	 * Gets a name of the first element.
+	 *
 	 * @return a name of the first element
 	 */
 	public String name() {
 		if (isEmpty()) return null;
-		
+
 		Node self = get(0);
 		if (self == null) return null;
-		
+
 		switch(self.getNodeType()) {
 		case Node.ELEMENT_NODE:
 		case Node.ATTRIBUTE_NODE:
@@ -457,21 +457,21 @@ public class Nodes extends ArrayList<Node> {
 		}
 		return null;
 	}
-	
+
 	/**
-	 * Sets a name of the current elements. 
-	 * 
+	 * Sets a name of the current elements.
+	 *
 	 * @param name a attribute name
 	 * @return a reference to this object
 	 */
 	public Nodes name(String name) {
 		if (name == null) throw new NullPointerException("name must not be null");
 		if (isEmpty()) return this;
-		
+
 		String uri = null;
 		String prefix = null;
 		String localName;
-		
+
 		int index = name.indexOf(':');
 		if (index > 0 && index < name.length()-1) {
 			localName = name.substring(index + 1);
@@ -482,10 +482,10 @@ public class Nodes extends ArrayList<Node> {
 		}
 		if (localName.isEmpty()) return null;
 		if (uri == null) uri = XMLConstants.NULL_NS_URI;
-		
+
 		for (Node self : this) {
 			if (self == null) continue;
-			
+
 			switch (self.getNodeType()) {
 			case Node.ELEMENT_NODE:
 			case Node.ATTRIBUTE_NODE:
@@ -499,23 +499,23 @@ public class Nodes extends ArrayList<Node> {
 				break;
 			}
 		}
-		
+
 		return this;
 	}
-	
+
 	/**
-	 * Sets a attribute value of the current elements. 
-	 * 
+	 * Sets a attribute value of the current elements.
+	 *
 	 * @param name a attribute name
 	 * @return a reference to this object
 	 */
 	public String attr(String name) {
 		if (name == null) throw new NullPointerException("name must not be null.");
 		if (isEmpty() || !(get(0) instanceof Element)) return null;
-		
+
 		String uri = null;
 		String localName = null;
-		
+
 		int index = name.indexOf(':');
 		if (index > 0 && index < name.length()-1) {
 			localName = name.substring(index + 1);
@@ -524,13 +524,13 @@ public class Nodes extends ArrayList<Node> {
 			localName = name;
 		}
 		if (localName.isEmpty()) return null;
-		
+
 		return ((Element)get(0)).getAttributeNS(uri, localName);
 	}
-	
+
 	/**
-	 * Gets a attribute value of the first element. 
-	 * 
+	 * Gets a attribute value of the first element.
+	 *
 	 * @param name a name
 	 * @return a attribute value of the first element
 	 */
@@ -538,11 +538,11 @@ public class Nodes extends ArrayList<Node> {
 		if (name == null) throw new NullPointerException("name must not be null.");
 		if (value == null) value = "";
 		if (isEmpty()) return this;
-		
+
 		String uri = null;
 		String prefix = null;
 		String localName;
-		
+
 		int index = name.indexOf(':');
 		if (index > 0 && index < name.length()-1) {
 			localName = name.substring(index + 1);
@@ -553,14 +553,14 @@ public class Nodes extends ArrayList<Node> {
 		}
 		if (localName.isEmpty()) return null;
 		if (uri == null) uri = XMLConstants.NULL_NS_URI;
-		
+
 		for (Node self : this) {
 			if (!(self instanceof Element)) continue;
 
 			Element elem = (Element)self;
 			String euri = elem.getNamespaceURI();
 			if (euri == null) euri = XMLConstants.NULL_NS_URI;
-			
+
 			String luri = uri;
 			String lname = name;
 			String lprefix = self.lookupPrefix(uri);
@@ -570,43 +570,43 @@ public class Nodes extends ArrayList<Node> {
 				luri = null;
 				lname = localName;
 			}
-			
+
 			elem.setAttributeNS(luri, lname, value);
 		}
 		return this;
 	}
-	
+
 	/**
 	 * Sets attributes of the current elements.
-	 * 
+	 *
 	 * @param attrs attributes pairs
 	 * @return a reference to this object
 	 */
 	public Nodes attr(Map<String, String> attrs) {
 		if (attrs == null) return this;
-		
+
 		for (Map.Entry<String, String> entry : attrs.entrySet()) {
 			attr(entry.getKey(), entry.getValue());
 		}
-		
+
 		return this;
 	}
-	
+
 	/**
 	 * Filters a each attribute value of the current elements.
-	 * 
-	 * @param name a attribute name 
+	 *
+	 * @param name a attribute name
 	 * @param func filter function
 	 * @return a reference to this object
 	 */
 	public Nodes attr(String name, Filter<String> func) {
 		if (name == null) throw new IllegalArgumentException("name is null");
 		if (func == null) return this;
-		
+
 		String uri = null;
 		String prefix = null;
 		String localName;
-		
+
 		int index = name.indexOf(':');
 		if (index > 0 && index < name.length()-1) {
 			localName = name.substring(index + 1);
@@ -617,7 +617,7 @@ public class Nodes extends ArrayList<Node> {
 		}
 		if (localName.isEmpty()) return null;
 		if (uri == null) uri = XMLConstants.NULL_NS_URI;
-		
+
 		StatusImpl state = new StatusImpl();
 		try {
 			for (Node self : this) {
@@ -625,20 +625,20 @@ public class Nodes extends ArrayList<Node> {
 				if (self == null || !(self instanceof Element)) {
 					continue;
 				}
-				
+
 				Element elem = (Element)self;
 				String oval = null;
 				if (elem.hasAttributeNS(uri, localName)) {
 					oval = elem.getAttributeNS(uri, localName);
 				}
-				
+
 				String nval = func.filter(oval, state);
 				if (nval == null) {
 					elem.removeAttributeNS(uri, localName);
 				} else if (!nval.equals(oval)) {
 					String euri = elem.getNamespaceURI();
 					if (euri == null) euri = XMLConstants.NULL_NS_URI;
-					
+
 					String luri = uri;
 					String lname = name;
 					String lprefix = self.lookupPrefix(uri);
@@ -648,7 +648,7 @@ public class Nodes extends ArrayList<Node> {
 						luri = null;
 						lname = localName;
 					}
-					
+
 					elem.setAttributeNS(luri, lname, nval);
 				}
 			}
@@ -657,23 +657,23 @@ public class Nodes extends ArrayList<Node> {
 				throw e;
 			}
 		}
-		
+
 		return this;
 	}
-	
+
 	/**
 	 * Removes attribute of the specified name.
-	 * 
+	 *
 	 * @param name a attribute name
 	 * @return a reference to this object
 	 */
 	public Nodes removeAttr(String name) {
 		if (name == null) return this;
 		if (isEmpty()) return this;
-		
+
 		String uri = null;
 		String localName = null;
-		
+
 		int index = name.indexOf(':');
 		if (index > 0 && index < name.length()-1) {
 			localName = name.substring(index + 1);
@@ -683,28 +683,28 @@ public class Nodes extends ArrayList<Node> {
 			localName = name;
 		}
 		if (localName.isEmpty()) return this;
-		
+
 		for (Node self : this) {
 			if (!(self instanceof Element)) continue;
 			((Element)self).removeAttributeNS(uri, localName);
 		}
 		return this;
 	}
-	
+
 	/**
 	 * Set a node value of the every node.
 	 * Note that this method differs from jQuery <code>val</code> method.
-	 * 
+	 *
 	 * @see org.w3c.dom.Node#setNodeValue(String)
 	 * @param value a new node value.
-	 * @return a reference to this object. 
+	 * @return a reference to this object.
 	 */
 	public Nodes val(String value) {
 		if (isEmpty() || get(0) == null) return null;
-		
+
 		for (Node self : this) {
 			if (self == null) continue;
-			
+
 			switch (self.getNodeType()) {
 			case Node.ATTRIBUTE_NODE:
 			case Node.CDATA_SECTION_NODE:
@@ -717,24 +717,24 @@ public class Nodes extends ArrayList<Node> {
 		}
 		return this;
 	}
-	
+
 	/**
 	 * Get a node value of the first node.
 	 * Note that this method differs from jQuery <code>val</code> method.
-	 * 
+	 *
 	 * @see org.w3c.dom.Node#getNodeValue()
 	 * @return a node value of the first node.
 	 */
 	public String val() {
 		if (isEmpty() || get(0) == null) return null;
-		
+
 		return get(0).getNodeValue();
 	}
-	
+
 	/**
 	 * Get a Nodes instance for a node at the specified index.
 	 * -N is the relative index for last.
-	 * 
+	 *
 	 * @param index a index number
 	 * @return a Nodes instance for a node at the specified index
 	 */
@@ -748,16 +748,16 @@ public class Nodes extends ArrayList<Node> {
 			return new Nodes(owner(), this, 0);
 		}
 	}
-	
+
 	/**
 	 * Checks current nodes matched against a specified pattern.
-	 * 
+	 *
 	 * @param pattern xpath pattern
 	 * @return true if at least one of these nodes matches
 	 */
 	public boolean is(String pattern) {
 		if (pattern == null || isEmpty()) return false;
-		
+
 		NodeMatcher m = owner().compileXPathPattern(pattern);
 		for (Node self : this) {
 			if (m.match(self)) {
@@ -766,16 +766,16 @@ public class Nodes extends ArrayList<Node> {
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Checks current nodes matched against a specified filter function.
-	 * 
+	 *
 	 * @param func a filter function
 	 * @return true if at least one of these nodes matches
 	 */
 	public boolean is(Judge<Nodes> func) {
 		if (func == null || isEmpty()) return false;
-		
+
 		StatusImpl state = new StatusImpl();
 		try {
 			for (Node self : this) {
@@ -791,28 +791,28 @@ public class Nodes extends ArrayList<Node> {
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Checks current nodes matched against a specified set of nodes.
-	 * 
+	 *
 	 * @param nodes a Nodes object
 	 * @return true if at least one of these nodes matches
 	 */
 	public boolean is(Nodes nodes) {
 		if (isEmpty() || nodes.isEmpty()) return false;
-		
+
 		for (Node self : this) {
 			if (nodes.contains(self)) {
 				return true;
 			}
 		}
-		
+
 		return false;
 	}
-	
+
 	/**
 	 * Checks current nodes matched against a specified node.
-	 * 
+	 *
 	 * @param node a node
 	 * @return true if at least one of these nodes matches
 	 */
@@ -825,16 +825,16 @@ public class Nodes extends ArrayList<Node> {
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Gets a index number of the first element matched a specified pattern.
-	 * 
+	 *
 	 * @param pattern a XPath pattern
 	 * @return the 0-based position if a matched node exists. else -1
 	 */
 	public int index(String pattern) {
 		if (pattern == null || pattern.isEmpty() || isEmpty()) return -1;
-		
+
 		NodeMatcher m = owner().compileXPathPattern(pattern);
 		for (int i = 0; i < size(); i++) {
 			if (m.match(get(i))) {
@@ -843,23 +843,23 @@ public class Nodes extends ArrayList<Node> {
 		}
 		return -1;
 	}
-	
+
 	/**
 	 * Gets a index number of the first element matched the first node of a specified Nodes.
-	 * 
+	 *
 	 * @param nodes a Nodes object
 	 * @return the 0-based position if a matched node exists. else -1
 	 */
 	public int index(Nodes nodes) {
 		if (nodes == null || nodes.isEmpty()) return -1;
 		if (isEmpty()) return -1;
-		
+
 		return index(nodes.get(0));
 	}
-	
+
 	/**
 	 * Gets a index number of the first element matched a specified node.
-	 * 
+	 *
 	 * @param node a node
 	 * @return a index number if a matched node exists. else -1
 	 */
@@ -869,10 +869,10 @@ public class Nodes extends ArrayList<Node> {
 		}
 		return -1;
 	}
-	
+
 	/**
 	 * Gets a mapped value's list from current nodes.
-	 * 
+	 *
 	 * @param xpath a mapper xpath expression
 	 * @return a mapped value's list
 	 */
@@ -881,7 +881,7 @@ public class Nodes extends ArrayList<Node> {
 			return new ArrayList<String>(0);
 		}
 		Object expr = owner().compileXPath(xpath, false);
-		
+
 		List<String> result = new ArrayList<String>(size());
 		for (Node self : this) {
 			String value = owner().evaluate(expr, self, String.class);
@@ -891,10 +891,10 @@ public class Nodes extends ArrayList<Node> {
 		}
 		return result;
 	}
-	
+
 	/**
 	 * Gets a mapped value's list from current nodes.
-	 * 
+	 *
 	 * @param func a mapper function
 	 * @return a mapped value's list
 	 */
@@ -902,7 +902,7 @@ public class Nodes extends ArrayList<Node> {
 		if (func == null || isEmpty()) {
 			return new ArrayList<String>(0);
 		}
-		
+
 		StatusImpl status = new StatusImpl();
 		List<String> result = new ArrayList<String>(size());
 		try {
@@ -917,23 +917,23 @@ public class Nodes extends ArrayList<Node> {
 			if (!StatusImpl.isCancelException(e)) {
 				throw e;
 			}
-		} 
+		}
 		return result;
 	}
-	
+
 	/**
 	 * Iterates a each node of current nodes.
-	 * 
+	 *
 	 * @param func a visitor function
 	 * @return a reference to this object
 	 */
 	public Nodes each(Visitor<Nodes> func) {
 		return each(func, false);
 	}
-	
+
 	/**
 	 * Iterates a each node of current nodes.
-	 * 
+	 *
 	 * @param func a visitor function
 	 * @param reverse true if you wish to iterate reverse.
 	 * @return a reference to this object
@@ -942,7 +942,7 @@ public class Nodes extends ArrayList<Node> {
 		if (func == null || isEmpty()) {
 			return this;
 		}
-		
+
 		StatusImpl status = new StatusImpl();
 		try {
 			ListIterator<Node> i = listIterator(reverse ? size() : 0);
@@ -957,10 +957,10 @@ public class Nodes extends ArrayList<Node> {
 		}
 		return this;
 	}
-	
+
 	/**
 	 * Reduces the set of elements to those that have a descendant that matched a specified pattern.
-	 * 
+	 *
 	 * @param pattern a XPath pattern
 	 * @return the set of elements  to those that have a descendant that matched
 	 */
@@ -968,7 +968,7 @@ public class Nodes extends ArrayList<Node> {
 		if (pattern == null || pattern.isEmpty() || isEmpty()) {
 			return new Nodes(owner(), this, 0);
 		}
-		
+
 		NodeMatcher m = owner().compileXPathPattern(pattern);
 		Nodes nodes = new Nodes(owner(), this, size());
 		for (Node self : this) {
@@ -983,7 +983,7 @@ public class Nodes extends ArrayList<Node> {
 		unique(nodes);
 		return nodes;
 	}
-	
+
 	@Override
 	public void add(int index, Node node) {
 		if (isExternalNode(node)) {
@@ -991,7 +991,7 @@ public class Nodes extends ArrayList<Node> {
 		}
 		super.add(index, node);
 	}
-	
+
 	@Override
 	public boolean add(Node node) {
 		if (isExternalNode(node)) {
@@ -999,7 +999,7 @@ public class Nodes extends ArrayList<Node> {
 		}
 		return super.add(node);
 	}
-	
+
 	@Override
 	public boolean addAll(int index, Collection<? extends Node> c) {
 		boolean result = super.addAll(index, c);
@@ -1013,7 +1013,7 @@ public class Nodes extends ArrayList<Node> {
 		}
 		return result;
 	}
-	
+
 	@Override
 	public boolean addAll(Collection<? extends Node> c) {
 		boolean result = super.addAll(c);
@@ -1027,7 +1027,7 @@ public class Nodes extends ArrayList<Node> {
 		}
 		return result;
 	}
-	
+
 	@Override
 	public Node set(int index, Node node) {
 		if (isExternalNode(node)) {
@@ -1035,20 +1035,20 @@ public class Nodes extends ArrayList<Node> {
 		}
 		return super.set(index, node);
 	}
-	
+
 	/**
 	 * Adds elements that matched pattern.
-	 * 
+	 *
 	 * @param pattern a pattern
 	 * @return a reference to this object
 	 */
 	public Nodes add(String pattern) {
 		return add(owner().find(pattern));
 	}
-	
+
 	/**
 	 * Adds a set of specified nodes.
-	 * 
+	 *
 	 * @param nodes a set of nodes
 	 * @return a reference to this object
 	 */
@@ -1058,17 +1058,17 @@ public class Nodes extends ArrayList<Node> {
 			results.addAll(this);
 			return results;
 		}
-		
+
 		Nodes results = new Nodes(owner(), this, size() + nodes.size());
 		results.addAll(this);
 		results.addAll(nodes);
 		unique(results);
 		return results;
 	}
-	
+
 	/**
 	 * Adds the previous set of nodes.
-	 * 
+	 *
 	 * @return a reference to this object
 	 */
 	public Nodes addBack() {
@@ -1077,17 +1077,17 @@ public class Nodes extends ArrayList<Node> {
 			results.addAll(this);
 			return results;
 		}
-		
+
 		Nodes results = new Nodes(owner(), this, size() + back.size());
 		results.addAll(this);
 		results.addAll(back);
 		unique(results);
 		return results;
 	}
-	
+
 	/**
 	 * Adds the previous set of nodes that filtered by a specified pattern.
-	 * 
+	 *
 	 * @return a reference to this object
 	 */
 	public Nodes addBack(String pattern) {
@@ -1096,9 +1096,9 @@ public class Nodes extends ArrayList<Node> {
 			results.addAll(this);
 			return results;
 		}
-		
+
 		NodeMatcher m = owner().compileXPathPattern(pattern);
-		
+
 		Nodes results = new Nodes(owner(), this, size() * 2);
 		results.addAll(this);
 		for (Node node : back) {
@@ -1109,10 +1109,10 @@ public class Nodes extends ArrayList<Node> {
 		unique(results);
 		return results;
 	}
-	
+
 	/**
 	 * Gets the previous set of nodes.
-	 * 
+	 *
 	 * @return a reference to this object
 	 */
 	public Nodes end() {
@@ -1121,11 +1121,11 @@ public class Nodes extends ArrayList<Node> {
 		}
 		return back;
 	}
-	
+
 	/**
 	 * Evaluate a specified XPath expression at a first node of current nodes.
 	 * And gets as a specified type.
-	 * 
+	 *
 	 * @param xpath a XPath expression
 	 * @param cls a result type
 	 * @return a result value.
@@ -1134,17 +1134,17 @@ public class Nodes extends ArrayList<Node> {
 		if (xpath == null || xpath.isEmpty() || isEmpty()) {
 			return null;
 		}
-		
+
 		Node self = get(0);
 		if (self == null) return null;
-		
+
 		Object expr = owner().compileXPath(xpath, false);
 		return owner().evaluate(expr, self, cls);
 	}
-	
+
 	/**
 	 * Selects nodes by a specified XPath expression.
-	 * 
+	 *
 	 * @param xpath a XPath expression
 	 * @return a set of nodes
 	 */
@@ -1152,9 +1152,9 @@ public class Nodes extends ArrayList<Node> {
 		if (xpath == null || xpath.isEmpty() || isEmpty()) {
 			return new Nodes(owner(), this, 0);
 		}
-		
+
 		Object expr = owner().compileXPath(xpath, false);
-		
+
 		Nodes results = new Nodes(owner(), this, size());
 		for (Node self : this) {
 			NodeList list = owner().evaluate(expr, self, NodeList.class);
@@ -1165,10 +1165,10 @@ public class Nodes extends ArrayList<Node> {
 		unique(results);
 		return results;
 	}
-	
+
 	/**
 	 * Finds elements matched a specified XPath pattern.
-	 * 
+	 *
 	 * @param pattern a XPath pattern
 	 * @return a set of elements
 	 */
@@ -1176,9 +1176,9 @@ public class Nodes extends ArrayList<Node> {
 		if (pattern == null || pattern.isEmpty() || isEmpty()) {
 			return new Nodes(owner(), this, 0);
 		}
-		
+
 		Object expr = owner().compileXPath(pattern, true);
-		
+
 		Nodes results = new Nodes(owner(), this, size());
 		for (Node self : this) {
 			NodeList list = owner().evaluate(expr, self, NodeList.class);
@@ -1191,10 +1191,10 @@ public class Nodes extends ArrayList<Node> {
 		unique(results);
 		return results;
 	}
-	
+
 	/**
 	 * Filters a set of current nodes with a specified pattern.
-	 * 
+	 *
 	 * @param pattern a pattern
 	 * @return a filtered set of nodes
 	 */
@@ -1202,7 +1202,7 @@ public class Nodes extends ArrayList<Node> {
 		if (pattern == null || pattern.isEmpty() || isEmpty()) {
 			return new Nodes(owner(), this, 0);
 		}
-		
+
 		NodeMatcher m = owner().compileXPathPattern(pattern);
 		Nodes results = new Nodes(owner(), this, size());
 		for (Node self : this) {
@@ -1213,10 +1213,10 @@ public class Nodes extends ArrayList<Node> {
 		unique(results);
 		return results;
 	}
-	
+
 	/**
 	 * Filters a set of current nodes with a filter function.
-	 * 
+	 *
 	 * @param func a filter function
 	 * @return a filtered set of nodes
 	 */
@@ -1224,7 +1224,7 @@ public class Nodes extends ArrayList<Node> {
 		if (func == null || isEmpty()) {
 			return new Nodes(owner(), this, 0);
 		}
-		
+
 		Nodes results = new Nodes(owner(), this, size());
 		StatusImpl state = new StatusImpl();
 		try {
@@ -1242,10 +1242,10 @@ public class Nodes extends ArrayList<Node> {
 		unique(results);
 		return results;
 	}
-	
+
 	/**
 	 * Get a set of nodes that not matched a specified pattern.
-	 * 
+	 *
 	 * @param pattern a pattern
 	 * @return a set of nodes that not matched a specified pattern
 	 */
@@ -1257,7 +1257,7 @@ public class Nodes extends ArrayList<Node> {
 		} else if (isEmpty()) {
 			return new Nodes(owner(), this, 0);
 		}
-		
+
 		NodeMatcher m = owner().compileXPathPattern(pattern);
 		Nodes results = new Nodes(owner(), this, size());
 		for (Node self : this) {
@@ -1268,10 +1268,10 @@ public class Nodes extends ArrayList<Node> {
 		unique(results);
 		return results;
 	}
-	
+
 	/**
 	 * Traverses descendants of current nodes that matched a specified pattern.
-	 * 
+	 *
 	 * @param pattern a pattern
 	 * @param func a visitor function
 	 * @return a reference of this object
@@ -1279,10 +1279,10 @@ public class Nodes extends ArrayList<Node> {
 	public Nodes traverse(String pattern, Visitor<Nodes> func) {
 		return traverse(pattern, func, false);
 	}
-	
+
 	/**
 	 * Traverses descendants of current nodes that matched a specified pattern.
-	 * 
+	 *
 	 * @param pattern a pattern
 	 * @param func a visitor function
 	 * @param reverse true if you wish to iterate reverse
@@ -1292,14 +1292,14 @@ public class Nodes extends ArrayList<Node> {
 		if (pattern == null || func == null) {
 			return this;
 		}
-		
+
 		NodeMatcher m = owner().compileXPathPattern(pattern);
 		if (m.getMatchType() == MatchType.NO_NODE) {
 			return this;
 		}
-		
+
 		int filter = toFilter(m.getMatchType());
-		
+
 		DocumentTraversal dt = (DocumentTraversal)owner().get();
 		StatusImpl status = new StatusImpl();
 		try {
@@ -1314,7 +1314,7 @@ public class Nodes extends ArrayList<Node> {
 								|| m.getMatchType() == MatchType.NAMESPACE_NODE
 								|| m.getMatchType() == MatchType.ANY_NODE
 								|| m.getMatchType() == MatchType.UNKNOWN_NODE) {
-							
+
 							NamedNodeMap attrs = node.getAttributes();
 							for (int pos = 0; pos < attrs.getLength(); pos++) {
 								Node attr = attrs.item(pos);
@@ -1328,7 +1328,7 @@ public class Nodes extends ArrayList<Node> {
 								}
 							}
 						}
-						
+
 						if (m.getMatchType() != MatchType.ATTRIBUTE_NODE
 								&& m.getMatchType() != MatchType.NAMESPACE_NODE) {
 							if (prev != null) {
@@ -1355,63 +1355,63 @@ public class Nodes extends ArrayList<Node> {
 				throw e;
 			}
 		}
-		
+
 		return this;
 	}
-	
+
 	/**
 	 * Gets the set of the parent element for current nodes.
-	 * 
+	 *
 	 * @return the set of the parent element
 	 */
 	public Nodes parent() {
 		return parentsInternal(SelectMode.FIRST);
 	}
-	
+
 	/**
 	 * Gets the set of the parent element for current nodes, and filters with a specified pattern.
-	 * 
+	 *
 	 * @param pattern a pattern
 	 * @return the filtered set of the parent element
 	 */
 	public Nodes parent(String pattern) {
 		return parentsInternal(pattern, SelectMode.FIRST);
 	}
-	
+
 	/**
 	 * Collects the set of the parent element for current nodes until matches a specified pattern.
-	 * 
+	 *
 	 * @param pattern a pattern
 	 * @return the filtered set of the parent element
 	 */
 	public Nodes parentsUntil(String pattern) {
 		return parentsInternal(pattern, SelectMode.UNTIL);
 	}
-	
+
 	/**
 	 * Gets the set of the ancestor elements for current nodes.
-	 * 
+	 *
 	 * @return the set of the ancestor elements
 	 */
 	public Nodes parents() {
 		return parentsInternal(SelectMode.ALL);
 	}
-	
+
 	/**
 	 * Gets the filtered set of the ancestor elements for current nodes.
-	 * 
+	 *
 	 * @param pattern a pattern
 	 * @return the filtered set of the ancestor elements
 	 */
 	public Nodes parents(String pattern) {
 		return parentsInternal(pattern, SelectMode.ALL);
 	}
-	
+
 	Nodes parentsInternal(SelectMode mode) {
 		Nodes results = new Nodes(owner(), this, size() * 2);
 		for (Node self : this) {
 			if (self == null) continue;
-			
+
 			Node parent = self;
 			while ((parent = parent.getParentNode()) != null) {
 				if (parent.getNodeType() != Node.ELEMENT_NODE) break;
@@ -1425,21 +1425,21 @@ public class Nodes extends ArrayList<Node> {
 		}
 		return results;
 	}
-	
+
 	Nodes parentsInternal(String pattern, SelectMode mode) {
 		if (pattern == null || pattern.isEmpty() || isEmpty()) {
 			return new Nodes(owner(), this, 0);
 		}
-		
+
 		NodeMatcher m = owner().compileXPathPattern(pattern);
 		Nodes results = new Nodes(owner(), this, size() * 2);
 		for (Node self : this) {
 			if (self == null) continue;
-			
+
 			Node parent = self;
 			while ((parent = parent.getParentNode()) != null) {
 				if (parent.getNodeType() != Node.ELEMENT_NODE) break;
-				
+
 				if (m.match(parent)) {
 					results.add(parent);
 					if (mode == SelectMode.UNTIL) break;
@@ -1455,10 +1455,10 @@ public class Nodes extends ArrayList<Node> {
 		}
 		return results;
 	}
-	
+
 	/**
 	 * Collects the set of the ancestors or self elements for current nodes until matches a pattern.
-	 * 
+	 *
 	 * @param pattern a pattern
 	 * @return the filtered set of the ancestor or self elements
 	 */
@@ -1466,16 +1466,16 @@ public class Nodes extends ArrayList<Node> {
 		if (pattern == null || pattern.isEmpty() || isEmpty()) {
 			return new Nodes(owner(), this, 0);
 		}
-		
+
 		NodeMatcher m = owner().compileXPathPattern(pattern);
 		Nodes results = new Nodes(owner(), this, size() * 2);
 		for (Node self : this) {
 			if (self == null) continue;
-			
+
 			Node current = self;
 			do {
 				if (current.getNodeType() != Node.ELEMENT_NODE) break;
-				
+
 				if (m.match(current)) {
 					results.add(current);
 					break;
@@ -1485,32 +1485,32 @@ public class Nodes extends ArrayList<Node> {
 		unique(results);
 		return results;
 	}
-	
+
 	/**
 	 * Gets the set of the child elements for current nodes.
-	 * 
+	 *
 	 * @return the set of the child elements
 	 */
 	public Nodes children() {
 		Nodes results = new Nodes(owner(), this, size() * 2);
 		for (Node self : this) {
 			if (!self.hasChildNodes()) continue;
-			
+
 			NodeList children = self.getChildNodes();
 			for (int i = 0; i < children.getLength(); i++) {
 				Node child = children.item(i);
 				if (child == null) continue;
 				if (child.getNodeType() != Node.ELEMENT_NODE) continue;
-				
+
 				results.add(child);
 			}
 		}
 		return results;
 	}
-	
+
 	/**
 	 * Gets the filtered set of the child elements for current nodes.
-	 * 
+	 *
 	 * @param pattern a pattern
 	 * @return the filtered set of child elements
 	 */
@@ -1518,18 +1518,18 @@ public class Nodes extends ArrayList<Node> {
 		if (pattern == null || pattern.isEmpty() || isEmpty()) {
 			return new Nodes(owner(), this, 0);
 		}
-		
+
 		NodeMatcher m = owner().compileXPathPattern(pattern);
 		Nodes results = new Nodes(owner(), this, size() * 2);
 		for (Node self : this) {
 			if (!self.hasChildNodes()) continue;
-			
+
 			NodeList children = self.getChildNodes();
 			for (int j = 0; j < children.getLength(); j++) {
 				Node child = children.item(j);
 				if (child == null) continue;
 				if (child.getNodeType() != Node.ELEMENT_NODE) continue;
-				
+
 				if (m.match(child)) {
 					results.add(child);
 				}
@@ -1537,31 +1537,31 @@ public class Nodes extends ArrayList<Node> {
 		}
 		return results;
 	}
-	
+
 	/**
 	 * Gets the set of child nodes for current nodes.
-	 * 
+	 *
 	 * @return the set of child nodes
 	 */
 	public Nodes contents() {
 		Nodes results = new Nodes(owner(), this, size() * 2);
 		for (Node self : this) {
 			if (!self.hasChildNodes()) continue;
-			
+
 			NodeList children = self.getChildNodes();
 			for (int i = 0; i < children.getLength(); i++) {
 				Node child = children.item(i);
 				if (child == null) continue;
-				
+
 				results.add(child);
 			}
 		}
 		return results;
 	}
-	
+
 	/**
 	 * Gets the filtered set of child nodes for current nodes.
-	 * 
+	 *
 	 * @param pattern a pattern
 	 * @return the filtered set of child nodes
 	 */
@@ -1569,17 +1569,17 @@ public class Nodes extends ArrayList<Node> {
 		if (pattern == null || pattern.isEmpty() || isEmpty()) {
 			return new Nodes(owner(), this, 0);
 		}
-		
+
 		NodeMatcher m = owner().compileXPathPattern(pattern);
 		Nodes results = new Nodes(owner(), this, size() * 2);
 		for (Node self : this) {
 			if (!self.hasChildNodes()) continue;
-			
+
 			NodeList children = self.getChildNodes();
 			for (int j = 0; j < children.getLength(); j++) {
 				Node child = children.item(j);
 				if (child == null) continue;
-				
+
 				if (m.match(child)) {
 					results.add(child);
 				}
@@ -1587,76 +1587,76 @@ public class Nodes extends ArrayList<Node> {
 		}
 		return results;
 	}
-	
+
 	/**
 	 * Gets the first node of current nodes.
-	 * 
+	 *
 	 * @return the first node
 	 */
 	public Nodes first() {
 		return eq(0);
 	}
-	
+
 	/**
 	 * Gets the last node of current nodes.
-	 * 
+	 *
 	 * @return the last node
 	 */
 	public Nodes last() {
 		return eq(-1);
 	}
-	
+
 	/**
 	 * Gets the set of the previous element for current nodes.
-	 * 
+	 *
 	 * @return the set of the previous element
 	 */
 	public Nodes prev() {
 		return prevInternal(SelectMode.FIRST);
 	}
-	
+
 	/**
 	 * Gets the filtered set of the previous element for current nodes.
-	 * 
+	 *
 	 * @return the filtered set of the previous element
 	 */
 	public Nodes prev(String pattern) {
 		return prevInternal(pattern, SelectMode.FIRST);
 	}
-	
+
 	/**
 	 * Collects the set of the previous element for current nodes until matches a specified pattern.
-	 * 
+	 *
 	 * @param pattern a pattern
 	 * @return the filtered set of the previous element
 	 */
 	public Nodes prevUntil(String pattern) {
 		return prevInternal(pattern, SelectMode.UNTIL);
 	}
-	
+
 	/**
 	 * Gets the set of the all previous elements for current nodes.
-	 * 
+	 *
 	 * @return the set of the all previous elements
 	 */
 	public Nodes prevAll() {
 		return prevInternal(SelectMode.ALL);
 	}
-	
+
 	/**
 	 * Gets the filtered set of the all previous elements for current nodes.
-	 * 
+	 *
 	 * @return the filtered set of the all previous elements
 	 */
 	public Nodes prevAll(String pattern) {
 		return prevInternal(pattern, SelectMode.ALL);
 	}
-	
+
 	Nodes prevInternal(SelectMode mode) {
 		Nodes results = new Nodes(owner(), this, size());
 		for (Node self : this) {
 			if (self == null) continue;
-			
+
 			Node prev = self;
 			while ((prev = prev.getPreviousSibling()) != null) {
 				if (prev.getNodeType() != Node.ELEMENT_NODE) continue;
@@ -1670,21 +1670,21 @@ public class Nodes extends ArrayList<Node> {
 		}
 		return results;
 	}
-	
+
 	Nodes prevInternal(String pattern, SelectMode mode) {
 		if (pattern == null || pattern.isEmpty() || isEmpty()) {
 			return new Nodes(owner(), this, 0);
 		}
-		
+
 		NodeMatcher m = owner().compileXPathPattern(pattern);
 		Nodes results = new Nodes(owner(), this, size());
 		for (Node self : this) {
 			if (self == null) continue;
-			
+
 			Node prev = self;
 			while ((prev = prev.getPreviousSibling()) != null) {
 				if (prev.getNodeType() != Node.ELEMENT_NODE) continue;
-				
+
 				if (m.match(prev)) {
 					results.add(prev);
 					if (mode == SelectMode.UNTIL) break;
@@ -1700,64 +1700,64 @@ public class Nodes extends ArrayList<Node> {
 		}
 		return results;
 	}
-	
+
 	/**
 	 * Gets the set of the next element for current nodes.
-	 * 
+	 *
 	 * @return the set of the next element
 	 */
 	public Nodes next() {
 		return nextInternal(SelectMode.FIRST);
 	}
-	
+
 	/**
 	 * Gets the filtered set of the next element for current nodes.
-	 * 
+	 *
 	 * @param pattern a pattern
 	 * @return the filtered set of the next element
 	 */
 	public Nodes next(String pattern) {
 		return nextInternal(pattern, SelectMode.FIRST);
 	}
-	
+
 	/**
 	 * Collects the set of the next element for current nodes until matches a specified pattern.
-	 * 
+	 *
 	 * @param pattern a pattern
 	 * @return the filtered set of the next element
 	 */
 	public Nodes nextUntil(String pattern) {
 		return nextInternal(pattern, SelectMode.UNTIL);
 	}
-	
+
 	/**
 	 * Gets the set of the all next elements for current nodes.
-	 * 
+	 *
 	 * @return the set of the all next elements
 	 */
 	public Nodes nextAll() {
 		return nextInternal(SelectMode.ALL);
 	}
-	
+
 	/**
 	 * Gets the filtered set of the all next elements for current nodes.
-	 * 
+	 *
 	 * @param pattern a pattern
 	 * @return the filtered set of the all next elements
 	 */
 	public Nodes nextAll(String pattern) {
 		return nextInternal(pattern, SelectMode.ALL);
 	}
-	
+
 	Nodes nextInternal(SelectMode mode) {
 		Nodes results = new Nodes(owner(), this, size() * 2);
 		for (Node self : this) {
 			if (self == null) continue;
-			
+
 			Node next = self;
 			while ((next = next.getNextSibling()) != null) {
 				if (next.getNodeType() != Node.ELEMENT_NODE) continue;
-				
+
 				results.add(next);
 				if (mode == SelectMode.FIRST) break;
 			}
@@ -1767,21 +1767,21 @@ public class Nodes extends ArrayList<Node> {
 		}
 		return results;
 	}
-	
+
 	Nodes nextInternal(String pattern, SelectMode mode) {
 		if (pattern == null || pattern.isEmpty() || isEmpty()) {
 			return new Nodes(owner(), this, 0);
 		}
-		
+
 		NodeMatcher m = owner().compileXPathPattern(pattern);
 		Nodes results = new Nodes(owner(), this, size() * 2);
 		for (Node self : this) {
 			if (self == null) continue;
-			
+
 			Node next = self;
 			while ((next = next.getNextSibling()) != null) {
 				if (next.getNodeType() != Node.ELEMENT_NODE) continue;
-				
+
 				if (m.match(next)) {
 					results.add(next);
 					if (mode == SelectMode.UNTIL) break;
@@ -1796,38 +1796,38 @@ public class Nodes extends ArrayList<Node> {
 		}
 		return results;
 	}
-	
+
 	/**
 	 * Gets the set of the all previous or next elements for current nodes.
-	 * 
+	 *
 	 * @return the set of the all previous or next elements
 	 */
 	public Nodes siblings() {
 		Nodes results = new Nodes(owner(), this, size());
 		for (Node self : this) {
 			if (self == null) continue;
-			
+
 			Node prev = self;
 			while ((prev = prev.getPreviousSibling()) != null) {
 				if (prev.getNodeType() != Node.ELEMENT_NODE) continue;
-				
+
 				results.add(prev);
 			}
-			
+
 			Node next = self;
 			while ((next = next.getNextSibling()) != null) {
 				if (next.getNodeType() != Node.ELEMENT_NODE) continue;
-				
+
 				results.add(next);
 			}
 		}
 		unique(results);
 		return results;
 	}
-	
+
 	/**
 	 * Gets the filtered set of the all previous or next elements for current nodes.
-	 * 
+	 *
 	 * @param pattern a pattern
 	 * @return the filtered set of the all previous or next elements
 	 */
@@ -1835,21 +1835,21 @@ public class Nodes extends ArrayList<Node> {
 		if (pattern == null || pattern.isEmpty() || isEmpty()) {
 			return new Nodes(owner(), this, 0);
 		}
-		
+
 		NodeMatcher m = owner().compileXPathPattern(pattern);
 		Nodes results = new Nodes(owner(), this, size());
 		for (Node self : this) {
 			if (self == null) continue;
-			
+
 			Node prev = self;
 			while ((prev = prev.getPreviousSibling()) != null) {
 				if (prev.getNodeType() != Node.ELEMENT_NODE) continue;
-				
+
 				if (m.match(prev)) {
 					results.add(prev);
 				}
 			}
-			
+
 			Node next = self;
 			while ((next = next.getNextSibling()) != null) {
 				if (next.getNodeType() != Node.ELEMENT_NODE) continue;
@@ -1862,20 +1862,20 @@ public class Nodes extends ArrayList<Node> {
 		unique(results);
 		return results;
 	}
-	
+
 	/**
 	 * Reduces the set of nodes to a subset specified by a range of indices.
-	 * 
+	 *
 	 * @param start the 0-based start position. If negative, it indicates an offset from the end
 	 * @return the sliced set of nodes
 	 */
 	public Nodes slice(int start) {
 		return slice(start, size());
 	}
-	
+
 	/**
 	 * Reduces the set of nodes to a subset specified by a range of indices.
-	 * 
+	 *
 	 * @param start the 0-based start position. If negative, it indicates an offset from the end
 	 * @param end the 0-based end position. If negative, it indicates an offset from the end
 	 * @return the sliced set of nodes
@@ -1883,63 +1883,63 @@ public class Nodes extends ArrayList<Node> {
 	public Nodes slice(int start, int end) {
 		if (start < 0) start = size() + start;
 		if (end < 0) end = size() + end;
-		
+
 		if (start < 0 || start >= size() || end <= 0 || end > size()) {
 			return new Nodes(owner(), this, 0);
 		}
-		
+
 		Nodes results = new Nodes(owner(), this, end-start);
 		int pos = 0;
 		for (Node self : this) {
 			if (self == null) continue;
 			if (self.getNodeType() != Node.ELEMENT_NODE) continue;
-			
+
 			if (pos >= start && pos < end) results.add(self);
 			pos++;
 		}
 		unique(results);
 		return results;
 	}
-	
+
 	/**
 	 * Inserts specified XML contents to the beginning of each element in the set of the elements.
-	 * 
+	 *
 	 * @param xml XML contents
 	 * @return a reference of this object
 	 * @throws XMLException if XML parsing error caused.
 	 */
 	public Nodes prepend(String xml) throws XMLException {
 		if (xml == null || xml.isEmpty()) return this;
-		
+
 		return prepend(new Nodes(owner(), xml));
 	}
-	
+
 	/**
 	 * Inserts specified nodes to the beginning of each element in the set of the elements.
-	 * 
+	 *
 	 * @param nodes inserting nodes
 	 * @return a reference of this object
 	 */
 	public Nodes prepend(Nodes nodes) {
 		if (nodes == null) return this;
-		
+
 		boolean first = true;
 		for (Node self : this) {
 			if (self == null) continue;
 			if (self.getNodeType() != Node.ELEMENT_NODE
 					&& self.getNodeType() != Node.DOCUMENT_NODE) continue;
-			
+
 			Node ref = self.getFirstChild();
 			for (Node node : nodes) {
 				if (node == null) continue;
-				
+
 				Document doc = self.getOwnerDocument();
 				if (doc != null && node.getOwnerDocument() != doc) {
 					node = doc.importNode(node, true);
 				} else {
 					if (!first) node = node.cloneNode(true);
 				}
-				
+
 				if (ref != null) {
 					self.insertBefore(node, ref);
 				} else {
@@ -1950,36 +1950,36 @@ public class Nodes extends ArrayList<Node> {
 		}
 		return this;
 	}
-	
+
 	/**
 	 * Insert every element in the set of nodes to the beginning of the target.
-	 * 
+	 *
 	 * @param pattern a pattern
 	 * @return the inserted nodes
 	 */
 	public Nodes prependTo(String pattern) {
 		return prependTo(owner().find(pattern));
 	}
-	
+
 	/**
 	 * Insert every element in the set of nodes to the beginning of the target.
-	 * 
+	 *
 	 * @param nodes target nodes
 	 * @return the inserted nodes
 	 */
 	public Nodes prependTo(Nodes nodes) {
 		if (nodes == null) return new Nodes(owner(), this, 0);
-		
+
 		Nodes results = new Nodes(owner(), this, nodes.size());
 		for (Node node : nodes) {
 			if (node == null) continue;
 			if (node.getNodeType() != Node.ELEMENT_NODE
 					&& node.getNodeType() != Node.DOCUMENT_NODE) continue;
-			
+
 			Node ref = node.getFirstChild();
 			for (Node self : this) {
 				if (self == null) continue;
-				
+
 				Document doc = node.getOwnerDocument();
 				if (doc != null && self.getOwnerDocument() != doc) {
 					self = doc.importNode(self, true);
@@ -1997,38 +1997,38 @@ public class Nodes extends ArrayList<Node> {
 		}
 		return results;
 	}
-	
+
 	/**
 	 * Inserts specified XML contents to the end of each element in the set of the elements.
-	 * 
+	 *
 	 * @param xml XML contents
 	 * @return a reference of this object
 	 * @throws XMLException if XML parsing error caused.
 	 */
 	public Nodes append(String xml) throws XMLException {
 		if (xml == null || xml.isEmpty()) return this;
-		
+
 		return append(new Nodes(owner(), xml));
 	}
-	
+
 	/**
 	 * Inserts specified nodes to the end of each element in the set of the elements.
-	 * 
+	 *
 	 * @param nodes inserting nodes
 	 * @return a reference of this object
 	 */
 	public Nodes append(Nodes nodes) {
 		if (nodes.isEmpty()) return this;
-		
+
 		boolean first = true;
 		for (Node self : this) {
 			if (self == null) continue;
 			if (self.getNodeType() != Node.ELEMENT_NODE
 					&& self.getNodeType() != Node.DOCUMENT_NODE) continue;
-			
+
 			for (Node node : nodes) {
 				if (node == null) continue;
-				
+
 				Document doc = self.getOwnerDocument();
 				if (doc != null && node.getOwnerDocument() != doc) {
 					node = doc.importNode(node, true);
@@ -2041,26 +2041,26 @@ public class Nodes extends ArrayList<Node> {
 		}
 		return this;
 	}
-	
+
 	/**
 	 * Insert every element in the set of nodes to the end of the target.
-	 * 
+	 *
 	 * @param pattern a pattern
 	 * @return the inserted nodes
 	 */
 	public Nodes appendTo(String pattern) {
 		return appendTo(owner().find(pattern));
 	}
-	
+
 	/**
 	 * Insert every element in the set of nodes to the end of the target.
-	 * 
+	 *
 	 * @param nodes target nodes
 	 * @return the inserted nodes
 	 */
 	public Nodes appendTo(Nodes nodes) {
 		if (nodes == null) return new Nodes(owner(), this, 0);
-		
+
 		Nodes result = new Nodes(owner(), this, nodes.size());
 		for (Node node : nodes) {
 			if (node == null) continue;
@@ -2069,7 +2069,7 @@ public class Nodes extends ArrayList<Node> {
 
 			for (Node self : this) {
 				if (self == null) continue;
-				
+
 				Document doc = node.getOwnerDocument();
 				if (doc != null && self.getOwnerDocument() != doc) {
 					self = doc.importNode(self, true);
@@ -2083,10 +2083,10 @@ public class Nodes extends ArrayList<Node> {
 		}
 		return result;
 	}
-	
+
 	/**
 	 * Inserts specified XML contents before each element in the set of the elements.
-	 * 
+	 *
 	 * @param xml XML contents
 	 * @return a reference of this object
 	 * @throws XMLException if XML parsing error caused.
@@ -2094,91 +2094,16 @@ public class Nodes extends ArrayList<Node> {
 	public Nodes before(String xml) throws XMLException {
 		return before(new Nodes(owner(), xml));
 	}
-	
+
 	/**
 	 * Inserts specified nodes before each element in the set of the elements.
-	 * 
+	 *
 	 * @param nodes inserting nodes
 	 * @return a reference of this object
 	 */
 	public Nodes before(Nodes nodes) {
 		if (nodes == null) return this;
-		
-		boolean first = true;
-		for (Node self : this) {
-			if (self == null) continue;
-			if (self.getNodeType() != Node.ELEMENT_NODE) continue;
-			
-			Node parent = self.getParentNode();
-			if (parent == null) continue;
-			
-			for (Node node : nodes) {
-				if (node == null) continue;
-				
-				Document doc = parent.getOwnerDocument();
-				if (doc != null && node.getOwnerDocument() != doc) {
-					node = doc.importNode(node, true);
-				} else {
-					if (!first) node = node.cloneNode(true);
-				}
-				
-				parent.insertBefore(node, self);
-			}
-			first = false;
-		}
-		return this;
-	}
-	
-	/**
-	 * Insert every element in the set of nodes before the target.
-	 * 
-	 * @param pattern a pattern
-	 * @return the inserted nodes
-	 */
-	public Nodes insertBefore(String pattern) {
-		if (pattern == null || pattern.isEmpty() || isEmpty()) {
-			return this;
-		}
-		
-		owner().find(pattern).before(this);
-		return this;
-	}
-	
-	/**
-	 * Insert every element in the set of nodes before the target.
-	 * 
-	 * @param nodes target nodes
-	 * @return the inserted nodes
-	 */
-	public Nodes insertBefore(Nodes nodes) {
-		if (nodes == null || nodes.isEmpty() || isEmpty()) {
-			return this;
-		}
-		
-		nodes.before(this);
-		return this;
-	}
-	
-	/**
-	 * Inserts specified XML contents after each element in the set of the elements.
-	 * 
-	 * @param xml XML contents
-	 * @return a reference of this object
-	 * @throws XMLException if XML parsing error caused.
-	 */
-	public Nodes after(String xml) throws XMLException {
-		return after(new Nodes(owner(), xml));
-	}
-	
-	/**
-	 * Inserts specified nodes after each element in the set of the elements.
-	 * 
-	 * @param nodes inserting nodes
-	 * @return a reference of this object
-	 */
-	public Nodes after(Nodes nodes) {
-		if (nodes == null) return this;
-		
+
 		boolean first = true;
 		for (Node self : this) {
 			if (self == null) continue;
@@ -2186,18 +2111,93 @@ public class Nodes extends ArrayList<Node> {
 
 			Node parent = self.getParentNode();
 			if (parent == null) continue;
-			
-			Node next = self.getNextSibling();
+
 			for (Node node : nodes) {
 				if (node == null) continue;
-				
+
 				Document doc = parent.getOwnerDocument();
 				if (doc != null && node.getOwnerDocument() != doc) {
 					node = doc.importNode(node, true);
 				} else {
 					if (!first) node = node.cloneNode(true);
 				}
-				
+
+				parent.insertBefore(node, self);
+			}
+			first = false;
+		}
+		return this;
+	}
+
+	/**
+	 * Insert every element in the set of nodes before the target.
+	 *
+	 * @param pattern a pattern
+	 * @return the inserted nodes
+	 */
+	public Nodes insertBefore(String pattern) {
+		if (pattern == null || pattern.isEmpty() || isEmpty()) {
+			return this;
+		}
+
+		owner().find(pattern).before(this);
+		return this;
+	}
+
+	/**
+	 * Insert every element in the set of nodes before the target.
+	 *
+	 * @param nodes target nodes
+	 * @return the inserted nodes
+	 */
+	public Nodes insertBefore(Nodes nodes) {
+		if (nodes == null || nodes.isEmpty() || isEmpty()) {
+			return this;
+		}
+
+		nodes.before(this);
+		return this;
+	}
+
+	/**
+	 * Inserts specified XML contents after each element in the set of the elements.
+	 *
+	 * @param xml XML contents
+	 * @return a reference of this object
+	 * @throws XMLException if XML parsing error caused.
+	 */
+	public Nodes after(String xml) throws XMLException {
+		return after(new Nodes(owner(), xml));
+	}
+
+	/**
+	 * Inserts specified nodes after each element in the set of the elements.
+	 *
+	 * @param nodes inserting nodes
+	 * @return a reference of this object
+	 */
+	public Nodes after(Nodes nodes) {
+		if (nodes == null) return this;
+
+		boolean first = true;
+		for (Node self : this) {
+			if (self == null) continue;
+			if (self.getNodeType() != Node.ELEMENT_NODE) continue;
+
+			Node parent = self.getParentNode();
+			if (parent == null) continue;
+
+			Node next = self.getNextSibling();
+			for (Node node : nodes) {
+				if (node == null) continue;
+
+				Document doc = parent.getOwnerDocument();
+				if (doc != null && node.getOwnerDocument() != doc) {
+					node = doc.importNode(node, true);
+				} else {
+					if (!first) node = node.cloneNode(true);
+				}
+
 				if (next != null) {
 					parent.insertBefore(node, next);
 				} else {
@@ -2208,10 +2208,10 @@ public class Nodes extends ArrayList<Node> {
 		}
 		return this;
 	}
-	
+
 	/**
 	 * Inserts every element in the set of nodes after the target.
-	 * 
+	 *
 	 * @param pattern a pattern
 	 * @return the inserted nodes
 	 */
@@ -2219,14 +2219,14 @@ public class Nodes extends ArrayList<Node> {
 		if (pattern == null || pattern.isEmpty() || isEmpty()) {
 			return this;
 		}
-		
+
 		owner().find(pattern).after(this);
 		return this;
 	}
-	
+
 	/**
 	 * Inserts every element in the set of nodes after the target.
-	 * 
+	 *
 	 * @param nodes target nodes
 	 * @return the inserted nodes
 	 */
@@ -2234,14 +2234,14 @@ public class Nodes extends ArrayList<Node> {
 		if (nodes == null || nodes.isEmpty() || isEmpty()) {
 			return this;
 		}
-		
+
 		nodes.after(this);
 		return this;
 	}
-	
+
 	/**
 	 * Wraps an XML structure around each element in the set of current elements.
-	 * 
+	 *
 	 * @param xml wrapping XML contents
 	 * @return a reference to this object
 	 * @throws XMLException if XML parsing error caused.
@@ -2249,72 +2249,72 @@ public class Nodes extends ArrayList<Node> {
 	public Nodes wrap(String xml) throws XMLException {
 		return wrap(new Nodes(owner(), xml));
 	}
-	
+
 	/**
 	 * Wraps an XML structure around each element in the set of current elements.
-	 * 
+	 *
 	 * @param nodes wrapping nodes
 	 * @return a reference to this object
 	 */
 	public Nodes wrap(Nodes nodes) {
 		if (nodes == null || nodes.isEmpty()) return this;
 		if (nodes.get(0) == null || nodes.get(0).getNodeType() != Node.ELEMENT_NODE) return this;
-		
+
 		for (Node self : this) {
 			if (self == null) continue;
 			if (self.getNodeType() != Node.ELEMENT_NODE) continue;
-			
+
 			Node parent = self.getParentNode();
 			if (parent == null) continue;
-			
+
 			Node root = nodes.get(0);
-			
+
 			Document doc = self.getOwnerDocument();
 			if (doc != null && root.getOwnerDocument() != doc) {
 				root = doc.importNode(root, true);
 			} else {
 				root = root.cloneNode(true);
 			}
-			
+
 			Node leaf = getFirstLeaf(root);
 			leaf.appendChild(parent.replaceChild(root, self));
 		}
 		return this;
 	}
-	
+
 	/**
 	 * Wraps an XML structure around the content of each element in the set of current elements.
-	 * 
+	 *
 	 * @param xml wrapping XML contents
 	 * @return a reference to this object
 	 */
 	public Nodes wrapInner(String xml) throws XMLException {
 		return wrapInner(new Nodes(owner(), xml));
 	}
-	
+
 	/**
 	 * Wraps an XML structure around the content of each element in the set of current elements.
-	 * 
+	 *
 	 * @param nodes wrapping nodes
 	 * @return a reference to this object
 	 */
 	public Nodes wrapInner(Nodes nodes) {
 		if (nodes == null || nodes.isEmpty()) return this;
 		if (nodes.get(0) == null || nodes.get(0).getNodeType() != Node.ELEMENT_NODE) return this;
-		
+
 		for (Node self : this) {
 			if (self == null) continue;
 			if (self.getNodeType() != Node.ELEMENT_NODE) continue;
-			
+
 			Node root = nodes.get(0);
-			
+
 			Document doc = self.getOwnerDocument();
 			if (doc != null && root.getOwnerDocument() != doc) {
 				root = doc.importNode(root, true);
 			} else {
 				root = root.cloneNode(true);
 			}
-			
+
 			Node leaf = getFirstLeaf(root);
 			while (self.hasChildNodes()) {
 				leaf.appendChild(self.getFirstChild());
@@ -2323,10 +2323,10 @@ public class Nodes extends ArrayList<Node> {
 		}
 		return this;
 	}
-	
+
 	/**
 	 * Wraps an XML structure around all elements in the set of current elements
-	 * 
+	 *
 	 * @param xml wrapping XML contents
 	 * @return a reference to this object.
 	 * @throws XMLException if XML parsing error caused.
@@ -2334,10 +2334,10 @@ public class Nodes extends ArrayList<Node> {
 	public Nodes wrapAll(String xml) throws XMLException {
 		return wrapAll(new Nodes(owner(), xml));
 	}
-	
+
 	/**
 	 * Wraps an XML structure around all elements in the set of current elements
-	 * 
+	 *
 	 * @param nodes wrapping nodes
 	 * @return a reference to this object.
 	 */
@@ -2345,25 +2345,25 @@ public class Nodes extends ArrayList<Node> {
 		if (nodes == null || nodes.isEmpty()) return this;
 		if (nodes.get(0) == null || nodes.get(0).getNodeType() != Node.ELEMENT_NODE) return this;
 		if (isEmpty() || get(0) == null) return this;
-		
+
 		Node root = nodes.get(0);
 		if (root.getParentNode() != null) {
 			root = root.cloneNode(true);
 		}
 		Node leaf = getFirstLeaf(root);
-		
+
 		Node parent = get(0).getParentNode();
 		if (parent == null) return this;
-		
+
 		for (Node self : this) {
 			if (self == null) continue;
-			if (self.getNodeType() != Node.ELEMENT_NODE) continue;	
-			
+			if (self.getNodeType() != Node.ELEMENT_NODE) continue;
+
 			Document doc = leaf.getOwnerDocument();
 			if (doc != null && self.getOwnerDocument() != doc) {
 				self = doc.importNode(self, true);
 			}
-			
+
 			if (root.getParentNode() == null) {
 				leaf.appendChild(parent.replaceChild(root, self));
 			} else {
@@ -2372,10 +2372,10 @@ public class Nodes extends ArrayList<Node> {
 		}
 		return this;
 	}
-	
+
 	/**
 	 * Removes the parents of the set of current elements, leaving the elements in their place.
-	 * 
+	 *
 	 * @return a reference to this object
 	 */
 	public Nodes unwrap() {
@@ -2385,7 +2385,7 @@ public class Nodes extends ArrayList<Node> {
 
 			Node parent = self.getParentNode();
 			if (parent == null) continue;
-			
+
 			Node next = self.getNextSibling();
 			parent.removeChild(self);
 			while (self.hasChildNodes()) {
@@ -2399,39 +2399,39 @@ public class Nodes extends ArrayList<Node> {
 		}
 		return this;
 	}
-	
+
 	/**
-	 * Replace each element in the set of current elements with the provided new content 
+	 * Replace each element in the set of current elements with the provided new content
 	 * and return the set of elements that was removed.
-	 * 
-	 * @param xml replacing XML contents 
+	 *
+	 * @param xml replacing XML contents
 	 * @return a reference to this object
 	 * @throws XMLException if XML parsing error caused.
 	 */
 	public Nodes replaceWith(String xml) throws XMLException {
 		return replaceWith(new Nodes(owner(), xml));
 	}
-	
+
 	/**
-	 * Replace each element in the set of current elements with the provided new content 
+	 * Replace each element in the set of current elements with the provided new content
 	 * and return the set of elements that was removed.
-	 * 
-	 * @param nodes replacing nodes 
+	 *
+	 * @param nodes replacing nodes
 	 * @return a reference to this object
-	 */	
+	 */
 	public Nodes replaceWith(Nodes nodes) {
 		if (nodes == null) return this;
-		
+
 		for (Node self : this) {
 			if (self == null) continue;
 			if (self.getNodeType() != Node.ELEMENT_NODE) continue;
-			
+
 			Node parent = self.getParentNode();
 			if (parent == null) continue;
-			
+
 			Node next = self.getNextSibling();
 			parent.removeChild(self);
-			
+
 			for (Node node : nodes) {
 				Document doc = parent.getOwnerDocument();
 				if (doc != null && node.getOwnerDocument() != doc) {
@@ -2439,7 +2439,7 @@ public class Nodes extends ArrayList<Node> {
 				} else {
 					if (node.getParentNode() != null) node = node.cloneNode(true);
 				}
-				
+
 				if (next != null) {
 					parent.insertBefore(node, next);
 				} else {
@@ -2449,34 +2449,34 @@ public class Nodes extends ArrayList<Node> {
 		}
 		return this;
 	}
-	
+
 	/**
 	 * Replace each target element with the set of current elements.
-	 * 
+	 *
 	 * @param pattern a pattern
 	 * @return a reference to this object
 	 */
 	public Nodes replaceAll(String pattern) {
 		return replaceAll(owner().find(pattern));
 	}
-	
+
 	/**
 	 * Replace each target element with the set of current elements.
-	 * 
+	 *
 	 * @param nodes replacing nodes
 	 * @return a reference to this object
 	 */
 	public Nodes replaceAll(Nodes nodes) {
 		if (nodes == null) return new Nodes(owner(), this, 0);
-		
+
 		Nodes results = new Nodes(owner(), this, size());
 		for (Node node : nodes) {
 			if (node == null) continue;
 			if (node.getNodeType() != Node.ELEMENT_NODE) continue;
-			
+
 			Node parent = node.getParentNode();
 			if (parent == null) continue;
-			
+
 			Node next = node.getNextSibling();
 			parent.removeChild(node);
 			for (Node self : this) {
@@ -2497,46 +2497,46 @@ public class Nodes extends ArrayList<Node> {
 		unique(results);
 		return results;
 	}
-	
+
 	/**
 	 * Removes all child nodes of the set of current nodes.
-	 * 
+	 *
 	 * @return a reference to this object
 	 */
 	public Nodes empty() {
 		for (Node self : this) {
 			if (self == null) continue;
-			if (self.getNodeType() != Node.ELEMENT_NODE 
+			if (self.getNodeType() != Node.ELEMENT_NODE
 					&& self.getNodeType() != Node.DOCUMENT_NODE) continue;
-			
+
 			while (self.hasChildNodes()) {
 				self.removeChild(self.getLastChild());
 			}
 		}
 		return this;
 	}
-	
+
 	/**
 	 * Removes the set of current nodes.
-	 * 
+	 *
 	 * @return a reference to this object
 	 */
 	public Nodes remove() {
 		for (Node self : this) {
 			if (self == null) continue;
 			if (self.getNodeType() != Node.ELEMENT_NODE) continue;
-			
+
 			Node parent = self.getParentNode();
 			if (parent == null) continue;
-			
+
 			parent.removeChild(self);
 		}
 		return this;
 	}
-	
+
 	/**
 	 * Removes the filtered set of current nodes.
-	 * 
+	 *
 	 * @param pattern a pattern
 	 * @return a reference to this object
 	 */
@@ -2544,24 +2544,24 @@ public class Nodes extends ArrayList<Node> {
 		if (pattern == null || pattern.isEmpty() || isEmpty()) {
 			return this;
 		}
-		
+
 		Object expr = owner().compileXPath(pattern, true);
 		for (Node self : this) {
 			if (self == null) continue;
 			if (self.getNodeType() != Node.ELEMENT_NODE) continue;
-			
+
 			NodeList nodes = owner().evaluate(expr, self, NodeList.class);
 			for (int i = 0; i < nodes.getLength(); i++) {
 				Node node = nodes.item(i);
 				Node parent = node.getParentNode();
 				if (parent == null) continue;
-				
+
 				parent.removeChild(node);
 			}
 		}
 		return this;
 	}
-	
+
 	@Override
 	public Nodes clone() {
 		Nodes clone = new Nodes(owner(), back, size());
@@ -2570,18 +2570,18 @@ public class Nodes extends ArrayList<Node> {
 		}
 		return clone;
 	}
-	
+
 	/**
 	 * Get a XML text for the children of the first node.
-	 * 
+	 *
 	 * @return a XML text for the children of the first node
 	 */
 	public String xml() {
 		if (isEmpty()) return "";
-		
+
 		NodeList nodes = get(0).getChildNodes();
 		if (nodes.getLength() == 0) return "";
-		
+
 		XMLWriter writer = new XMLWriter();
 		writer.setShowXMLDeclaration(false);
 		StringWriter out = new StringWriter();
@@ -2594,10 +2594,10 @@ public class Nodes extends ArrayList<Node> {
 		}
 		return out.toString();
 	}
-	
+
 	/**
 	 * Sets the XML contents of each element in the set of current nodes.
-	 * 
+	 *
 	 * @param xml a XML contents
 	 * @return a reference of this object
 	 */
@@ -2605,31 +2605,31 @@ public class Nodes extends ArrayList<Node> {
 		empty().append(xml);
 		return this;
 	}
-	
+
 	/**
 	 * Gets a concatenated text of current nodes.
-	 * 
+	 *
 	 * @return a concatenated text of current nodes
 	 */
 	public String text() {
 		if (isEmpty()) return "";
-		
+
 		StringBuilder sb = new StringBuilder();
 		for (Node self : this) {
 			if (self instanceof Document) {
 				self = ((Document)self).getDocumentElement();
 			}
-			
+
 			if (self instanceof Element) {
 				sb.append(self.getTextContent());
 			}
 		}
 		return sb.toString();
 	}
-	
+
 	/**
 	 * Sets the text contents of each element in the set of current nodes.
-	 * 
+	 *
 	 * @param text a text contents
 	 * @return a reference of this object
 	 */
@@ -2639,24 +2639,24 @@ public class Nodes extends ArrayList<Node> {
 		}
 		return this;
 	}
-	
+
 	/**
 	 * Gets the XPath full path.
-	 * 
+	 *
 	 * @return the XPath full path
 	 */
 	public String xpath() {
 		if (isEmpty() || get(0) == null) {
 			return "";
 		}
-		
+
 		List<Node> list = new ArrayList<Node>();
 		Node current = get(0);
 		while (current != null && current instanceof Element) {
 			list.add(current);
 			current = current.getParentNode();
 		}
-		
+
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < list.size(); i++) {
 			Node node = list.get(list.size()-i-1);
@@ -2664,18 +2664,18 @@ public class Nodes extends ArrayList<Node> {
 		}
 		return sb.toString();
 	}
-	
+
 	/**
 	 * Normalizes the set of current nodes.
 	 * This method executes below two action:
-	 * - executes {@link org.w3c.dom.Node#normalize()}. 
+	 * - executes {@link org.w3c.dom.Node#normalize()}.
 	 * - removes waste namespace declarations.
-	 * 
+	 *
 	 * @return a reference to this object
 	 */
 	public Nodes normalize() {
 		if (isEmpty()) return this;
-		
+
 		Object expr = owner().compileXPath("//namespace::*", false);
 		for (Node self : this) {
 			NodeList list = owner().evaluate(expr, self, NodeList.class);
@@ -2683,10 +2683,10 @@ public class Nodes extends ArrayList<Node> {
 				Node ns = list.item(i);
 				if (XMLConstants.XML_NS_URI.equals(ns.getNodeValue())) continue;
 				if (XMLConstants.XMLNS_ATTRIBUTE_NS_URI.equals(ns.getNodeValue())) continue;
-				
+
 				Node parent = ns.getParentNode();
 				if (!(parent instanceof Element)) continue;
-				
+
 				expr = owner().compileXPath("//*[namespace-uri()='" + ns.getNodeValue() + "' or @*[namespace-uri()='" + ns.getNodeValue() + "']]", false);
 				if (!owner().evaluate(expr, parent, boolean.class)) {
 					if (ns.getNodeName() != null && !ns.getNodeName().isEmpty()) {
@@ -2700,66 +2700,66 @@ public class Nodes extends ArrayList<Node> {
 		}
 		return this;
 	}
-	
+
 	/**
 	 * Reverses the order of the current nodes.
 	 */
 	public void reverse() {
 		Collections.reverse(this);
 	}
-	
+
 	/**
 	 * Store arbitrary data associated with the matched elements.
-	 * 
+	 *
 	 * @param name access key.
 	 * @param value the associated data.
 	 * @return a reference to this object
 	 */
 	public Nodes data(String name, Object value) {
 		if (name == null) throw new NullPointerException("name must not be null.");
-		
+
 		for (Node self : this) {
 			owner().xmlContext.addData(self, name, value);
 		}
-		
+
 		return this;
 	}
-	
+
 	/**
 	 * Get data associated with the matched elements.
-	 * 
+	 *
 	 * @param name access key.
 	 * @return the associated data for name.
 	 */
 	public Object data(String name) {
 		if (name == null) throw new NullPointerException("name must not be null.");
 		if (isEmpty()) return null;
-		
+
 		return owner().xmlContext.getData(get(0), name);
 	}
-	
+
 	public Nodes removeData(String name) {
 		if (name == null) throw new NullPointerException("name must not be null.");
-		
+
 		for (Node self : this) {
 			owner().xmlContext.removeData(self, name);
 		}
-		
+
 		return this;
 	}
-	
+
 	/**
 	 * Determines whether any of the current elements are assigned the given class.
-	 * 
+	 *
 	 * @param classes determining classes
 	 * @return true if any of the current elements are assigned the given class
 	 */
 	public boolean hasClass(String classes) {
 		if (classes == null || classes.isEmpty()) return false;
-		
+
 		String target = attr("class");
 		if (target == null || target.isEmpty()) return false;
-		
+
 		int start = 0;
 		for (int i = 0; i < classes.length(); i++) {
 			char c = classes.charAt(i);
@@ -2788,42 +2788,42 @@ public class Nodes extends ArrayList<Node> {
 		}
 		return true;
 	}
-	
+
 	/**
 	 * Adds the specified classes to each of the set of current elements.
-	 * 
+	 *
 	 * @param classes adding classes
 	 * @return a reference to this object
 	 */
 	public Nodes addClass(String classes) {
 		return toggleClassInternal(classes, true);
 	}
-	
+
 	/**
 	 * Removes classes from each element in the set of current elements
-	 * 
+	 *
 	 * @param classes removing classes
 	 * @return a reference to this object
-	 */	
+	 */
 	public Nodes removeClass(String classes) {
 		return toggleClassInternal(classes, false);
 	}
-	
+
 	/**
 	 * Toggles classes from each element in the set of current elements
-	 * 
+	 *
 	 * @param classes toggling classes
 	 * @return a reference to this object
-	 */	
+	 */
 	public Nodes toggleClass(String classes, boolean toggle) {
 		return toggleClassInternal(classes, toggle);
 	}
-	
+
 	private Nodes toggleClassInternal(String classes, Boolean toggle) {
 		if (classes == null || classes.isEmpty()) return this;
-		
+
 		Set<String> set = new LinkedHashSet<String>();
-		
+
 		String target = attr("class");
 		int start = 0;
 		if (target != null) {
@@ -2838,7 +2838,7 @@ public class Nodes extends ArrayList<Node> {
 				}
 			}
 		}
-		
+
 		start = 0;
 		for (int i = 0; i < classes.length(); i++) {
 			char c = classes.charAt(i);
@@ -2874,19 +2874,19 @@ public class Nodes extends ArrayList<Node> {
 		}
 		return this;
 	}
-	
+
 	/**
 	 * Gets the value of a css property in a style attribute for the first element in the set of current elements.
-	 * 
+	 *
 	 * @param name css property name
 	 * @return css property value
 	 */
 	public String css(String name) {
 		if (name == null) throw new NullPointerException("name must not be null.");
-		
+
 		String style = attr("style");
 		if (style == null || style.isEmpty()) return null;
-		
+
 		Matcher m = STYLE_PATTERN.matcher(style);
 		while (m.find()) {
 			if (name.equalsIgnoreCase(m.group(1))) {
@@ -2895,33 +2895,33 @@ public class Nodes extends ArrayList<Node> {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Sets the value of a css property to a style attribute for each element in the set of current elements.
-	 * 
+	 *
 	 * @param name css property name
 	 * @return a reference to this object
 	 */
 	public Nodes css(String name, String value) {
 		if (name == null) throw new NullPointerException("name must not be null.");
-		
+
 		String style = attr("style");
 		if (style != null && !style.isEmpty()) {
 			Map<String, String> map = new LinkedHashMap<String, String>();
-			
+
 			Matcher m = STYLE_PATTERN.matcher(style);
 			while (m.find()) {
 				if (m.group(1) == null || m.group(1).isEmpty()) continue;
-				
+
 				String cname = m.group(1).toLowerCase();
 				String cvalue = (m.group(2) != null && !m.group(2).isEmpty()) ? m.group(2) : null;
 				map.put(cname, cvalue);
 			}
-			
+
 			name = name.toLowerCase();
 			value = (value != null && !value.isEmpty()) ? value : null;
 			map.put(name, value);
-			
+
 			StringBuilder sb = new StringBuilder();
 			for (Map.Entry<String, String> entry : map.entrySet()) {
 				if (entry.getValue() == null) continue;
@@ -2943,10 +2943,10 @@ public class Nodes extends ArrayList<Node> {
 		}
 		return this;
 	}
-	
+
 	/**
 	 * Sets the css properties to a style attribute for each element in the set of current elements.
-	 * 
+	 *
 	 * @param props css properties
 	 * @return a reference to this object
 	 */
@@ -2959,21 +2959,21 @@ public class Nodes extends ArrayList<Node> {
 			Matcher m = STYLE_PATTERN.matcher(style);
 			while (m.find()) {
 				if (m.group(1) == null || m.group(1).isEmpty()) continue;
-				
+
 				String cname = m.group(1).toLowerCase();
 				String cvalue = (m.group(2) != null && !m.group(2).isEmpty()) ? m.group(2) : null;
 				map.put(cname, cvalue);
 			}
-			
+
 			for (Map.Entry<String, String> entry : props.entrySet()) {
 				if (entry.getKey() == null || entry.getKey().isEmpty()) continue;
-				
+
 				String name = entry.getKey().toLowerCase();
 				String value = (entry.getValue() != null && !entry.getValue().isEmpty()) ? entry.getValue() : null;
 				map.put(name, value);
 			}
 
-			
+
 			StringBuilder sb = new StringBuilder();
 			for (Map.Entry<String, String> entry : map.entrySet()) {
 				if (entry.getValue() == null) continue;
@@ -2995,23 +2995,23 @@ public class Nodes extends ArrayList<Node> {
 			}
 			attr("style", sb.toString());
 		}
-		
+
 		return this;
 	}
-	
+
 	/**
 	 * Gets count of current nodes.
-	 * 
+	 *
 	 * @return count of current nodes
 	 */
 	public int getLength() {
 		return size();
 	}
-	
+
 	@Override
 	public String toString() {
 		if (isEmpty()) return "";
-		
+
 		XMLWriter serializer = new XMLWriter();
 		serializer.setShowXMLDeclaration(false);
 		StringWriter writer = new StringWriter();
@@ -3024,23 +3024,23 @@ public class Nodes extends ArrayList<Node> {
 		}
 		return writer.toString();
 	}
-	
+
 	boolean isExternalNode(Node node) {
 		if (node == null) return false;
 		if (node instanceof Document) return false;
 		if (node.getOwnerDocument() == owner().doc) return false;
-		
+
 		return true;
 	}
-	
+
 	static Node getFirstLeaf(Node node) {
 		if (!node.hasChildNodes()) return node;
-		
+
 		NodeList children = node.getChildNodes();
 		for (int i = 0; i < children.getLength(); i++) {
 			Node child = children.item(i);
 			if (child == null) continue;
-			
+
 			if (child.hasChildNodes()) {
 				return getFirstLeaf(child);
 			} else {
@@ -3049,24 +3049,34 @@ public class Nodes extends ArrayList<Node> {
 		}
 		return null;
 	}
-	
-	static void unique(final Nodes nodes) {
-		if (nodes.size() < 2) return;
-		
-		Collections.sort(nodes, new Comparator<Node>() {
+
+	/**
+	 * Sorts this list using the supplied Comparator to compare elements.
+	 *
+	 * @param c the Comparator used to compare list elements.
+	 */
+	public void sort(Comparator<? super Node> c) {
+		Collections.sort(this, c);
+	}
+
+	/**
+	 * Sorts this list.
+	 */
+	public void sort() {
+		Collections.sort(this, new Comparator<Node>() {
 			@Override
 			public int compare(Node a, Node b) {
 				if (a == b) return 0;
 				if (a == null) return -1;
 				if (b == null) return 1;
-				
+
 				short compare = a.compareDocumentPosition(b);
 				if (compare != 0) {
 					if ((compare & Node.DOCUMENT_POSITION_DISCONNECTED) != 0) {
-						if (a instanceof Document || contains(nodes.owner().doc, a)) {
+						if (a instanceof Document || contains(owner().doc, a)) {
 							return -1;
 						}
-						if (b instanceof Document || contains(nodes.owner().doc, b)) {
+						if (b instanceof Document || contains(owner().doc, b)) {
 							return 1;
 						}
 						return 0;
@@ -3076,7 +3086,13 @@ public class Nodes extends ArrayList<Node> {
 				return 0;
 			}
 		});
-		
+	}
+
+	static void unique(final Nodes nodes) {
+		if (nodes.size() < 2) return;
+
+		nodes.sort();
+
 		int dis = 0;
 		for (int i = 0; i < nodes.size(); i++) {
 			Node current = nodes.get(i);
@@ -3090,13 +3106,13 @@ public class Nodes extends ArrayList<Node> {
 			nodes.remove(nodes.size() - 1);
 		}
 	}
-	
+
 	static boolean contains(Node a, Node b) {
 		Node bup = (b != null) ? b.getParentNode() : null;
-		return (a == bup || (bup != null && bup instanceof Element 
+		return (a == bup || (bup != null && bup instanceof Element
 				&& (a.compareDocumentPosition(bup) & Node.DOCUMENT_POSITION_CONTAINED_BY) != 0));
 	}
-	
+
 	static int toFilter(MatchType type) {
 		switch (type) {
 		case DOCUMENT_NODE:
@@ -3114,6 +3130,6 @@ public class Nodes extends ArrayList<Node> {
 			return NodeFilter.SHOW_PROCESSING_INSTRUCTION;
 		default:
 			return NodeFilter.SHOW_ALL;
-		}		
+		}
 	}
 }
