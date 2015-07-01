@@ -674,3 +674,5 @@ XMLIC は、Apache License, Version 2.0下で配布します。
 ### 2013/7/16 version 0.8.0
 
 - XMLIC 最初のリリースとなります。元となる仕様が jQuery API ですので大きな変更は予定していませんが、1.0 までは不具合、要望など積極的に取り入れたいと思いますので、ご要望あれば是非。
+
+Copyright (c) 2013 Hidekatsu Izuno Licensed under the [Apache License 2.0](LICENSE.txt).
