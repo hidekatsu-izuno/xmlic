@@ -618,6 +618,11 @@ XMLIC は、Apache License, Version 2.0下で配布します。
 
 ## リリースノート
 
+### 2015/7/4 version 1.0.3
+
+- すでに root 要素が存在してる XML オブジェクトに root メソッドで要素を設定するとエラーが発生する問題を修正しました。
+- Nods クラスに JavaScript 互換の sort() メソッドを追加しました。
+
 ### 2014/3/1 version 1.0.2
 
 - Nodes クラスに JavaScript 互換の reverse() メソッドを追加しました。
