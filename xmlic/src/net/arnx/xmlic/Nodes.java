@@ -22,10 +22,6 @@ import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
-import net.arnx.xmlic.internal.util.NodeMatcher;
-import net.arnx.xmlic.internal.util.NodeMatcher.MatchType;
-import net.arnx.xmlic.internal.util.StatusImpl;
-
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -35,6 +31,10 @@ import org.w3c.dom.NodeList;
 import org.w3c.dom.traversal.DocumentTraversal;
 import org.w3c.dom.traversal.NodeFilter;
 import org.w3c.dom.traversal.NodeIterator;
+
+import net.arnx.xmlic.internal.util.NodeMatcher;
+import net.arnx.xmlic.internal.util.NodeMatcher.MatchType;
+import net.arnx.xmlic.internal.util.StatusImpl;
 
 /**
  * A list of org.w3c.dom.Node, have traversal and manipulation API (like jQuery).

@@ -596,7 +596,7 @@ public class NamespaceNode implements Node
     
     
         /**
-         * @see NodeList#current
+         * @see NodeList#item
          */
         public Node item(int index)
         {

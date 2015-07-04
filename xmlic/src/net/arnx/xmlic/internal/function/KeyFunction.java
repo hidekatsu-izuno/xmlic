@@ -25,25 +25,24 @@ public class KeyFunction implements Function {
 		} else if (!(args.get(0) instanceof String)) {
 			throw new FunctionCallException("invalid argument: key(string, node)");
 		}
-		
+
 		XmlicContext xcontext;
 		try {
 			xcontext = (XmlicContext)context.getVariableValue(null, null, XmlicContext.VARIABLE_NAME);
 		} catch (UnresolvableException e) {
 			throw new FunctionCallException(e);
 		}
-		
+
 		Navigator nav = context.getNavigator();
 		Object doc = nav.getDocumentNode(xcontext.getCurrentNode());
-		
+
 		Key key = xcontext.getKey((String)args.get(0));
 		String value = StringFunction.evaluate(args.get(1), nav);
 		if (value == null) {
 			return Collections.EMPTY_LIST;
 		}
-		
+
 		try {
-			
 			List result = new XmlicXPath(xcontext, key.match, true).selectNodes(doc);
 			XPath use = new XmlicXPath(xcontext, key.use, false);
 			Iterator i = result.iterator();

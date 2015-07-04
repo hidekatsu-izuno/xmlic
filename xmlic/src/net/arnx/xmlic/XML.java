@@ -22,11 +22,6 @@ import java.util.regex.Pattern;
 
 import javax.xml.XMLConstants;
 
-import net.arnx.xmlic.internal.org.jaxen.XPath;
-import net.arnx.xmlic.internal.util.NodeMatcher;
-import net.arnx.xmlic.internal.util.XmlicContext;
-import net.arnx.xmlic.internal.util.XmlicContext.Key;
-
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -35,14 +30,19 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.dom.ProcessingInstruction;
 
+import net.arnx.xmlic.internal.org.jaxen.XPath;
+import net.arnx.xmlic.internal.util.NodeMatcher;
+import net.arnx.xmlic.internal.util.XmlicContext;
+import net.arnx.xmlic.internal.util.XmlicContext.Key;
+
 /**
  * XML class is for managing XML Document and namespace settings.
  */
 public class XML implements Serializable {
 	private static final long serialVersionUID = 1L;
-	
+
 	private static final String[] ESCAPE_CHARS = new String[128];
-	
+
 	static {
 		for (int i = 0; i < 32; i++) {
 			ESCAPE_CHARS[i] = "&#";
@@ -54,10 +54,10 @@ public class XML implements Serializable {
 		ESCAPE_CHARS['"'] = "&quot;";
 		ESCAPE_CHARS[0x7F] = "&#";
 	}
-	
+
 	/**
 	 * Load an XML document from a input file.
-	 * 
+	 *
 	 * @param file a input file.
 	 * @return a new XML instance.
 	 * @throws XMLException if XML parsing error caused.
@@ -65,10 +65,10 @@ public class XML implements Serializable {
 	public static XML load(File file) throws XMLException {
 		return load(file.toURI());
 	}
-	
+
 	/**
 	 * Load an XML document from a URI.
-	 * 
+	 *
 	 * @param uri a URI.
 	 * @return a new XML instance.
 	 * @throws XMLException if XML parsing error caused.
@@ -76,10 +76,10 @@ public class XML implements Serializable {
 	public static XML load(URI uri) throws XMLException {
 		return new XMLLoader().load(uri);
 	}
-	
+
 	/**
 	 * Load an XML document from a URL.
-	 * 
+	 *
 	 * @param url a URL.
 	 * @return a new XML instance.
 	 * @throws XMLException if XML parsing error caused.
@@ -91,10 +91,10 @@ public class XML implements Serializable {
 			throw new IllegalArgumentException(e);
 		}
 	}
-	
+
 	/**
 	 * Load an XML document from a binary input stream.
-	 * 
+	 *
 	 * @param in a binary input stream.
 	 * @return a new XML instance.
 	 * @throws XMLException if XML parsing error caused.
@@ -102,10 +102,10 @@ public class XML implements Serializable {
 	public static XML load(InputStream in) throws XMLException {
 		return new XMLLoader().load(in);
 	}
-	
+
 	/**
 	 * Load an XML document from a character input stream.
-	 * 
+	 *
 	 * @param reader a character input stream.
 	 * @return a new XML instance.
 	 * @throws XMLException if XML parsing error caused.
@@ -113,11 +113,11 @@ public class XML implements Serializable {
 	public static XML load(Reader reader) throws XMLException {
 		return new XMLLoader().load(reader);
 	}
-	
+
 	final Document doc;
 	final XmlicContext xmlContext;
 	final Collection<XMLException.Detail> warnings;
-	
+
 	/**
 	 * Construct a new XML instance by the empty Document.
 	 */
@@ -126,46 +126,46 @@ public class XML implements Serializable {
 		this.doc = XmlicContext.getDocumentBuilder().newDocument();
 		this.warnings = Collections.emptyList();
 	}
-	
+
 	/**
 	 * Construct a new XML instance by parsing the specified text.
-	 * 
+	 *
 	 * @param text an XML text.
 	 * @throws XMLException if XML parsing error caused.
 	 */
 	public XML(String text) throws XMLException {
 		XMLLoader loader = new XMLLoader();
 		XML xml = loader.load(new StringReader(text));
-		
+
 		this.xmlContext = xml.xmlContext;
 		this.doc = xml.doc;
 		this.warnings = xml.warnings;
 	}
-	
+
 	/**
 	 * Construct a new XML instance by the specified {@link org.w3c.dom.Document} instance.
-	 * 
+	 *
 	 * @param doc an instance of Document.
 	 */
 	public XML(Document doc) {
 		this(doc, Collections.<XMLException.Detail>emptyList());
 	}
-	
+
 	XML(Document doc, Collection<XMLException.Detail> warnings) {
 		if (doc == null) throw new NullPointerException("doc must not be null.");
 		if (warnings == null) throw new NullPointerException("warnings must not be null.");
-		
+
 		this.xmlContext = new XmlicContext();
 		this.doc = doc;
 		this.warnings = warnings;
-		
+
 		Element root = doc.getDocumentElement();
 		if (root != null) {
 			NamedNodeMap attrs = root.getAttributes();
 			for (int i = 0; i < attrs.getLength(); i++) {
 				Node node = attrs.item(i);
 				if (!(node instanceof Attr)) continue;
-				
+
 				if (XMLConstants.XMLNS_ATTRIBUTE_NS_URI.equals(node.getNamespaceURI())) {
 					String prefix = node.getPrefix();
 					if (prefix == null || prefix.isEmpty()) {
@@ -178,25 +178,25 @@ public class XML implements Serializable {
 			}
 		}
 	}
-	
+
 	XML(XmlicContext nsContext, Document doc, Collection<XMLException.Detail> warnings) {
 		this.xmlContext = nsContext;
 		this.doc = doc;
 		this.warnings = warnings;
 	}
-	
+
 	/**
 	 * Get the current {@link org.w3c.dom.Document}.
-	 * 
+	 *
 	 * @return the current Document.
 	 */
 	public Document get() {
 		return doc;
 	}
-	
+
 	/**
 	 * Gets the encoding of this document.
-	 * 
+	 *
 	 * @return the encoding
 	 */
 	public String encoding() {
@@ -206,10 +206,10 @@ public class XML implements Serializable {
 		}
 		return encoding;
 	}
-	
+
 	/**
 	 * Adds a namespace mapping for using XPath expression.
-	 * 
+	 *
 	 * @param prefix a namespace prefix
 	 * @param uri a namespace URI
 	 * @return a reference to this object
@@ -218,17 +218,17 @@ public class XML implements Serializable {
 		xmlContext.addNamespace(prefix, uri);
 		return this;
 	}
-	
+
 	/**
 	 * Gets the namespace mapping for a namespace prefix
-	 * 
+	 *
 	 * @param prefix a namespace prefix
-	 * @return the namespace URI for a sprcified prefix 
+	 * @return the namespace URI for a sprcified prefix
 	 */
 	public String getNamespaceMapping(String prefix) {
 		return xmlContext.getNamespaceURI(prefix);
 	}
-	
+
 	public Map<String, String> getNamespaceMappings() {
 		Map<String, String> map = new HashMap<String, String>();
 		for (String prefix : xmlContext.getPrefixes()) {
@@ -236,10 +236,10 @@ public class XML implements Serializable {
 		}
 		return map;
 	}
-	
+
 	/**
 	 * Removes a namespace mapping for using XPath expression.
-	 * 
+	 *
 	 * @param prefix a namespace prefix
 	 * @return a reference to this object
 	 */
@@ -247,20 +247,20 @@ public class XML implements Serializable {
 		xmlContext.removeNamespace(prefix);
 		return this;
 	}
-	
+
 	public XML addKey(String name, String match, String use) {
 		xmlContext.addKey(name, new Key(match, use));
 		return this;
 	}
-	
+
 	public XML removeKey(String name) {
 		xmlContext.removeKey(name);
 		return this;
 	}
-	
+
 	/**
 	 * Gets a Nodes instance that has document node.
-	 * 
+	 *
 	 * @return a Nodes instance that has document node
 	 */
 	public Nodes doc() {
@@ -268,36 +268,41 @@ public class XML implements Serializable {
 		nodes.add(doc);
 		return nodes;
 	}
-	
+
 	/**
 	 * Gets a Nodes instance that has the root element of this document.
-	 * 
+	 *
 	 * @return a Nodes instance that has the root element of this document
 	 */
 	public Nodes root() {
-		Nodes nodes = new Nodes(this, doc(), 1);
-		nodes.add(doc.getDocumentElement());
-		return nodes;
+		Element elem = doc.getDocumentElement();
+		if (elem != null) {
+			Nodes nodes = new Nodes(this, doc(), 1);
+			nodes.add(elem);
+			return nodes;
+		} else {
+			return new Nodes(this, doc(), 0);
+		}
 	}
-	
+
 	/**
 	 * Sets the root element of this document.
-	 * 
+	 *
 	 * @return a Nodes instance that has the root element of this document
 	 */
 	public Nodes root(Nodes nodes) {
 		if (nodes == null || nodes.isEmpty()) {
 			return doc().empty();
 		} else {
-			return doc().append(nodes);
+			return doc().empty().append(nodes);
 		}
 	}
-	
+
 	/**
 	 * Evaluate a specified XPath expression at this document.
 	 * And gets as a specified type.
-	 * This method is same to doc().evaluate(xpath, cls). 
-	 * 
+	 * This method is same to doc().evaluate(xpath, cls).
+	 *
 	 * @param xpath a XPath expression
 	 * @param cls a result type
 	 * @return a result value.
@@ -305,53 +310,53 @@ public class XML implements Serializable {
 	public <T> T evaluate(String xpath, Class<T> cls) {
 		return doc().evaluate(xpath, cls);
 	}
-	
+
 	/**
 	 * Selects nodes by a specified XPath expression.
-	 * This method is same to doc().select(xpath). 
-	 * 
+	 * This method is same to doc().select(xpath).
+	 *
 	 * @param xpath a XPath expression
 	 * @return a set of nodes
 	 */
 	public Nodes select(String xpath) {
 		return doc().select(xpath);
 	}
-	
+
 	/**
 	 * Finds elements matched a specified XPath pattern.
-	 * This method is same to doc().find(pattern). 
-	 * 
+	 * This method is same to doc().find(pattern).
+	 *
 	 * @param pattern a XPath pattern
 	 * @return a set of elements
 	 */
 	public Nodes find(String pattern) {
 		return doc().find(pattern);
 	}
-	
+
 	/**
 	 * Gets the set of child nodes for current document.
-	 * This method is same to doc().contents(). 
-	 * 
+	 * This method is same to doc().contents().
+	 *
 	 * @return the set of child nodes
 	 */
 	public Nodes contents() {
 		return doc().contents();
 	}
-	
+
 	/**
 	 * Gets the filtered set of child nodes for current document.
-	 * This method is same to doc().contents(pattern). 
-	 * 
+	 * This method is same to doc().contents(pattern).
+	 *
 	 * @return the filtered set of child nodes
 	 */
 	public Nodes contents(String pattern) {
 		return doc().contents(pattern);
 	}
-	
+
 	/**
 	 * Traverses all nodes that matched a specified pattern.
-	 * This method is same to doc().traverse(pattern, func). 
-	 * 
+	 * This method is same to doc().traverse(pattern, func).
+	 *
 	 * @param pattern a pattern
 	 * @param func a visitor function
 	 * @return a Nodes instance that has document node
@@ -359,95 +364,95 @@ public class XML implements Serializable {
 	public Nodes traverse(String pattern, Visitor<Nodes> func) {
 		return doc().traverse(pattern, func);
 	}
-	
+
 	/**
 	 * Removes all child nodes of the set of current nodes.
-	 * This method is same to doc().empty(). 
-	 * 
+	 * This method is same to doc().empty().
+	 *
 	 * @return a Nodes instance that has document node
 	 */
 	public Nodes empty() {
 		return doc().empty();
 	}
-	
+
 	/**
 	 * Removes the filtered set of all nodes.
-	 * This method is same to doc().remove(pattern). 
-	 * 
+	 * This method is same to doc().remove(pattern).
+	 *
 	 * @param pattern a pattern
 	 * @return a Nodes instance that has document node
 	 */
 	public Nodes remove(String pattern) {
 		return doc().remove(pattern);
 	}
-	
+
 	/**
 	 * Gets a concatenated text of this document.
-	 * This method is same to doc().text(). 
-	 * 
+	 * This method is same to doc().text().
+	 *
 	 * @return a concatenated text of this document.
 	 */
 	public String text() {
 		return doc().text();
 	}
-	
+
 	/**
 	 * Get a XML text for this document.
-	 * This method is same to doc().xml(). 
-	 * 
+	 * This method is same to doc().xml().
+	 *
 	 * @return a XML text for this document
 	 */
 	public String xml() {
 		return doc().xml();
 	}
-	
+
 	/**
 	 * Sets the XML contents of this document.
-	 * 
+	 *
 	 * @param xml a XML contents
 	 * @return a Nodes instance that has document node
 	 */
 	public Nodes xml(String xml) {
 		return doc().xml(xml);
 	}
-	
+
 	/**
 	 * Normalizes this document.
 	 * This method executes below two action:
-	 * - executes {@link org.w3c.dom.Document#normalize()}. 
+	 * - executes {@link org.w3c.dom.Document#normalize()}.
 	 * - removes waste namespace declarations.
-	 * 
+	 *
 	 * @return a Nodes instance that has document node
 	 */
 	public Nodes normalize() {
 		return doc().normalize();
 	}
-	
+
 	@Override
 	public XML clone() {
 		return new XML(xmlContext, (Document)doc.cloneNode(true), warnings);
 	}
-	
+
 	static final Pattern ATTR_PATTERN = Pattern.compile("\\G[ \\t\\r\\n]*([^ \\t\\r\\n=]+)[ \\t\\r\\n]*=[ \\t\\r\\n]*(?:\"([^\"]+)\"|'([^'])')[ \\t\\r\\n]*");
-	
+
 	/**
 	 * Gets a XSLT template transformer from a associated stylesheet.
-	 * 
+	 *
 	 * @return a XSLT template transformer. null if not exists.
-	 * @throws XSLTException if XSLT load error caused. 
+	 * @throws XSLTException if XSLT load error caused.
 	 */
 	public XSLT stylesheet() throws XMLException {
 		String target = null;
-		
+
 		NodeList list = doc.getChildNodes();
 		for (int i = 0; i < list.getLength(); i++) {
 			Node node = list.item(i);
 			if (node.getNodeType() == Node.ELEMENT_NODE) break;
 			if (node.getNodeType() != Node.PROCESSING_INSTRUCTION_NODE) continue;
-			
+
 			ProcessingInstruction pi = (ProcessingInstruction)node;
 			if (!"xml-stylesheet".equals(pi.getTarget()) || pi.getData() == null) continue;
-			
+
 			Matcher m = ATTR_PATTERN.matcher(pi.getData());
 			boolean valid = true;
 			String type = null;
@@ -469,12 +474,12 @@ public class XML implements Serializable {
 					break;
 				}
 			}
-			
+
 			if (valid && "text/xsl".equals(type) && href != null) {
 				target = href;
 			}
 		}
-		
+
 		if (target != null) {
 			try {
 				URI uri = new URI(target);
@@ -493,37 +498,37 @@ public class XML implements Serializable {
 			return null;
 		}
 	}
-	
+
 	/**
 	 * Writes to a file in UTF-8. This method close the stream.
-	 * 
+	 *
 	 * @param file a file
 	 * @throws IOException if I/O Error occurred
 	 */
 	public void writeTo(File file) throws IOException {
 		writeTo(new FileOutputStream(file));
 	}
-	
+
 	/**
 	 * Writes to a binary stream in UTF-8. This method close the stream.
-	 * 
+	 *
 	 * @param out a binary stream
 	 * @throws IOException if I/O Error occurred
 	 */
 	public void writeTo(OutputStream out) throws IOException {
 		XMLWriter serializer = new XMLWriter();
 		serializer.setEncoding("UTF-8");
-	
+
 		try {
 			serializer.writeTo(out, this);
 		} finally {
 			out.close();
 		}
 	}
-	
+
 	/**
 	 * Writes to a character stream. This method close the stream.
-	 * 
+	 *
 	 * @param writer a character stream
 	 * @throws IOException if I/O Error occurred
 	 */
@@ -535,7 +540,7 @@ public class XML implements Serializable {
 			writer.close();
 		}
 	}
-	
+
 	NodeMatcher compileXPathPattern(String text) {
 		return xmlContext.compileXPathPattern(text);
 	}
@@ -543,11 +548,11 @@ public class XML implements Serializable {
 	Object compileXPath(String text, boolean pattern) {
 		return xmlContext.compileXPath(text, pattern);
 	}
-	
+
 	<T> T evaluate(Object expr, Node node, Class<T> cls) {
 		return xmlContext.evaluate(this, (XPath)expr, node, cls);
 	}
-	
+
 	@Override
 	public String toString() {
 		XMLWriter xwriter = new XMLWriter();
@@ -566,10 +571,10 @@ public class XML implements Serializable {
 		}
 		return writer.toString();
 	}
-	
+
 	/**
 	 * Escapes text for XML contents.
-	 * 
+	 *
 	 * @param text a text
 	 * @return a escaped text
 	 */
@@ -595,17 +600,17 @@ public class XML implements Serializable {
 		}
 		return text;
 	}
-	
+
 	/**
 	 * Unescapes text for plain text.
-	 * 
+	 *
 	 * @param text a escaped text
 	 * @return a text
 	 */
 	public static String unescape(String text) {
 		StringBuilder sb = null;
 		int start = 0;
-		
+
 		// 0 & 1 a 2 m 3 p 4
 		// 0 & 1 a 2 p 5 o 6 s 7
 		// 0 & 1 l 8 t 9
