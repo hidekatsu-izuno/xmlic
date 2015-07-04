@@ -532,6 +532,7 @@ public class Nodes extends ArrayList<Node> {
 	 * Gets a attribute value of the first element.
 	 *
 	 * @param name a name
+	 * @param value a new attribute value
 	 * @return a attribute value of the first element
 	 */
 	public Nodes attr(String name, String value) {
@@ -1088,6 +1089,7 @@ public class Nodes extends ArrayList<Node> {
 	/**
 	 * Adds the previous set of nodes that filtered by a specified pattern.
 	 *
+	 * @param pattern a pattern
 	 * @return a reference to this object
 	 */
 	public Nodes addBack(String pattern) {
@@ -1126,6 +1128,7 @@ public class Nodes extends ArrayList<Node> {
 	 * Evaluate a specified XPath expression at a first node of current nodes.
 	 * And gets as a specified type.
 	 *
+	 * @param <T> a result type parameter
 	 * @param xpath a XPath expression
 	 * @param cls a result type
 	 * @return a result value.
@@ -1618,6 +1621,7 @@ public class Nodes extends ArrayList<Node> {
 	/**
 	 * Gets the filtered set of the previous element for current nodes.
 	 *
+	 * @param pattern a pattern
 	 * @return the filtered set of the previous element
 	 */
 	public Nodes prev(String pattern) {
@@ -1646,6 +1650,7 @@ public class Nodes extends ArrayList<Node> {
 	/**
 	 * Gets the filtered set of the all previous elements for current nodes.
 	 *
+	 * @param pattern a pattern
 	 * @return the filtered set of the all previous elements
 	 */
 	public Nodes prevAll(String pattern) {
@@ -2813,6 +2818,7 @@ public class Nodes extends ArrayList<Node> {
 	 * Toggles classes from each element in the set of current elements
 	 *
 	 * @param classes toggling classes
+	 * @param toggle a boolean value to determine whether the class should be added or removed
 	 * @return a reference to this object
 	 */
 	public Nodes toggleClass(String classes, boolean toggle) {
@@ -2900,6 +2906,7 @@ public class Nodes extends ArrayList<Node> {
 	 * Sets the value of a css property to a style attribute for each element in the set of current elements.
 	 *
 	 * @param name css property name
+	 * @param value a value of css property
 	 * @return a reference to this object
 	 */
 	public Nodes css(String name, String value) {
@@ -3000,6 +3007,41 @@ public class Nodes extends ArrayList<Node> {
 	}
 
 	/**
+	 * Sorts this list.
+	 */
+	public void sort() {
+		Collections.sort(this, new Comparator<Node>() {
+			@Override
+			public int compare(Node a, Node b) {
+				if (a == b) return 0;
+				if (a == null) return -1;
+				if (b == null) return 1;
+
+				short compare = a.compareDocumentPosition(b);
+				if (compare != 0) {
+					if ((compare & Node.DOCUMENT_POSITION_DISCONNECTED) != 0) {
+						if (a instanceof Document || contains(owner().doc, a)) {
+							return -1;
+						}
+						if (b instanceof Document || contains(owner().doc, b)) {
+							return 1;
+						}
+						return 0;
+					}
+					return (compare & Node.DOCUMENT_POSITION_FOLLOWING) != 0 ? -1 : 1;
+				}
+				return 0;
+			}
+
+			boolean contains(Node a, Node b) {
+				Node bup = (b != null) ? b.getParentNode() : null;
+				return (a == bup || (bup != null && bup instanceof Element
+						&& (a.compareDocumentPosition(bup) & Node.DOCUMENT_POSITION_CONTAINED_BY) != 0));
+			}
+		});
+	}
+
+	/**
 	 * Gets count of current nodes.
 	 *
 	 * @return count of current nodes
@@ -3050,44 +3092,6 @@ public class Nodes extends ArrayList<Node> {
 		return null;
 	}
 
-	/**
-	 * Sorts this list using the supplied Comparator to compare elements.
-	 *
-	 * @param c the Comparator used to compare list elements.
-	 */
-	public void sort(Comparator<? super Node> c) {
-		Collections.sort(this, c);
-	}
-
-	/**
-	 * Sorts this list.
-	 */
-	public void sort() {
-		Collections.sort(this, new Comparator<Node>() {
-			@Override
-			public int compare(Node a, Node b) {
-				if (a == b) return 0;
-				if (a == null) return -1;
-				if (b == null) return 1;
-
-				short compare = a.compareDocumentPosition(b);
-				if (compare != 0) {
-					if ((compare & Node.DOCUMENT_POSITION_DISCONNECTED) != 0) {
-						if (a instanceof Document || contains(owner().doc, a)) {
-							return -1;
-						}
-						if (b instanceof Document || contains(owner().doc, b)) {
-							return 1;
-						}
-						return 0;
-					}
-					return (compare & Node.DOCUMENT_POSITION_FOLLOWING) != 0 ? -1 : 1;
-				}
-				return 0;
-			}
-		});
-	}
-
 	static void unique(final Nodes nodes) {
 		if (nodes.size() < 2) return;
 
@@ -3105,12 +3109,6 @@ public class Nodes extends ArrayList<Node> {
 		for (int i = 0; i < dis; i++) {
 			nodes.remove(nodes.size() - 1);
 		}
-	}
-
-	static boolean contains(Node a, Node b) {
-		Node bup = (b != null) ? b.getParentNode() : null;
-		return (a == bup || (bup != null && bup instanceof Element
-				&& (a.compareDocumentPosition(bup) & Node.DOCUMENT_POSITION_CONTAINED_BY) != 0));
 	}
 
 	static int toFilter(MatchType type) {

@@ -11,7 +11,7 @@
 <body>
 <div class="nav">
 <h1 class="logo"><a href="#"><img src="img/xmlic.jpg" alt="XMLIC" width="115" height="34" /></a></h1>
-<div class="bar">version 1.0.2</div>
+<div class="bar">version 1.0.3</div>
 <ul class="menu">
 	<li><a href="#introduction">XMLICとは</a></li>
 	<li><a href="#download">ダウンロード</a></li>
@@ -98,7 +98,7 @@ jQuery が単一の <code>window.document</code> に対して　XMLIC は複数�
 <li><code>XML</code> インスタンス は、<code>Nodes</code> インスタンスの <code>getOwner()</code> メソッドを通じて取得できます。</li>
 <li>書き込みは、 <code>XML</code> インスタンスの <code>writeTo()</code> メソッドを使います。</li>
 </ul>
-<p>XPath は  XSLT 1.0 パターンとして判定されます。そのため、子孫要素の <code>div</code> を捜すために <code>find(".//div")</code> のように記述する必要はなく、 
+<p>XPath は  XSLT 1.0 パターンとして判定されます。そのため、子孫要素の <code>div</code> を捜すために <code>find(".//div")</code> のように記述する必要はなく、
 <code>find("div")</code> と書くことができます。</p>
 
 <h2 id="load">XML 文書の読み込み <span class="sub">- Load</span></h2>
@@ -118,7 +118,7 @@ XML xml = XML.load(new FileReader("test.xml"));
 XML xml = XML.load(new URI("http://..."));
 </pre>
 
-<p>検証を行なう必要があるなど、オプションの指定が必要な場合は、<code>XMLLoader</code> （あるいは <code>DocumentBuilder</code> などを通じて）構築した Document 
+<p>検証を行なう必要があるなど、オプションの指定が必要な場合は、<code>XMLLoader</code> （あるいは <code>DocumentBuilder</code> などを通じて）構築した Document
 オブジェクトを <code>XML</code> クラスのコンストラクタを使ってラップします。</p>
 <pre class="source">
 <span class="comment">// <code>XMLLoader</code> から DOM を構築し、<code>XML</code> クラスでラップします。</span>
@@ -240,7 +240,7 @@ xml.find("div").parents();
 xml.find("div").parent("@class='test'");
 xml.find("div").parents("@class='test'");
 </pre>
-<p>条件に一致する親要素までを取得できる  <code>parentsUntil</code>、自分も含むすべての親要素をから最初に条件に一致した要素を取得できる <code>closest</code> 
+<p>条件に一致する親要素までを取得できる  <code>parentsUntil</code>、自分も含むすべての親要素をから最初に条件に一致した要素を取得できる <code>closest</code>
 も同様に用意されています。</p>
 <pre class="source">
 <span class="comment">//  <code>div</code> 要素を検索し、<code>class="test"</code> を持つ要素までの親要素を取得します。</span>
@@ -308,8 +308,8 @@ xml.find("div").contents("first()");
 </pre>
 
 <h3 id="filter">取得結果の操作<span class="sub"> - filter / not, eq　/ first / last　/ slice</span></h3>
-<p>取得結果をフィルタリングしたい場合は、<code>filter</code> メソッドを使います。<code>filter</code>メソッドには、XPath 
-式によるフィルタと、内部クラスを用いた２種類が用意されています。<code>not</code> メソッドは、<code>filter</code> 
+<p>取得結果をフィルタリングしたい場合は、<code>filter</code> メソッドを使います。<code>filter</code>メソッドには、XPath
+式によるフィルタと、内部クラスを用いた２種類が用意されています。<code>not</code> メソッドは、<code>filter</code>
 とは逆に条件にマッチしないものだけを残します。</p>
 <pre class="source">
 <span class="comment">// <code>div</code> 要素を検索した結果に対し属性でフィルタリングします。</span>
@@ -362,7 +362,7 @@ xml.find("div")
 </pre>
 
 <h3 id="each">取得結果の列挙<span class="sub"> - each</span></h3>
-<p><code>Nodes</code> クラスは、<code>ArrayList&lt;Node&gt;</code> を継承しているため、通常のリストと同様、<code>for</code> 
+<p><code>Nodes</code> クラスは、<code>ArrayList&lt;Node&gt;</code> を継承しているため、通常のリストと同様、<code>for</code>
 文による列挙が可能です。</p>
 <pre class="source">
 <span class="comment">// 取得結果を列挙します。</span>
@@ -420,7 +420,7 @@ xml.find("div").each(new Visitor&lt;Nodes&gt;() {
 </table>
 
 <p>名前空間導入以前の XML における名前やいわゆる タグ名（<code>tagName</code>）は、デフォルト名前空間で修飾された名前として扱われます。</p>
-<p>jQuery には名前の操作機能がありませんが、XMLIC では、名前空間、プレフィックス、ローカル名、修飾された名前それぞれに対し 
+<p>jQuery には名前の操作機能がありませんが、XMLIC では、名前空間、プレフィックス、ローカル名、修飾された名前それぞれに対し
 <code>namespace</code>、<code>prefix</code>、<code>localName</code>、<code>name</code>
 メソッドでアクセスすることができます（複数のノードが含まれる場合は、先頭ノードの情報が返されます）。</p>
 <pre class="source">
@@ -516,8 +516,8 @@ int index = xml.find("div").index(node);
 </div>
 <div style="border: 1px dashed green; background-color: #90ee90; margin: 10px; padding: 1px 3px;">after</div>
 </div>
-<p><code>prepend</code>、<code>append</code>、<code>before</code>、<code>after</code> と 
-<code>prependTo</code>、<code>appendTo</code>、<code>insertBefore</code>、<code>insertAfter</code> 
+<p><code>prepend</code>、<code>append</code>、<code>before</code>、<code>after</code> と
+<code>prependTo</code>、<code>appendTo</code>、<code>insertBefore</code>、<code>insertAfter</code>
 の違いは、前者がオブジェクトの要素群に引数で指定した要素群を加えるのに対し、後者は、引数で指定した要素群にオブジェクトの要素群を加える点にあります（対象が逆になる）。</p>
 <pre class="source">
 <span class="comment">// すべての <code>div</code> 要素に指定した要素を追加します。</span>
@@ -578,7 +578,7 @@ Nodes clone = xml.find("div").clone();
 </pre>
 
 <h3 id="evaluate">ノードの評価<span class="sub"> - evaluate</span></h3>
-<p>XPath では、ノードの選択の他に文字列/数値/真偽値の結果を返す場合があります。XMLIC には、そのような場合にも対応できるように、<code>evaluate</code> 
+<p>XPath では、ノードの選択の他に文字列/数値/真偽値の結果を返す場合があります。XMLIC には、そのような場合にも対応できるように、<code>evaluate</code>
 という汎用の XPath 評価メソッドを用意しています。引数には、 xpath と戻り値の型を指定します。型には、<code>Nodes</code>、<code>NodeList</code>、
 <code>Node</code>、<code>String</code>、<code>Boolean</code> / <code>boolean</code>、各種数値型（<code>Number</code>のサブクラス）
 を指定することができます。 </p>
@@ -589,7 +589,7 @@ if (nodes.evaluate("self::node()[@name='test']", boolean.class)) {
 </pre>
 
 <h3 id="normalize">ノードの正規化<span class="sub"> - normalize</span></h3>
-<p><code>normalize</code> メソッドは、ノードの正規化を行います。具体的には、子要素より下にあるテキストノードを結合してひとつのノードにまとめます。これは、<code>Node</code> クラスの 
+<p><code>normalize</code> メソッドは、ノードの正規化を行います。具体的には、子要素より下にあるテキストノードを結合してひとつのノードにまとめます。これは、<code>Node</code> クラスの
 <code>normalize</code> の動作と同じですが、XMLIC ではこの動作に加え、不用な名前空間宣言の除去も行います。</p>
 <pre class="source">
 nodes.normalize();
@@ -668,7 +668,7 @@ writer.writeTo(new FileOutputStream("test.xml"), xml);
 
 <p>部分的な XML を出力したい場合は、<code>toString</code> でも取得出来ます。</p>
 
-<h2 id="maven">Mavenリポジトリ</h2> 
+<h2 id="maven">Mavenリポジトリ</h2>
 <p>XMLIC は、0.9.1 以降 Maven Central Repository に登録されるようになりました。groupId、artifactIdは次の通りです。</p>
 <pre class="source">
 &lt;groupId&gt;net.arnx&lt;/groupId&gt;
@@ -684,6 +684,12 @@ writer.writeTo(new FileOutputStream("test.xml"), xml);
 <p>バグや要望などは<a href="http://sourceforge.jp/projects/xmlic">XMLIC プロジェクトサイト</a>の<a href="http://sourceforge.jp/projects/xmlic/ticket/">チケット</a>に報告ください。</p>
 
 <h2 id="releasenote">リリースノート</h2>
+
+<h3>2015/7/4 version 1.0.3</h3>
+<ul>
+<li>すでに root 要素が存在してる XML オブジェクトに root メソッドで要素を設定するとエラーが発生する問題を修正しました。</li>
+<li>Nods クラスに JavaScript 互換の sort() メソッドを追加しました。</li>
+</ul>
 
 <h3>2014/3/1 version 1.0.2</h3>
 <ul>

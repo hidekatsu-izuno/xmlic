@@ -220,7 +220,7 @@ public class XML implements Serializable {
 	}
 
 	/**
-	 * Gets the namespace mapping for a namespace prefix
+	 * Gets namespace to a namespace prefix.
 	 *
 	 * @param prefix a namespace prefix
 	 * @return the namespace URI for a sprcified prefix
@@ -229,6 +229,11 @@ public class XML implements Serializable {
 		return xmlContext.getNamespaceURI(prefix);
 	}
 
+	/**
+	 * Gets a mapping of namespace for all namespace prefixes.
+	 *
+	 * @return a mapping of namespace for all namespace prefixes
+	 */
 	public Map<String, String> getNamespaceMappings() {
 		Map<String, String> map = new HashMap<String, String>();
 		for (String prefix : xmlContext.getPrefixes()) {
@@ -238,7 +243,7 @@ public class XML implements Serializable {
 	}
 
 	/**
-	 * Removes a namespace mapping for using XPath expression.
+	 * Removes a mapping of namespace for using XPath expression.
 	 *
 	 * @param prefix a namespace prefix
 	 * @return a reference to this object
@@ -248,11 +253,25 @@ public class XML implements Serializable {
 		return this;
 	}
 
+	/**
+	 * Adds a key definition.
+	 *
+	 * @param name a key name
+	 * @param match a node pattern which the key will be applied
+	 * @param use the value of the key for each of the nodes
+	 * @return a reference to this object
+	 */
 	public XML addKey(String name, String match, String use) {
 		xmlContext.addKey(name, new Key(match, use));
 		return this;
 	}
 
+	/**
+	 * Remove a key definition.
+	 *
+	 * @param name a key name
+	 * @return a reference to this object
+	 */
 	public XML removeKey(String name) {
 		xmlContext.removeKey(name);
 		return this;
@@ -288,6 +307,7 @@ public class XML implements Serializable {
 	/**
 	 * Sets the root element of this document.
 	 *
+	 * @param nodes the root element of this document
 	 * @return a Nodes instance that has the root element of this document
 	 */
 	public Nodes root(Nodes nodes) {
@@ -303,6 +323,7 @@ public class XML implements Serializable {
 	 * And gets as a specified type.
 	 * This method is same to doc().evaluate(xpath, cls).
 	 *
+	 * @param <T> a result type parameter
 	 * @param xpath a XPath expression
 	 * @param cls a result type
 	 * @return a result value.
@@ -347,6 +368,7 @@ public class XML implements Serializable {
 	 * Gets the filtered set of child nodes for current document.
 	 * This method is same to doc().contents(pattern).
 	 *
+	 * @param pattern a pattern
 	 * @return the filtered set of child nodes
 	 */
 	public Nodes contents(String pattern) {
@@ -439,7 +461,7 @@ public class XML implements Serializable {
 	 * Gets a XSLT template transformer from a associated stylesheet.
 	 *
 	 * @return a XSLT template transformer. null if not exists.
-	 * @throws XSLTException if XSLT load error caused.
+	 * @throws XMLException if XSLT load error caused.
 	 */
 	public XSLT stylesheet() throws XMLException {
 		String target = null;
