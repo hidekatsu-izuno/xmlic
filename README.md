@@ -129,18 +129,18 @@ xml.traverse("*", new Visitor<Nodes>() {
 
 主要な XPath 式と findなどで用いるXPath パターンとCSS セレクタの対比表を次に示します。参考にしてください。
 
-|対象          |XPath                                 |XPath パターン                  |CSS セレクタ        |
-|--------------|--------------------------------------|--------------------------------|--------------------|
-|すべての要素  |.//\*                                 |\*                              |\*                  |
-|要素が一致    |.//element                            |element                         |element             |
-|子要素        |.//parent/child                       |parent/child                    |parent > child      |
-|子孫要素      |.//ancestor//descendant               |ancestor//descendant            |ancestor descendant |
-|属性がある    |.//\*[\@name]                         |\*[\@name]                      |[name]              |
-|属性が一致    |.//\*[\@name='value']                 |\@name='value'                  |[name='value']      |
-|n番目の子要素 |.//\*[n] あるいは .//\*[position()=n] |\*[n] あるいは \*[position()=n] |:nth-child(n)       |
-|最初の子要素  |.//\*[1]                              |\*[1]                           |:first-child        |
-|最後の子要素  |.//\*[last()]                         |\*[last()]                      |:last-child         |
-|OR 条件選択   |expr \| ... \| expr                   |expr \| ... \| expr             |expr, ..., expr     |
+|対象          |XPath                                   |XPath パターン                    |CSS セレクタ        |
+|--------------|----------------------------------------|----------------------------------|--------------------|
+|すべての要素  |.//\*                                   |\*                                |\*                  |
+|要素が一致    |.//element                              |element                           |element             |
+|子要素        |.//parent/child                         |parent/child                      |parent > child      |
+|子孫要素      |.//ancestor//descendant                 |ancestor//descendant              |ancestor descendant |
+|属性がある    |.//\*\[@name]                           |\*\[@name]                        |\[name]             |
+|属性が一致    |.//\*\[@name='value']                   |@name='value'                     |\[name='value']     |
+|n番目の子要素 |.//\*\[n] あるいは .//\*\[position()=n] |\*\[n] あるいは \*\[position()=n] |:nth-child(n)       |
+|最初の子要素  |.//\*\[1]                               |\*\[1]                            |:first-child        |
+|最後の子要素  |.//\*\[last()]                          |\*\[last()]                       |:last-child         |
+|OR 条件選択   |expr \| ... \| expr                     |expr \| ... \| expr               |expr, ..., expr     |
 
 jQueryでは #ID の形でID指定を多用しますが、XMLではスキーマにID型が指定されない限り利用できないため、通常の属性同様 @id='ID' と記述します （XPath にも ID 構文は存在しますが、スキーマを使い検証を実施し DOM 内に ID 型であるという情報が設定されている場合に限り、id()='ID' と書くことで検索が可能です）。
 
