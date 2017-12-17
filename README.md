@@ -129,7 +129,7 @@ xml.traverse("*", new Visitor<Nodes>() {
 
 Below is a comparison table of XPath patterns and CSS selectors used for major XPath expressions and find etc. please refer.
 
-|Target          |XPath                                   |XPath パターン                    |CSS セレクタ        |
+|Target          |XPath                                   |XPath Pattern                    |CSS Selector        |
 |--------------|----------------------------------------|----------------------------------|--------------------|
 |All elements  |.//\*                                   |\*                                |\*                  |
 |matches a element |.//element                              |element                           |element             |
