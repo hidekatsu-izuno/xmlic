@@ -65,20 +65,20 @@ uploadArchives {
 			}
 
 			pom.project {
-				name 'jef4j'
+				name 'xmlic'
 				packaging 'jar'
-				description 'JEF charset support for Java'
-				url 'https://github.com/hidekatsu-izuno/jef4j'
+				description 'jQuery like DOM traversal and manipulation API'
+				url 'https://github.com/hidekatsu-izuno/xmlic'
 
 				scm {
-					url 'https://github.com/hidekatsu-izuno/jef4j'
-					connection 'scm:git:git://github.com/hidekatsu-izuno/jef4j.git'
+					url 'https://github.com/hidekatsu-izuno/xmlic'
+					connection 'scm:git:git://github.com/hidekatsu-izuno/xmlic.git'
 				}
 
 				licenses {
 					license {
-						name 'MIT License'
-						url 'http://www.opensource.org/licenses/mit-license.php'
+						name 'The Apache Software License, Version 2.0'
+						url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
 					}
 				}
 
