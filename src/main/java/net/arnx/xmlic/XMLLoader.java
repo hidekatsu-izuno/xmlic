@@ -8,6 +8,7 @@ import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -31,6 +32,7 @@ public class XMLLoader {
 	boolean xincludeAware = true;
 
 	Map<String, Boolean> features = new HashMap<>();
+	Map<String, Object> attrs = new HashMap<>();
 	Map<URI, URI> externalSources = new HashMap<>();
 	
 	public void setValidationg(boolean flag) {
@@ -79,6 +81,58 @@ public class XMLLoader {
 	
 	public boolean isXIncludeAware() {
 		return xincludeAware;
+	}
+
+	public void setAccessExternalDTD(String protocols) {
+		setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, protocols);
+	}
+
+	public String getAccessExternalDTD() {
+		Object value = getAttribute(XMLConstants.ACCESS_EXTERNAL_DTD);
+		if (value instanceof String) {
+			return (String)value;
+		}
+		return null;
+	}
+
+	public void setAccessExternalSchema(String protocols) {
+		setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, protocols);
+	}
+
+	public String getAccessExternalSchema() {
+		Object value = getAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA);
+		if (value instanceof String) {
+			return (String)value;
+		}
+		return null;
+	}
+	
+	public void setAccessExternalStylesheet(String protocols) {
+		setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, protocols);
+	}
+
+	public String getAccessExternalStylesheet() {
+		Object value = getAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET);
+		if (value instanceof String) {
+			return (String)value;
+		}
+		return null;
+	}
+
+	public void setAttribute(String key, Object value) {
+		attrs.put(key, value);
+	}
+
+	public Object getAttribute(String key) {
+		return attrs.get(key);
+	}
+
+	public void setSecureProcessing(boolean flag) {
+		setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, flag);
+	}
+
+	public boolean getSecureProcessing() {
+		return getFeature(XMLConstants.FEATURE_SECURE_PROCESSING);
 	}
 
 	public void setFeature(String key, boolean flag) {
@@ -132,6 +186,10 @@ public class XMLLoader {
 		dbf.setCoalescing(coalescing);
 		dbf.setExpandEntityReferences(expandEntityReferences);
 		dbf.setXIncludeAware(xincludeAware);
+
+		for (Map.Entry<String, Object> entry : attrs.entrySet()) {
+			dbf.setAttribute(entry.getKey(), entry.getValue());
+		}
 
 		for (Map.Entry<String, Boolean> entry : features.entrySet()) {
 			try {
