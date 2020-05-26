@@ -14,7 +14,7 @@ Usage is simple. With jQuery users, you can start using it immediately.
 import net.arnx.xmlic.XML;
 
 // Read test.xml and set the attribute "class =" alert "to div tag.
-XML.load(new File("test.xml"))
+XML.load(Path.of("test.xml"))
     .find("div")
     .attr("class", "alert");
 ```
@@ -34,6 +34,9 @@ XPath is determined as an XSLT 1.0 pattern. Therefore, you do not need to write 
 There are two patterns for loading a XML document. Usually we use load static method of XML class. You can not specify options, but you will not be bothered with normal usage.
 
 ```java
+// Get instance of XML class from file path.
+XML xml = XML.load(Path.of("test.xml"));
+
 // Get instance of XML class from file.
 XML xml = XML.load(new File("test.xml"));
 
@@ -617,6 +620,12 @@ You do not have to worry about incorporating it in your own library, changing th
 In addition, XMLIC has changed jaxen package and shipped. Please follow the license of jaxen for that part (it is a loose license according to Apache license, so special consideration is not necessary).
 
 ## Release note
+
+### 2020/5/26 version 1.1.0
+
+- Change a minimum support version into Java 1.8.
+- Add methods for DocumentBuilderFactory feature settings to XMLLoader.
+- Add methods for a external resource replacement to XMLLoader.
 
 ### 2015/7/4 version 1.0.3
 

@@ -13,6 +13,7 @@ import java.io.Writer;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -53,6 +54,18 @@ public class XML implements Serializable {
 		ESCAPE_CHARS['\''] = "&apos;";
 		ESCAPE_CHARS['"'] = "&quot;";
 		ESCAPE_CHARS[0x7F] = "&#";
+	}
+
+	
+	/**
+	 * Load an XML document from a input file path.
+	 *
+	 * @param path a input file path.
+	 * @return a new XML instance.
+	 * @throws XMLException if XML parsing error caused.
+	 */
+	public static XML load(Path path) throws XMLException {
+		return load(path.toFile());
 	}
 
 	/**

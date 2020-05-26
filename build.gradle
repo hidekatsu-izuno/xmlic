@@ -1,24 +1,28 @@
-apply plugin: 'java'
-apply plugin: 'maven'
-apply plugin: 'signing'
+
+plugins {
+	id 'java-library'
+	id 'maven-publish'
+	id 'signing'
+}
 
 group = 'net.arnx'
 archivesBaseName = 'xmlic'
-version = '1.0.3'
+version = '1.1.0'
 
-sourceCompatibility = 1.6
-targetCompatibility = 1.6
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
 
 repositories {
     jcenter()
 }
 
 dependencies {
-    testCompile 'junit:junit:4.12'
+    testImplementation 'junit:junit:4.12'
 }
 
 compileJava {
 	options.encoding = 'UTF-8'
+	options.debug = true
 }
 
 compileTestJava {
@@ -27,69 +31,77 @@ compileTestJava {
 
 javadoc {
 	options {
-		links 'https://docs.oracle.com/javase/8/docs/api/'
+		links(JavaVersion.current().isJava11Compatible() ? 
+			'https://docs.oracle.com/en/java/javase/11/docs/api' : 
+			'https://docs.oracle.com/javase/8/docs/api/')
 		locale = 'en_US'
 		encoding = 'UTF-8'
 		docEncoding = 'UTF-8'
 		charSet = 'UTF-8'
 		author = true
 	}
+	options.addBooleanOption('html5', JavaVersion.current().isJava9Compatible())
 	exclude '**/internal/**'
 }
 
-task javadocJar(type: Jar) {
-	classifier = 'javadoc'
-	from javadoc
-}
-
 task sourcesJar(type: Jar) {
-	classifier = 'sources'
-	from sourceSets.main.allSource
+    classifier 'sources'
+    from sourceSets.main.allSource
 }
 
-artifacts {
-	archives javadocJar, sourcesJar
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier 'javadoc'
+    from javadoc.destinationDir
 }
 
-signing {
-	sign configurations.archives
-}
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
 
-uploadArchives {
-	repositories {
-		mavenDeployer {
-			beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+            artifact sourcesJar
+            artifact javadocJar
 
-			repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-				authentication(userName: "${sonatypeUsername}", password: "${sonatypePassword}")
-			}
-
-			pom.project {
-				name 'xmlic'
-				packaging 'jar'
-				description 'jQuery like DOM traversal and manipulation API'
-				url 'https://github.com/hidekatsu-izuno/xmlic'
-
-				scm {
-					url 'https://github.com/hidekatsu-izuno/xmlic'
-					connection 'scm:git:git://github.com/hidekatsu-izuno/xmlic.git'
-				}
+            pom {
+				name = 'xmlic'
+				description = 'jQuery like DOM traversal and manipulation API'
+				url = 'https://github.com/hidekatsu-izuno/xmlic'
 
 				licenses {
 					license {
-						name 'The Apache Software License, Version 2.0'
-						url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+						name = 'The Apache Software License, Version 2.0'
+						url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+					}
+				}
+				
+				developers {
+					developer {
+						id = 'hidekatsu.izuno'
+						name = 'Hidekatsu Izuno'
+						email = 'hidekatsu.izuno@gmail.com'
 					}
 				}
 
-				developers {
-					developer {
-						id 'hidekatsu.izuno'
-						name 'Hidekatsu Izuno'
-						email 'hidekatsu.izuno@gmail.com'
-					}
+				scm {
+					url = 'https://github.com/hidekatsu-izuno/xmlic'
+					connection = 'scm:git:git://github.com/hidekatsu-izuno/xmlic.git'
+					developerConnection = 'scm:git:ssh:git@github.com:hidekatsu-izuno/xmlic.git'
 				}
 			}
 		}
 	}
+	
+	repositories {
+		maven {
+			url = "https://oss.sonatype.org/service/local/staging/deploy/maven2"
+			credentials {
+				username = sonatypeUsername
+				password = sonatypePassword
+			}
+		}
+	}
+}
+
+signing {
+	sign publishing.publications.mavenJava
 }

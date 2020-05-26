@@ -5,6 +5,8 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -27,6 +29,9 @@ public class XMLLoader {
 	boolean coalescing = false;
 	boolean expandEntityReferences = true;
 	boolean xincludeAware = true;
+
+	Map<String, Boolean> features = new HashMap<>();
+	Map<URI, URI> externalSources = new HashMap<>();
 	
 	public void setValidationg(boolean flag) {
 		this.validating = flag;
@@ -75,6 +80,34 @@ public class XMLLoader {
 	public boolean isXIncludeAware() {
 		return xincludeAware;
 	}
+
+	public void setFeature(String key, boolean flag) {
+		features.put(key, flag);
+	}
+
+	public boolean getFeature(String key) {
+		Boolean result = features.get(key);
+		if (result != null) {
+			return result;
+		}
+		return false;
+	}
+
+	public void setExternalSource(String systemId, String url) {
+		try {
+			externalSources.put(new URI(systemId), new URI(url));
+		} catch (URISyntaxException e) {
+			throw new IllegalArgumentException(e);
+		}
+	}
+
+	public String getExternalSource(String systemId) {
+		try {
+			return externalSources.get(new URI(systemId)).toASCIIString();
+		} catch (URISyntaxException e) {
+			throw new IllegalArgumentException(e);
+		}
+	}
 	
 	public XML load(URI uri) throws XMLException {
 		return load(new InputSource(uri.normalize().toASCIIString()));
@@ -99,6 +132,14 @@ public class XMLLoader {
 		dbf.setCoalescing(coalescing);
 		dbf.setExpandEntityReferences(expandEntityReferences);
 		dbf.setXIncludeAware(xincludeAware);
+
+		for (Map.Entry<String, Boolean> entry : features.entrySet()) {
+			try {
+				dbf.setFeature(entry.getKey(), entry.getValue());
+			} catch (ParserConfigurationException e) {
+				throw new IllegalStateException(e.getMessage(), e);
+			}
+		}
 		
 		DocumentBuilder db;
 		try {
@@ -108,7 +149,7 @@ public class XMLLoader {
 		}
 		
 		if (is.getSystemId() != null) {
-			db.setEntityResolver(new EntityResolverImpl(is.getSystemId()));
+			db.setEntityResolver(new EntityResolverImpl(is.getSystemId(), externalSources));
 		}
 		
 		XmlicErrorHandler handler = new XmlicErrorHandler();
@@ -123,9 +164,11 @@ public class XMLLoader {
 	
 	private static class EntityResolverImpl implements EntityResolver {
 		private String base;
+		private Map<URI, URI> externalSources;
 		
-		public EntityResolverImpl(String base) {
+		public EntityResolverImpl(String base, Map<URI, URI> externalSources) {
 			this.base = base;
+			this.externalSources = externalSources;
 		}
 		
 		@Override
@@ -134,7 +177,12 @@ public class XMLLoader {
 			
 			try {
 				URI uri = new URI(systemId);
-				if (!uri.isAbsolute()) {
+				if (uri.isAbsolute()) {
+					URI replacement = externalSources.get(uri);
+					if (replacement != null) {
+						uri = replacement;
+					}
+				} else {
 					if (this.base != null && !this.base.isEmpty()) {
 						uri = new URI(this.base).resolve(uri);
 					} else {
