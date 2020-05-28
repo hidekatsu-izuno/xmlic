@@ -618,6 +618,11 @@ XMLIC は、Apache License, Version 2.0下で配布します。
 
 ## リリースノート
 
+### 2020/5/27 version 1.1.1
+
+- XMLLoader に DocumentBuilderFactory の attribute を設定するメソッドを追加しました。
+- XMLWriter に DOMConfiguration の parameter を設定するメソッドを追加しました。
+
 ### 2020/5/26 version 1.1.0
 
 - 最小サポートバージョンを Java 1.8 以上に変更しました。

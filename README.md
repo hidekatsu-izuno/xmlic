@@ -621,6 +621,11 @@ In addition, XMLIC has changed jaxen package and shipped. Please follow the lice
 
 ## Release note
 
+### 2020/5/27 version 1.1.1
+
+- Add methods for DocumentBuilderFactory attribute settings to XMLLoader.
+- Add methods for DOMConfiguration parameter settings to XMLWriter.
+
 ### 2020/5/26 version 1.1.0
 
 - Change a minimum support version into Java 1.8.
